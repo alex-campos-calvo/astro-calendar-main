@@ -1,4 +1,4 @@
-import { google, lucia } from '@/lib/auth/auth'
+import { google, lucia } from '@/lib/auth'
 import { decodeIdToken, generateCodeVerifier, OAuth2RequestError, OAuth2Tokens } from 'arctic'
 import { generateId } from 'lucia'
 
@@ -49,7 +49,9 @@ export async function GET(context: APIContext): Promise<Response> {
         await db.update(User).set({ google_id: googleUser.sub }).where(eq(User.id, existingUser.id))
       }
 
-      const session = await lucia.createSession(existingUser.id, {})
+      const session = await lucia.createSession(existingUser.id, {
+        is_admin: existingUser.is_admin
+      })
       const sessionCookie = lucia.createSessionCookie(session.id)
       context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
       return context.redirect('/dashboard')
@@ -59,15 +61,14 @@ export async function GET(context: APIContext): Promise<Response> {
     await db.insert(User).values({
       id: userId,
       name: 'Google User ' + userId,
-      email: googleUser.email,
+      email: googleUser.email.toLowerCase(),
       google_id: googleUser.sub,
       is_admin: false
     })
 
-    const session = await lucia.createSession(userId, {})
+    const session = await lucia.createSession(userId, { is_admin: false })
     const sessionCookie = lucia.createSessionCookie(session.id)
     context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-
     return context.redirect('/dashboard')
   } catch (e) {
     console.error(e)

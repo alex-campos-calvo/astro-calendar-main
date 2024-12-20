@@ -1,5 +1,4 @@
-import { lucia } from '@/lib/auth/auth'
-import { db, eq, User } from 'astro:db'
+import { lucia } from '@/lib/auth'
 import { sequence } from 'astro:middleware'
 
 async function auth(context, next) {

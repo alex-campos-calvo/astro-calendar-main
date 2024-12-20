@@ -1,21 +1,84 @@
 ---
 import Layout from '@/layouts/Layout.astro'
+import { lucia } from '@/lib/auth'
+import { db, eq, User } from 'astro:db'
+import { generateId } from 'lucia'
+import { Argon2id } from 'oslo/password'
 
-//Usuario logeado de la cookie
 const user = Astro.locals.user
 if (user) {
   return Astro.redirect('/dashboard')
+}
+
+const errors = {
+  name: '',
+  email: '',
+  password: ''
+}
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData()
+    const name = (data.get('name') as string)?.trim()
+    const email = (data.get('email') as string)?.trim()
+    const password = (data.get('password') as string)?.trim()
+
+    if (typeof name !== 'string' || name.length < 3 || name.length > 255) {
+      errors.name = 'Por favor, introduce un nombre válido.'
+    }
+
+    if (
+      typeof email !== 'string' ||
+      email.length < 3 ||
+      email.length > 255 ||
+      !/.+@.+\..+/.test(email)
+    ) {
+      errors.email = 'Por favor, introduce una dirección de email válida.'
+    }
+
+    if (typeof password !== 'string' || password.length < 8 || password.length > 64) {
+      errors.password = 'Por favor, introduce una contraseña válida.'
+    }
+
+    const hasErrors = Object.values(errors).some((e) => e)
+    if (!hasErrors) {
+      const existingUser = await db
+        .select()
+        .from(User)
+        .where(eq(User.email, email.toLowerCase()))
+        .get()
+      if (!existingUser) {
+        const userId = generateId(15)
+        const hashedPassword = await new Argon2id().hash(password)
+        await db.insert(User).values({
+          id: userId,
+          name: name,
+          email: email.toLowerCase(),
+          password: hashedPassword,
+          is_admin: false
+        })
+
+        const session = await lucia.createSession(userId, { is_admin: false })
+        const sessionCookie = lucia.createSessionCookie(session.id)
+        Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+        return Astro.redirect('/dashboard')
+      } else {
+        errors.name = 'Por favor, introduce un nombre válido.'
+        errors.email = 'Por favor, introduce una dirección de email válida.'
+        errors.password = 'Por favor, introduce una contraseña válida.'
+      }
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(e.message)
+    }
+  }
 }
 ---
 
 <Layout title="Registro">
   <div class="flex flex-col justify-center items-center mt-32">
     <div class="w-full max-w-md">
-      <form
-        class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-        method="POST"
-        action="api/signup"
-      >
+      <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" method="POST">
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="name"> Name </label>
           <input
@@ -27,6 +90,7 @@ if (user) {
             required
           />
         </div>
+        {errors.name}
         <div class="mb-6">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="email"> Email </label>
           <input
@@ -38,6 +102,19 @@ if (user) {
             required
           />
         </div>
+        {errors.email}
+        <div class="mb-6">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="email"> Contraseña </label>
+          <input
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Contraseña"
+            required
+          />
+        </div>
+        {errors.password}
         <div class="flex items-center justify-between">
           <button
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

@@ -6,6 +6,7 @@ const User = defineTable({
     google_id: column.text({ optional: true }),
     email: column.text({ unique: true, optional: false }),
     name: column.text({ optional: false }),
+    password: column.text({ optional: true }),
     is_admin: column.boolean({ optional: false })
   }
 })

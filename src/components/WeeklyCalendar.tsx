@@ -1,7 +1,6 @@
 import Event from './Event'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import {
-  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   EllipsisHorizontalIcon
@@ -9,7 +8,7 @@ import {
 import { useEffect, useRef } from 'react'
 import events from '@/data/events.json'
 
-export default function WeeklyCalendar() {
+export default function WeeklyCalendar(props) {
   const container = useRef(null)
   const containerNav = useRef(null)
   const containerOffset = useRef(null)

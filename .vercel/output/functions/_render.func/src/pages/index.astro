@@ -1,7 +1,7 @@
 ---
 import { Argon2id } from 'oslo/password'
 import { lucia } from '@/lib/auth'
-import { db, eq, User } from 'astro:db'
+import { and, db, eq, User } from 'astro:db'
 
 import Layout from '@/layouts/Login.astro'
 
@@ -10,10 +10,7 @@ if (user) {
   return Astro.redirect('/dashboard')
 }
 
-const errors = {
-  email: '',
-  password: ''
-}
+let error = ''
 if (Astro.request.method === 'POST') {
   try {
     const data = await Astro.request.formData()
@@ -26,40 +23,37 @@ if (Astro.request.method === 'POST') {
       email.length > 255 ||
       !/.+@.+\..+/.test(email)
     ) {
-      errors.email = 'Por favor, introduce una dirección de email válida.'
+      error = 'Por favor, introduce una dirección de email válida.'
+      return
     }
 
     if (typeof password !== 'string' || password.length < 8 || password.length > 64) {
-      errors.password = 'Por favor, introduce una contraseña válida.'
+      error = 'Por favor, introduce una contraseña válida.'
+      return
     }
 
-    const hasErrors = Object.values(errors).some((e) => e)
-    if (!hasErrors) {
-      const existingUser = await db
-        .select()
-        .from(User)
-        .where(eq(User.email, email.toLowerCase()))
-        .get()
+    const hashedPassword = await new Argon2id().hash(password)
 
-      if (
-        existingUser &&
-        existingUser.password &&
-        (await new Argon2id().verify(existingUser.password, password))
-      ) {
-        const session = await lucia.createSession(existingUser.id, {
-          is_admin: existingUser.is_admin
-        })
-        const sessionCookie = lucia.createSessionCookie(session.id)
-        Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-        return Astro.redirect('/dashboard')
-      } else {
-        errors.email = 'Por favor, introduce una dirección de email válida.'
-        errors.password = 'Por favor, introduce una contraseña válida.'
-      }
+    const existingUser = await db
+      .select()
+      .from(User)
+      .where(and(eq(User.email, email.toLowerCase()), eq(User.password, password)))
+      .get()
+
+    if (existingUser) {
+      const session = await lucia.createSession(existingUser.id, {
+        is_admin: existingUser.is_admin
+      })
+      const sessionCookie = lucia.createSessionCookie(session.id)
+      Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+      return Astro.redirect('/dashboard')
     }
+
+    error = 'Por favor, introduce una combinación válida de email y contraseña.'
   } catch (e) {
     if (e instanceof Error) {
       console.error(e.message)
+      error = 'Ha ocurrido un problema, contacte con un administrador.'
     }
   }
 }
@@ -92,7 +86,7 @@ if (Astro.request.method === 'POST') {
               />
             </div>
           </div>
-          {errors.email}
+
           <div>
             <label for="password" class="block text-sm/6 font-medium text-gray-900"
               >Contraseña</label
@@ -108,7 +102,6 @@ if (Astro.request.method === 'POST') {
               />
             </div>
           </div>
-          {errors.password}
           <!--
           <div class="flex items-center justify-between">
             <div class="flex gap-3">
