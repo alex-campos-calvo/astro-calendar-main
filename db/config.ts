@@ -16,15 +16,19 @@ const User_Slot = defineTable({
     id: column.text({ primaryKey: true, optional: false, unique: true }),
     user_id: column.text({ references: () => User.columns.id, optional: false }),
     slot_id: column.text({ references: () => Slot.columns.id, optional: false }),
-    default: column.boolean({ optional: false, default: false })
+    default: column.boolean({ optional: false, default: false }),
+    date: column.date({ optional: true }),
+    start_hour: column.number({ optional: true }),
+    end_hour: column.number({ optional: true })
   }
 })
 
 const Slot = defineTable({
   columns: {
     id: column.text({ primaryKey: true, optional: false, unique: true }),
-    start_date: column.date({ optional: false }),
-    end_date: column.date({ optional: false })
+    week_day: column.number({ optional: false }),
+    start_hour: column.number({ optional: false }),
+    end_hour: column.number({ optional: false })
   }
 })
 

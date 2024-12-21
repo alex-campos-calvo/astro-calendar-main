@@ -60,7 +60,7 @@ export async function GET(context: APIContext): Promise<Response> {
     const userId = generateId(15)
     await db.insert(User).values({
       id: userId,
-      name: 'Google User ' + userId,
+      name: googleUser.name,
       email: googleUser.email.toLowerCase(),
       google_id: googleUser.sub,
       is_admin: false
