@@ -1,16 +1,8 @@
 ---
 import Layout from '@/layouts/Layout.astro'
-import Header from '@/components/Header'
 import WeeklyCalendar from '@/components/WeeklyCalendar'
 ---
 
 <Layout title="Panel semanal">
-  <div class="flex flex-col items-center justify-center">
-    <div class="my-5">
-      <Header client:load />
-    </div>
-    <div class="w-11/12 mb-10">
-      <WeeklyCalendar client:load />
-    </div>
-  </div>
+  <WeeklyCalendar client:load />
 </Layout>
