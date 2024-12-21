@@ -1,5 +1,5 @@
-import { google, lucia } from '@/lib/auth/auth'
-import { decodeIdToken, generateCodeVerifier, OAuth2RequestError } from 'arctic'
+import { google, lucia } from '@/lib/auth'
+import { decodeIdToken, generateCodeVerifier, OAuth2RequestError, OAuth2Tokens } from 'arctic'
 import { generateId } from 'lucia'
 
 import type { APIContext } from 'astro'
@@ -19,7 +19,9 @@ export async function GET(context: APIContext): Promise<Response> {
       storedCodeVerifier == null ||
       state !== storedState?.value
     ) {
-      throw new Error('Invalid request')
+      return new Response('Please restart the process.', {
+        status: 400
+      })
     }
 
     const tokens = await google.validateAuthorizationCode(code, storedCodeVerifier?.value)
@@ -28,8 +30,13 @@ export async function GET(context: APIContext): Promise<Response> {
         Authorization: `Bearer ${tokens.accessToken()}`
       }
     })
+
     const googleUser = await response.json()
-    console.log('Google User: ' + JSON.stringify(googleUser))
+    if (googleUser == null || googleUser.email == null || googleUser.sub == null) {
+      return new Response('Email & Gooogle ID are required.', {
+        status: 400
+      })
+    }
 
     const existingUser = await db
       .select()
@@ -37,33 +44,31 @@ export async function GET(context: APIContext): Promise<Response> {
       .where(or(eq(User.email, googleUser?.email), eq(User.google_id, googleUser?.sub)))
       .get()
 
-    console.log('Existing User: ' + JSON.stringify(existingUser))
     if (existingUser) {
       if (existingUser.google_id == null) {
-        console.log('Update existing User: ' + JSON.stringify(existingUser))
         await db.update(User).set({ google_id: googleUser.sub }).where(eq(User.id, existingUser.id))
       }
 
-      const session = await lucia.createSession(existingUser.id, {})
+      const session = await lucia.createSession(existingUser.id, {
+        is_admin: existingUser.is_admin
+      })
       const sessionCookie = lucia.createSessionCookie(session.id)
       context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
       return context.redirect('/dashboard')
     }
 
-    // Create a new user
     const userId = generateId(15)
     await db.insert(User).values({
       id: userId,
       name: 'Google User ' + userId,
-      email: googleUser.email,
+      email: googleUser.email.toLowerCase(),
       google_id: googleUser.sub,
       is_admin: false
     })
 
-    const session = await lucia.createSession(userId, {})
+    const session = await lucia.createSession(userId, { is_admin: false })
     const sessionCookie = lucia.createSessionCookie(session.id)
     context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-
     return context.redirect('/dashboard')
   } catch (e) {
     console.error(e)

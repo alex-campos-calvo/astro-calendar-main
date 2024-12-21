@@ -1,4 +1,4 @@
-import { lucia } from '@/lib/auth/auth'
+import { lucia } from '@/lib/auth'
 import { sequence } from 'astro:middleware'
 
 async function auth(context, next) {
@@ -26,15 +26,25 @@ async function auth(context, next) {
 }
 
 async function permissions(context, next) {
-  /*const user = context.locals.user
+  const user = context.locals.user
   if (
     !user &&
     context.url.pathname !== '/' &&
-    context.url.pathname !== '/login' &&
-    context.url.pathname !== '/signup'
+    context.url.pathname !== '/signup' &&
+    !context.url.pathname.startsWith('/auth')
   ) {
-    return await context.redirect('/login')
-  }*/
+    return await context.redirect('/')
+  }
+
+  if (user && context.url.pathname === '/' && context.url.pathname === '/signup') {
+    return await context.redirect('/dashboard')
+  }
+
+  //TODO - change 'user.is_admin' to '!user.is_admin'
+  if (user && user.is_admin && context.url.pathname.startsWith('/slots')) {
+    return await context.redirect('/dashboard')
+  }
+
   return await next()
 }
 
