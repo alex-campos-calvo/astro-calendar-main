@@ -28,7 +28,8 @@ const Slot = defineTable({
     id: column.text({ primaryKey: true, optional: false, unique: true }),
     week_day: column.number({ optional: false }),
     start_hour: column.number({ optional: false }),
-    end_hour: column.number({ optional: false })
+    end_hour: column.number({ optional: false }),
+    size: column.number({ optional: false })
   }
 })
 

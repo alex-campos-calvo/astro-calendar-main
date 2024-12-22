@@ -1,18 +1,24 @@
 ---
 import '@/styles/global.css'
+import { ClientRouter } from 'astro:transitions'
 ---
 
 <!doctype html>
 <html lang="es" class="h-full bg-gray-50">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Motion Leon - salud y movimiento" />
+    <meta name="generator" content={Astro.generator} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
+
     <title>MOTION-LEON</title>
+    <meta name="title" content="MOTION-LEON" />
+    <meta name="description" content="Motion Leon - salud y movimiento" />
+    <ClientRouter />
   </head>
   <body class="h-full">
-    <slot />
+    <article>
+      <slot />
+    </article>
   </body>
 </html>

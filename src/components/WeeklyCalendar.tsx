@@ -6,9 +6,16 @@ import {
   EllipsisHorizontalIcon
 } from '@heroicons/react/20/solid'
 import { useEffect, useRef } from 'react'
-import events from '@/data/events.json'
 
-export default function WeeklyCalendar(props) {
+export default function WeeklyCalendar({ slots }) {
+  const events = slots.map((slot) => ({
+    id: slot.id,
+    week_day: slot.week_day,
+    start_hour: Number(slot.start_hour) - 7,
+    end_hour: Number(slot.end_hour) - 7,
+    color: 'green'
+  }))
+
   const container = useRef(null)
   const containerNav = useRef(null)
   const containerOffset = useRef(null)
@@ -25,7 +32,7 @@ export default function WeeklyCalendar(props) {
   }, [])
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col h-full">
       <header className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
         <h1 className="text-base font-semibold text-gray-900">
           <time dateTime="2022-01">Diciembre 2024</time>
@@ -282,7 +289,12 @@ export default function WeeklyCalendar(props) {
                 style={{ gridTemplateRows: '1.75rem repeat(28, minmax(0, 1fr)) auto' }}
               >
                 {events.map((event) => (
-                  <Event key={event.id} row={event.row} column={event.column} color={event.color} />
+                  <Event
+                    key={event.id}
+                    row={event.start_hour}
+                    column={event.week_day}
+                    color={event.color}
+                  />
                 ))}
               </ol>
             </div>
