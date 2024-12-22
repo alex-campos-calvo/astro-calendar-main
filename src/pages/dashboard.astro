@@ -1,8 +1,11 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import WeeklyCalendar from '@/components/WeeklyCalendar'
+import { db, Slot } from 'astro:db'
+
+const events = await db.select().from(Slot).all()
 ---
 
 <Layout title="Panel semanal">
-  <WeeklyCalendar client:load />
+  <WeeklyCalendar slots={events} client:load />
 </Layout>
