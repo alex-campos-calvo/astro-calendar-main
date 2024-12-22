@@ -8,23 +8,28 @@ import {
 import { useEffect, useRef } from 'react'
 import events from '@/data/events.json'
 
-export default function WeeklyCalendar(props) {
-  const container = useRef(null)
-  const containerNav = useRef(null)
-  const containerOffset = useRef(null)
+export default function WeeklyCalendar(_props) {
+  const container = useRef<HTMLDivElement>(null)
+  const containerNav = useRef<HTMLDivElement>(null)
+  const containerOffset = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Set the container scroll position based on the current time.
     const currentMinute = new Date().getHours() * 60
-    container.current.scrollTop =
-      ((container.current.scrollHeight -
-        containerNav.current.offsetHeight -
-        containerOffset.current.offsetHeight) *
-        currentMinute) /
-      1440
+    if (container.current && containerNav.current) {
+      container.current.scrollTop =
+        ((container.current.scrollHeight -
+          containerNav.current.offsetHeight -
+          (containerOffset.current ? containerOffset.current.offsetHeight : 0)) *
+          currentMinute) /
+        1440
+    }
   }, [])
 
   return (
+
+  
+
     <div className="flex h-full flex-col">
       <header className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
         <h1 className="text-base font-semibold text-gray-900">
