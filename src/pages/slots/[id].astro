@@ -1,0 +1,72 @@
+---
+import events from '../../data/events.json'
+import users from '../../data/users.json'
+import Breadcrumbs from '../../components/Breadcrumbs.tsx'
+
+const { id } = Astro.params
+
+const eventDetails = events.find((event) => event.id === parseInt(id, 10))
+
+if (!eventDetails) {
+  throw new Error(`Evento con ID ${id} no encontrado.`)
+}
+---
+
+<html>
+  <body>
+    <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-6 sm:px-6">
+        <div class="grid grid-cols-2 gap-4 items-center">
+          <h3 class="text-base/7 font-semibold text-gray-900">
+            Clase el Lunes 9 a las 9:00 / ID: {eventDetails.id}
+          </h3>
+          <button type="button" class="rounded-md bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100">
+            <a href="/">Volver al calendario</a>
+          </button>
+        </div>
+        <p class="mt-1 max-w-2xl text-sm/6 text-gray-500">
+          Detalles: Fila {eventDetails.row} / Columna {eventDetails.column}
+        </p>
+      </div>
+      <div class="border-t border-gray-100">
+        <dl class="divide-y divide-gray-100">
+          <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-900">Nivel</dt>
+            <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{eventDetails.color}</dd>
+          </div>
+          <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-900">Instructor</dt>
+            <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">Mario</dd>
+          </div>
+          <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-900">Participantes</dt>
+            <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {users.map((user) => (
+                  <div
+                    class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
+                  >
+                    <div class="shrink-0">
+                      <img
+                        class="size-10 rounded-full"
+                        src={user.image}
+                        alt={user.name}
+                      />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <a href="#" class="focus:outline-none">
+                        <span class="absolute inset-0" aria-hidden="true"></span>
+                        <p class="text-sm font-medium text-gray-900">{user.name}</p>
+                        <p class="truncate text-sm text-gray-500">Nivel: {user.level}</p>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </body>
+</html>

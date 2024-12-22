@@ -282,7 +282,13 @@ export default function WeeklyCalendar(props) {
                 style={{ gridTemplateRows: '1.75rem repeat(28, minmax(0, 1fr)) auto' }}
               >
                 {events.map((event) => (
-                  <Event key={event.id} row={event.row} column={event.column} color={event.color} />
+                  <Event
+                    key={event.id}
+                    row={event.row}
+                    column={event.column}
+                    color={event.color}
+                    link={event.id}
+                  />
                 ))}
               </ol>
             </div>
