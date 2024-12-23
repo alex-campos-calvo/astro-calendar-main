@@ -1,50 +1,101 @@
 ---
-
 import Layout from '@/layouts/Layout.astro'
-import CardMembers from '@/components/CardMembers'
-import users from '../../data/users.json'
+import CardMembers from '@/components/Member'
+import { and, db, eq, Slot, User_Slot } from 'astro:db'
+import moment from 'moment'
+import 'moment/locale/es'
 
+interface Event {
+  Slot: {
+    id: string
+    week_day: number
+    start_hour: number
+    end_hour: number
+    size: number
+  }
+  User_Slot: {
+    id: string
+    user_id: string
+    slot_id: string
+    default: boolean
+    date: Date | null
+  } | null
+}
 
+const id = Astro.params.id
+const date = Astro.url.searchParams.get('date')
 
+if (!id || !date || (date && !moment(date, 'YYYY-MM-DD').isValid())) {
+  return Astro.redirect('/dashboard')
+}
+
+let slots: Event[] = []
+let { start_hour_text, end_hour_text, size_text, type_text, participants_text } = {
+  start_hour_text: '',
+  end_hour_text: '',
+  size_text: '',
+  type_text: 'G',
+  participants_text: ''
+}
+const current = moment(date, 'YYYY-MM-DD')
+if (id) {
+  slots = await db
+    .select()
+    .from(Slot)
+    .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
+    .where(and(eq(Slot.id, id), eq(User_Slot.default, false), eq(User_Slot.date, current.toDate())))
+    .all()
+
+  if (slots && slots.length === 0) {
+    return Astro.redirect('/dashboard')
+  } else {
+    if (slots[0]?.Slot) {
+      const item = slots[0]?.Slot
+      start_hour_text = moment({
+        hour: Math.floor(item.start_hour),
+        minute: Math.floor((item.start_hour % 1) * 60)
+      }).format('HH:mm')
+      end_hour_text = moment({
+        hour: Math.floor(item.end_hour),
+        minute: Math.floor((item.end_hour % 1) * 60)
+      }).format('HH:mm')
+      size_text = String(item.size)
+      type_text = 'G' + String(item.size)
+      participants_text = slots?.length.toString()
+    }
+  }
+}
 ---
 
 <Layout title="Detalles de la clase">
   <div class="overflow-hidden bg-white shadow sm:rounded-lg">
     <div class="px-4 py-6 sm:px-6">
-      <div class="grid grid-cols-2 gap-4 items-center">
-        <h3 class="text-base/7 font-semibold text-gray-900">
-          Clase el Lunes 9 a las 9:00 
-        </h3>
+      <div class="gap-4 items-center">
+        <h3 class="text-base/7 font-semibold text-gray-900">Lunes 9</h3>
+        <span class="text-gray-400">{start_hour_text} - {end_hour_text}</span>
       </div>
-      <p class="mt-1 max-w-2xl text-sm/6 text-gray-500">
-        Detalles:
-      </p>
     </div>
-    <div class="border-t border-gray-100">
+    <div class="grid grid-cols-1 sm:grid-cols-2">
       <dl class="divide-y divide-gray-100">
-        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Nivel</dt>
-          <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0"></dd>
+        <div class="px-4 py-6 sm:px-6 flex border-t border-gray-100">
+          <dt class="text-sm font-medium text-gray-900">Instructor:</dt>
+          <dd class="text-sm text-gray-400 ml-2"></dd>
         </div>
-        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Instructor</dt>
-          <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">Mario</dd>
-        </div>
-        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Participantes</dt>
-          <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2"
-            >
-                {users.map((user) => (
-                    <div>
-                        <CardMembers user={user} client:load />
-                    </div>
-                    
-            ))}
-            </div>
-          </dd>
+        <div class="px-4 py-6 sm:px-6 flex border-t border-gray-100">
+          <dt class="text-sm font-medium text-gray-900">Tipo:</dt>
+          <dd class="text-sm text-gray-400 ml-2">{type_text}</dd>
         </div>
       </dl>
+      <div class="px-4 py-6 grid sm:px-6 border-t sm:border-l border-gray-100">
+        <dt class="text-sm font-medium text-gray-900">
+          Participantes ({participants_text}/{size_text})
+        </dt>
+        <dd class="mt-6 text-sm/6 text-gray-700">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {slots.map((slot) => <CardMembers user={slot?.User_Slot?.user_id} client:load />)}
+          </div>
+        </dd>
+      </div>
     </div>
   </div>
 </Layout>

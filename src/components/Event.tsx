@@ -17,7 +17,8 @@ export default function Event({ item }) {
   const size = String(item.size)
   const groupType = 'G' + String(item.size)
   const participants = item.User_Slots?.length
-  const link = '/slots/' + String(item.id)
+  const link =
+    '/slots/' + String(item.id) + '?date=' + moment(item.User_Slots[0]?.date).format('YYYY-MM-DD')
 
   return (
     <li
