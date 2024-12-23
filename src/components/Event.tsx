@@ -1,8 +1,7 @@
-import { CursorArrowRaysIcon } from '@heroicons/react/24/solid'
 import moment from 'moment'
 import 'moment/locale/es'
 
-export default function Event({ item, eventSelect }) {
+export default function Event({ item }) {
   const row = Number(item.start) * 2
   const end = Math.round(Number(item.end * 2))
   const column = 'sm:col-start-' + String(item.week_day)
@@ -18,13 +17,15 @@ export default function Event({ item, eventSelect }) {
   const size = String(item.size)
   const groupType = 'G' + String(item.size)
   const participants = item.User_Slots?.length
+  const link = '/slots/' + String(item.id)
 
   return (
     <li
       className={'relative mt-px ' + (!item.today ? 'hidden' : null) + ' sm:flex ' + column}
       style={{ gridRow: row + ' / span ' + end, viewTransitionName: item.id }}
     >
-      <div
+      <a
+        href={link}
         className={
           'group absolute inset-1 flex flex-col overflow-hidden rounded-lg p-5 justify-between ' +
           color
@@ -45,7 +46,7 @@ export default function Event({ item, eventSelect }) {
           </p>
           <p className="text-sm/5">{groupType}</p>
         </div>
-      </div>
+      </a>
     </li>
   )
 }

@@ -22,10 +22,17 @@ export default function WeeklyCalendar({ today, week_days, week_slots }) {
   }
 
   useEffect(() => {
-    if (selectedItemId) {
-      console.log(selectedItemId)
+    // Set the container scroll position based on the current time.
+    const currentMinute = new Date().getHours() * 60
+    if (container.current && containerNav.current) {
+      container.current.scrollTop =
+        ((container.current.scrollHeight -
+          containerNav.current.offsetHeight -
+          (containerOffset.current ? containerOffset.current.offsetHeight : 0)) *
+          currentMinute) /
+        1440
     }
-  }, [selectedItemId])
+  }, [])
 
   return (
     <div className="flex flex-col h-full">
@@ -249,7 +256,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots }) {
                 style={{ gridTemplateRows: '1.75rem repeat(28, minmax(0, 1fr)) auto' }}
               >
                 {week_slots.map((event) => (
-                  <Event key={event.id} item={event} eventSelect={eventSelect} />
+                  <Event key={event.id} item={event} />
                 ))}
               </ol>
             </div>
