@@ -1,29 +1,51 @@
-export default function Event(props) {
-  const row = Number(props.row) * 2
-  const column = 'sm:col-start-' + String(props.column)
-  const color = 'bg-' + String(props.color) + '-50'
-  const hoverColor = 'hover:bg-' + String(props.color) + '-100'
+import { CursorArrowRaysIcon } from '@heroicons/react/24/solid'
+import moment from 'moment'
+import 'moment/locale/es'
+
+export default function Event({ item, eventSelect }) {
+  const row = Number(item.start) * 2
+  const end = Math.round(Number(item.end * 2))
+  const column = 'sm:col-start-' + String(item.week_day)
+  const color = 'bg-' + String(item.color) + '-50 hover:bg-' + String(item.color) + '-100'
+  const start_hour = moment({
+    hour: Math.floor(item.start_hour),
+    minute: Math.floor((item.start_hour % 1) * 60)
+  }).format('HH:mm')
+  const end_hour = moment({
+    hour: Math.floor(item.end_hour),
+    minute: Math.floor((item.end_hour % 1) * 60)
+  }).format('HH:mm')
+  const size = String(item.size)
+  const groupType = 'G' + String(item.size)
+  const participants = item.User_Slots?.length
+
   return (
     <li
-      className={'relative mt-px hidden sm:flex ' + column}
-      style={{ gridRow: row + ' / span 2' }}
+      className={'relative mt-px ' + (!item.today ? 'hidden' : null) + ' sm:flex ' + column}
+      style={{ gridRow: row + ' / span ' + end, viewTransitionName: item.id }}
     >
-      <a
-        href="#"
+      <div
         className={
-          'group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ' +
-          color +
-          ' p-2 text-xs/5 ' +
-          hoverColor
+          'group absolute inset-1 flex flex-col overflow-hidden rounded-lg p-5 justify-between ' +
+          color
         }
       >
-        <p className="order-1 font-semibold text-slate-700">
-          {'Fila: ' + row / 2 + ' | Columna: ' + column[column.length - 1]}
-        </p>
-        <p className="text-slate-500 group-hover:text-slate-700">
-          <time dateTime="2022-01-12T06:00">7:00 AM</time>
-        </p>
-      </a>
+        <div className="grid grid-cols-2">
+          <div className="2xl:flex">
+            <p className="font-semibold text-md/1">
+              <time>{start_hour}</time>
+            </p>
+            <span className="hidden 2xl:inline">-</span>
+            <p className="font-semibold text-md/1">
+              <time>{end_hour}</time>
+            </p>
+          </div>
+          <p className="text-md/1 text-right">
+            {participants}/{size}
+          </p>
+          <p className="text-sm/5">{groupType}</p>
+        </div>
+      </div>
     </li>
   )
 }

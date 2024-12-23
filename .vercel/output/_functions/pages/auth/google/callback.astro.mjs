@@ -1,6 +1,7 @@
-import { g as google, d as db, U as User, l as lucia } from '../../../chunks/index_BUTutAy8.mjs';
+import { g as google, l as lucia } from '../../../chunks/index_BFB6Q139.mjs';
 import { OAuth2RequestError } from 'arctic';
 import { generateId } from 'lucia';
+import { d as db, U as User } from '../../../chunks/_astro_db_DexOsEvT.mjs';
 import { or, eq } from '@astrojs/db/dist/runtime/virtual.js';
 export { renderers } from '../../../renderers.mjs';
 
@@ -42,8 +43,8 @@ async function GET(context) {
     const userId = generateId(15);
     await db.insert(User).values({
       id: userId,
-      name: "Google User " + userId,
-      email: googleUser.email,
+      name: googleUser.name,
+      email: googleUser.email.toLowerCase(),
       google_id: googleUser.sub,
       is_admin: false
     });

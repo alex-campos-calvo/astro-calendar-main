@@ -1,11 +1,9 @@
-import { l as lucia } from '../../chunks/index_BUTutAy8.mjs';
+import { l as lucia } from '../../chunks/index_BFB6Q139.mjs';
 export { renderers } from '../../renderers.mjs';
 
 async function POST(context) {
   if (!context.locals.session) {
-    return new Response(null, {
-      status: 401
-    });
+    return context.redirect("/");
   }
   await lucia.invalidateSession(context.locals.session.id);
   const sessionCookie = lucia.createBlankSessionCookie();

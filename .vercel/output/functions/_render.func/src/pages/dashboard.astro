@@ -1,16 +1,44 @@
 ---
+import moment from 'moment'
+import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
-import Header from '@/components/Header'
 import WeeklyCalendar from '@/components/WeeklyCalendar'
+import { and, between, db, eq, Slot } from 'astro:db'
+import { User_Slot } from 'astro:db'
+
+const current = moment()
+const monday = current.clone().startOf('week')
+const friday = monday.clone().add(4, 'days')
+
+const week_slots_from_slot = await db
+  .select()
+  .from(Slot)
+  .innerJoin(
+    User_Slot,
+    and(
+      eq(User_Slot.slot_id, Slot.id),
+      eq(User_Slot.default, false),
+      between(User_Slot.date, monday.toDate(), friday.toDate())
+    )
+  )
+  .all()
+console.log(week_slots_from_slot)
+
+const week_slots_from_user_slot = await db
+  .select()
+  .from(User_Slot)
+  .fullJoin(
+    Slot,
+    and(
+      eq(User_Slot.slot_id, Slot.id),
+      eq(User_Slot.default, false),
+      between(User_Slot.date, monday.toDate(), friday.toDate())
+    )
+  )
+  .all()
+console.log(week_slots_from_user_slot)
 ---
 
 <Layout title="Panel semanal">
-  <div class="flex flex-col items-center justify-center">
-    <div class="my-5">
-      <Header client:load />
-    </div>
-    <div class="w-11/12 mb-10">
-      <WeeklyCalendar client:load />
-    </div>
-  </div>
+  <!--<WeeklyCalendar slots={week_slots} client:load />  -->
 </Layout>

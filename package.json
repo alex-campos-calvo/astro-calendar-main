@@ -3,8 +3,8 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "astro dev --remote",
+    "build": "astro build --remote",
     "db": "astro db push --remote",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
@@ -30,6 +30,7 @@
     "astro": "5.0.5",
     "lucia": "3.2.2",
     "lucia-adapter-astrodb": "0.2.0",
+    "moment": "2.30.1",
     "oslo": "1.2.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",

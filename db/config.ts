@@ -17,9 +17,7 @@ const User_Slot = defineTable({
     user_id: column.text({ references: () => User.columns.id, optional: false }),
     slot_id: column.text({ references: () => Slot.columns.id, optional: false }),
     default: column.boolean({ optional: false, default: false }),
-    date: column.date({ optional: true }),
-    start_hour: column.number({ optional: true }),
-    end_hour: column.number({ optional: true })
+    date: column.date({ optional: true })
   }
 })
 

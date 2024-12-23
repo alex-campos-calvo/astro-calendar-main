@@ -1,10 +1,10 @@
-import { F as ROUTE_TYPE_HEADER, R as REROUTE_DIRECTIVE_HEADER, D as DEFAULT_404_COMPONENT, ab as bold, ac as red, ad as yellow, ae as dim, af as blue, O as clientAddressSymbol, A as AstroError, ag as LocalsNotAnObject, ah as REROUTABLE_STATUS_CODES, U as responseSentSymbol, ai as commonjsGlobal } from './astro/server_BKc9_Ao_.mjs';
-import { e as ensure404Route, a as default404Instance, D as DEFAULT_404_ROUTE } from './astro-designed-error-pages_wZr51DlV.mjs';
+import { H as ROUTE_TYPE_HEADER, R as REROUTE_DIRECTIVE_HEADER, D as DEFAULT_404_COMPONENT, ac as bold, ad as red, ae as yellow, af as dim, ag as blue, Q as clientAddressSymbol, A as AstroError, ah as LocalsNotAnObject, ai as REROUTABLE_STATUS_CODES, V as responseSentSymbol, aj as commonjsGlobal } from './astro/server_vUHW0twu.mjs';
+import { e as ensure404Route, a as default404Instance, D as DEFAULT_404_ROUTE } from './astro-designed-error-pages_BPpXGPAu.mjs';
 import buffer from 'node:buffer';
 import crypto$1 from 'node:crypto';
 import { Http2ServerResponse } from 'node:http2';
-import { r as requestHasLocale, a as requestIs404Or500, n as notFound, b as redirectToFallback, c as normalizeTheLocale, d as redirectToDefaultLocale, e as defineMiddleware, f as ensureServerIslandRoute, g as createEndpoint, S as SERVER_ISLAND_COMPONENT, h as SERVER_ISLAND_ROUTE, R as RouteCache, s as sequence, i as findRouteToRewrite, m as matchRoute, j as RenderContext, k as getSetCookiesFromResponse } from './index_PxCdbvwC.mjs';
-import { N as NOOP_MIDDLEWARE_FN } from './noop-middleware_UZxJ39Lo.mjs';
+import { r as requestHasLocale, a as requestIs404Or500, n as notFound, b as redirectToFallback, c as normalizeTheLocale, d as redirectToDefaultLocale, e as defineMiddleware, f as ensureServerIslandRoute, g as createEndpoint, S as SERVER_ISLAND_COMPONENT, h as SERVER_ISLAND_ROUTE, R as RouteCache, s as sequence, i as findRouteToRewrite, m as matchRoute, j as RenderContext, k as getSetCookiesFromResponse } from './index_D00Vy947.mjs';
+import { N as NOOP_MIDDLEWARE_FN } from './noop-middleware_CoYGCwgE.mjs';
 import { f as fileExtension, j as joinPaths, s as slash, p as prependForwardSlash, r as removeTrailingForwardSlash, a as appendForwardSlash } from './path_CVKLlyuj.mjs';
 import require$$1 from 'os';
 import require$$0 from 'path';

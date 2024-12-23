@@ -1,41 +1,37 @@
 import Event from './Event'
+import { useEffect, useRef, useState } from 'react'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   EllipsisHorizontalIcon
 } from '@heroicons/react/20/solid'
-import { useEffect, useRef } from 'react'
 
-export default function WeeklyCalendar({ slots }) {
-  const events = slots.map((slot) => ({
-    id: slot.id,
-    week_day: slot.week_day,
-    start_hour: Number(slot.start_hour) - 7,
-    end_hour: Number(slot.end_hour) - 7,
-    color: 'green'
-  }))
+export default function WeeklyCalendar({ today, week_days, week_slots }) {
+  const [selectedItemId, setSelectedItemId] = useState(null)
+  const container = useRef<HTMLDivElement>(null)
+  const containerNav = useRef<HTMLDivElement>(null)
+  const containerOffset = useRef<HTMLDivElement>(null)
 
-  const container = useRef(null)
-  const containerNav = useRef(null)
-  const containerOffset = useRef(null)
+  function eventSelect(e, item) {
+    e.target.classList.toggle('bg-' + item.color + '-50')
+    e.target.classList.toggle('hover:bg-' + item.color + '-100')
+    e.target.classList.toggle('bg-blue-200')
+    e.target.classList.toggle('hover:bg-blue-200')
+    setSelectedItemId(item)
+  }
 
   useEffect(() => {
-    // Set the container scroll position based on the current time.
-    const currentMinute = new Date().getHours() * 60
-    container.current.scrollTop =
-      ((container.current.scrollHeight -
-        containerNav.current.offsetHeight -
-        containerOffset.current.offsetHeight) *
-        currentMinute) /
-      1440
-  }, [])
+    if (selectedItemId) {
+      console.log(selectedItemId)
+    }
+  }, [selectedItemId])
 
   return (
     <div className="flex flex-col h-full">
       <header className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
         <h1 className="text-base font-semibold text-gray-900">
-          <time dateTime="2022-01">Diciembre 2024</time>
+          <time dateTime={today.date_name}>{today.month_name + ' ' + today.year_name}</time>
         </h1>
         <div className="flex items-center">
           <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
@@ -98,80 +94,44 @@ export default function WeeklyCalendar({ slots }) {
             className="sticky top-0 z-30 flex-none bg-white shadow ring-1 ring-black/5 sm:pr-8"
           >
             <div className="grid grid-cols-5 text-sm/6 text-gray-500 sm:hidden">
-              <button type="button" className="flex flex-col items-center pb-3 pt-2">
-                L{' '}
-                <span className="mt-1 flex size-8 items-center justify-center font-semibold text-gray-900">
-                  10
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-3 pt-2">
-                M{' '}
-                <span className="mt-1 flex size-8 items-center justify-center font-semibold text-gray-900">
-                  11
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-3 pt-2">
-                M{' '}
-                <span className="mt-1 flex size-8 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white">
-                  12
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-3 pt-2">
-                J{' '}
-                <span className="mt-1 flex size-8 items-center justify-center font-semibold text-gray-900">
-                  13
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-3 pt-2">
-                V{' '}
-                <span className="mt-1 flex size-8 items-center justify-center font-semibold text-gray-900">
-                  14
-                </span>
-              </button>
+              {week_days.map((day) => (
+                <button
+                  key={day.name}
+                  type="button"
+                  className="flex flex-col items-center pb-3 pt-2"
+                >
+                  {day.short_name + ' '}
+                  <span
+                    className={
+                      'mt-1 flex size-8 items-center justify-center font-semibold ' +
+                      (day.today ? 'rounded-full bg-gray-900 text-white' : 'text-gray-900')
+                    }
+                  >
+                    {day.number}
+                  </span>
+                </button>
+              ))}
             </div>
 
             <div className="-mr-px hidden grid-cols-5 divide-x divide-gray-100 border-r border-gray-100 text-sm/6 text-gray-500 sm:grid">
               <div className="col-end-1 w-14" />
-              <div className="flex items-center justify-center py-3">
-                <span>
-                  Lun{' '}
-                  <span className="items-center justify-center font-semibold text-gray-900">
-                    10
+              {week_days.map((day) => (
+                <div key={day.name} className="flex items-center justify-center py-3 capitalize">
+                  <span className={day.today ? 'flex items-baseline' : ''}>
+                    {day.name + ' '}
+                    <span
+                      className={
+                        'items-center justify-center font-semibold ' +
+                        (day.today
+                          ? 'ml-1.5 flex size-8 rounded-full bg-gray-900 text-white'
+                          : 'text-gray-900')
+                      }
+                    >
+                      {day.number}
+                    </span>
                   </span>
-                </span>
-              </div>
-              <div className="flex items-center justify-center py-3">
-                <span>
-                  Mar{' '}
-                  <span className="items-center justify-center font-semibold text-gray-900">
-                    11
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center justify-center py-3">
-                <span className="flex items-baseline">
-                  Mier{' '}
-                  <span className="ml-1.5 flex size-8 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white">
-                    12
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center justify-center py-3">
-                <span>
-                  Jue{' '}
-                  <span className="items-center justify-center font-semibold text-gray-900">
-                    13
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center justify-center py-3">
-                <span>
-                  Vie{' '}
-                  <span className="items-center justify-center font-semibold text-gray-900">
-                    14
-                  </span>
-                </span>
-              </div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="flex flex-auto">
@@ -288,13 +248,8 @@ export default function WeeklyCalendar({ slots }) {
                 className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-5 sm:pr-8"
                 style={{ gridTemplateRows: '1.75rem repeat(28, minmax(0, 1fr)) auto' }}
               >
-                {events.map((event) => (
-                  <Event
-                    key={event.id}
-                    row={event.start_hour}
-                    column={event.week_day}
-                    color={event.color}
-                  />
+                {week_slots.map((event) => (
+                  <Event key={event.id} item={event} eventSelect={eventSelect} />
                 ))}
               </ol>
             </div>

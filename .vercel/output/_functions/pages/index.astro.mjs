@@ -1,16 +1,18 @@
 /* empty css                                     */
-import { c as createComponent, r as renderTemplate, a as addAttribute, b as renderHead, d as renderSlot, e as createAstro, f as renderComponent, m as maybeRenderHead } from '../chunks/astro/server_BKc9_Ao_.mjs';
+import { c as createComponent, r as renderTemplate, a as addAttribute, e as renderComponent, f as renderHead, g as renderSlot, d as createAstro, m as maybeRenderHead } from '../chunks/astro/server_vUHW0twu.mjs';
 import { Argon2id } from 'oslo/password';
-import { d as db, U as User, l as lucia } from '../chunks/index_BUTutAy8.mjs';
+import { l as lucia } from '../chunks/index_BFB6Q139.mjs';
+import { d as db, U as User } from '../chunks/_astro_db_DexOsEvT.mjs';
 /* empty css                                     */
-import { and, eq } from '@astrojs/db/dist/runtime/virtual.js';
+import { $ as $$ClientRouter } from '../chunks/ClientRouter_VHxCPBSV.mjs';
+import { eq } from '@astrojs/db/dist/runtime/virtual.js';
 export { renderers } from '../renderers.mjs';
 
 const $$Astro$1 = createAstro();
 const $$Login = createComponent(($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$Astro$1, $$props, $$slots);
   Astro2.self = $$Login;
-  return renderTemplate`<html lang="es" class="h-full bg-gray-50"> <head><meta charset="UTF-8"><meta name="description" content="Motion Leon - salud y movimiento"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator"${addAttribute(Astro2.generator, "content")}><title>MOTION-LEON</title>${renderHead()}</head> <body class="h-full"> ${renderSlot($$result, $$slots["default"])} </body></html>`;
+  return renderTemplate`<html lang="es" class="h-full bg-gray-50"> <head><meta charset="UTF-8"><meta name="generator"${addAttribute(Astro2.generator, "content")}><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>MOTION-LEON</title><meta name="title" content="MOTION-LEON"><meta name="description" content="Motion Leon - salud y movimiento">${renderComponent($$result, "ClientRouter", $$ClientRouter, {})}${renderHead()}</head> <body class="h-full"> <article> ${renderSlot($$result, $$slots["default"])} </article> </body></html>`;
 }, "C:/Users/Alex/Documents/Astro/astro-calendar-main/src/layouts/Login.astro", void 0);
 
 const $$Astro = createAstro();
@@ -21,41 +23,45 @@ const $$Index = createComponent(async ($$result, $$props, $$slots) => {
   if (user) {
     return Astro2.redirect("/dashboard");
   }
-  let error = "";
+  const errors = {
+    email: "",
+    password: ""
+  };
   if (Astro2.request.method === "POST") {
     try {
       const data = await Astro2.request.formData();
       const email = data.get("email")?.trim();
       const password = data.get("password")?.trim();
       if (typeof email !== "string" || email.length < 3 || email.length > 255 || !/.+@.+\..+/.test(email)) {
-        error = "Por favor, introduce una direcci\xF3n de email v\xE1lida.";
-        return;
+        errors.email = "Por favor, introduce una direcci\xF3n de email v\xE1lida.";
       }
       if (typeof password !== "string" || password.length < 8 || password.length > 64) {
-        error = "Por favor, introduce una contrase\xF1a v\xE1lida.";
-        return;
+        errors.password = "Por favor, introduce una contrase\xF1a v\xE1lida.";
       }
-      const hashedPassword = await new Argon2id().hash(password);
-      const existingUser = await db.select().from(User).where(and(eq(User.email, email.toLowerCase()), eq(User.password, password))).get();
-      if (existingUser) {
-        const session = await lucia.createSession(existingUser.id, {
-          is_admin: existingUser.is_admin
-        });
-        const sessionCookie = lucia.createSessionCookie(session.id);
-        Astro2.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
-        return Astro2.redirect("/dashboard");
+      const hasErrors = Object.values(errors).some((e) => e);
+      if (!hasErrors) {
+        const existingUser = await db.select().from(User).where(eq(User.email, email.toLowerCase())).get();
+        if (existingUser && existingUser.password && await new Argon2id().verify(existingUser.password, password)) {
+          const session = await lucia.createSession(existingUser.id, {
+            is_admin: existingUser.is_admin
+          });
+          const sessionCookie = lucia.createSessionCookie(session.id);
+          Astro2.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+          return Astro2.redirect("/dashboard");
+        } else {
+          errors.email = "Por favor, introduce una direcci\xF3n de email v\xE1lida.";
+          errors.password = "Por favor, introduce una contrase\xF1a v\xE1lida.";
+        }
       }
-      error = "Por favor, introduce una combinaci\xF3n v\xE1lida de email y contrase\xF1a.";
     } catch (e) {
       if (e instanceof Error) {
         console.error(e.message);
-        error = "Ha ocurrido un problema, contacte con un administrador.";
       }
     }
   }
   return renderTemplate`${renderComponent($$result, "Layout", $$Login, {}, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"> <div class="sm:mx-auto sm:w-full sm:max-w-md"> <img class="mx-auto h-16 w-auto" src="/img/logo_inverted.webp" alt="Your Company"> <h2 class="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
 Iniciar sesión en tu cuenta
-</h2> </div> <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"> <div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12"> <form class="space-y-6" method="POST"> <div> <label for="email" class="block text-sm/6 font-medium text-gray-900">Dirección de email</label> <div class="mt-2"> <input type="email" name="email" id="email" autocomplete="email" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"> </div> </div> <div> <label for="password" class="block text-sm/6 font-medium text-gray-900">Contraseña</label> <div class="mt-2"> <input type="password" name="password" id="password" autocomplete="current-password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"> </div> </div> <!--
+</h2> </div> <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"> <div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12"> <form class="space-y-6" method="POST"> <div> <label for="email" class="block text-sm/6 font-medium text-gray-900">Dirección de email</label> <div class="mt-2"> <input type="email" name="email" id="email" autocomplete="email" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"> </div> </div> ${errors.email} <div> <label for="password" class="block text-sm/6 font-medium text-gray-900">Contraseña</label> <div class="mt-2"> <input type="password" name="password" id="password" autocomplete="current-password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"> </div> </div> ${errors.password} <!--
           <div class="flex items-center justify-between">
             <div class="flex gap-3">
               <div class="flex h-6 shrink-0 items-center">
