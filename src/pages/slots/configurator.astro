@@ -1,5 +1,132 @@
 ---
 import Layout from '@/layouts/Layout.astro'
+import { and, db, eq, Slot, User_Slot, User } from 'astro:db'
+import moment from 'moment'
+import 'moment/locale/es'
+
+interface Class {
+  id: string
+  week_day: number
+  start_hour: number
+  end_hour: number
+  size: number
+}
+
+const date = Astro.url.searchParams.get('date') || moment().format('YYYY-MM-DD')
+
+if (!moment(date, 'YYYY-MM-DD').isValid()) {
+  return Astro.redirect('/dashboard')
+}
+
+const currentDate = moment(date, 'YYYY-MM-DD').toDate()
+
+let classes = (await db
+  .select()
+  .from(Slot)
+  .where(eq(Slot.week_day, currentDate.getDay()))
+  .all()) as Class[]
+
+// Agrupar clases por ID único (si hay duplicados tras el JOIN)
+const uniqueClasses: Class[] = Object.values(
+  classes.reduce(
+    (acc, classItem) => {
+      acc[classItem.id] = classItem
+      return acc
+    },
+    {} as Record<string, Class>
+  )
+)
+
+// Obtener usuarios
+let users = await db
+  .select()
+  .from(User_Slot)
+  .leftJoin(User, eq(User_Slot.user_id, User.id))
+  .where(and(eq(User_Slot.default, false), eq(User_Slot.date, moment(currentDate).format('YYYY-MM-DD'))))
+  .all()
+
+users = users.map((user) => ({
+  ...user,
+  User: user.User
+    ? {
+        ...user.User,
+        name: user.User.name || 'Sin Nombre',
+        email: user.User.email || 'Sin Email',
+        google_id: user.User.google_id || null,
+        password: user.User.password || null,
+        is_admin: user.User.is_admin ?? false
+      }
+    : null
+}))
 ---
 
-<Layout title="Configurador de clases" />
+<Layout>
+    <div class="relative p-8">
+      <!-- Contenedor de botones (Posicionados en la parte superior derecha) -->
+      <div class="grid grid-cols-2 gap-4 absolute top-8 right-8 mb-4">
+        <button class="bg-gray-500 text-white px-3 py-2 rounded-lg shadow-md hover:bg-blue-600 text-sm">
+          Crear Clase
+        </button>
+        <button class="bg-gray-300 text-white px-3 py-2 rounded-lg shadow-md hover:bg-yellow-600 text-sm">
+          Modificar Clase
+        </button>
+      </div>
+  
+      <div class="grid grid-cols-2 gap-8">
+        <!-- Listado de Clases -->
+        <div class="bg-white shadow-lg rounded-lg p-6 mt-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Listado de Clases</h2>
+          <div class="space-y-4">
+            {
+              uniqueClasses.map((classItem) => {
+                const classDate = moment(date, 'YYYY-MM-DD')
+                  .day(classItem.week_day)
+                  .format('dddd, DD [de] MMMM [de] YYYY')
+                const startTime = moment({
+                  hour: Math.floor(classItem.start_hour),
+                  minute: Math.floor((classItem.start_hour % 1) * 60)
+                }).format('HH:mm')
+                const endTime = moment({
+                  hour: Math.floor(classItem.end_hour),
+                  minute: Math.floor((classItem.end_hour % 1) * 60)
+                }).format('HH:mm')
+  
+                return (
+                  <div class="border rounded-lg p-4 shadow-sm" data-key={classItem.id}>
+                    <h3 class="text-gray-800 font-semibold">{classDate}</h3>
+                    <p class="text-sm text-gray-600">
+                      Horario: {startTime} - {endTime}
+                    </p>
+                    <p class="text-sm text-gray-600">Capacidad: {classItem.size}</p>
+                  </div>
+                )
+              })
+            }
+          </div>
+        </div>
+  
+        <!-- Listado de Usuarios -->
+        <div class="bg-white shadow-lg rounded-lg p-6 mt-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Listado de Usuarios</h2>
+          <div class="space-y-4">
+            {
+              users.map((user) => (
+                <div
+                  id={user.User?.id}
+                  class="flex items-center space-x-4 border rounded-lg p-4 shadow-sm"
+                >
+                  <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center text-lg font-semibold">
+                    {user.User?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 class="text-gray-800 font-semibold">{user.User?.name}</h3>
+                    <p class="text-sm text-gray-600">{user.User?.email}</p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </Layout>
