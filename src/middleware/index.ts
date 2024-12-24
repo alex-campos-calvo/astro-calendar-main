@@ -41,7 +41,11 @@ async function permissions(context, next) {
   }
 
   //TODO - change 'user.is_admin' to '!user.is_admin'
-  if (user && user.is_admin && context.url.pathname.startsWith('/slots')) {
+  if (
+    user &&
+    user.is_admin &&
+    (context.url.pathname.startsWith('/slots') || context.url.pathname.startsWith('/users'))
+  ) {
     return await context.redirect('/dashboard')
   }
 

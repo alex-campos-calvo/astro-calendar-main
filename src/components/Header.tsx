@@ -40,7 +40,7 @@ const items = {
     {
       name: 'Listado de miembros',
       description: 'Consulta y modifica los datos tus clientes',
-      href: '/slots/members',
+      href: '/members/users',
       icon: UserGroupIcon
     }
   ],

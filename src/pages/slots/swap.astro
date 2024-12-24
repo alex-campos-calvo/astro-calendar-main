@@ -1,0 +1,8 @@
+---
+import Layout from '@/layouts/Layout.astro'
+
+const slot1: string | null = Astro.url.searchParams.get('slot1')
+const slot2: string | null = Astro.url.searchParams.get('slot2')
+---
+
+<Layout title="Configurador de clases" />
