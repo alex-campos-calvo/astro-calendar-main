@@ -1,31 +1,12 @@
 ---
 import moment from 'moment'
 import 'moment/locale/es'
-
 import Layout from '@/layouts/Layout.astro'
 import WeeklyCalendar from '@/components/WeeklyCalendar'
-import { and, between, db, eq, Slot, User_Slot } from 'astro:db'
-interface User_Event {
-  id: string
-  user_id: string
-  slot_id: string
-  default: boolean
-  date: Date
-}
-interface Event {
-  id: string
-  week_day: number
-  start_hour: number
-  end_hour: number
-  size: number
-  start: number
-  end: number
-  color: string
-  today: boolean
-  User_Slots: User_Event[]
-}
+import type { Clase, Participante } from '@/lib/types/bbdd.ts'
+import { and, or, db, eq, Slot, User_Slot } from 'astro:db'
 
-const date = Astro.url.searchParams.get('date')
+const date: string | null = Astro.url.searchParams.get('date')
 const current = date && moment(date, 'YYYY-MM-DD').isValid() ? moment(date) : moment()
 
 const today = {
@@ -80,16 +61,26 @@ const slots = await db
   .from(Slot)
   .innerJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
   .where(
-    and(eq(User_Slot.default, false), between(User_Slot.date, monday.toDate(), friday.toDate()))
+    and(
+      eq(User_Slot.default, false),
+      or(
+        eq(User_Slot.date, monday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, tuesday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, wednesday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, thursday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, friday.format('YYYY-MM-DD'))
+      )
+    )
   )
   .all()
 
-const week_slots: Event[] = []
+const week_slots: Clase[] = []
 slots?.forEach((item) => {
   const current = week_slots.find((slot) => slot.id === item.Slot.id)
   if (!current) {
-    const s: Event = {
+    const s: Clase = {
       id: item.Slot.id,
+      user_id: item.Slot.user_id,
       week_day: moment(item.User_Slot.date).weekday() + 1,
       start_hour: item.Slot.start_hour,
       end_hour: item.Slot.end_hour,
@@ -98,11 +89,11 @@ slots?.forEach((item) => {
       end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
       color: item.Slot.size > 1 ? 'green' : 'red',
       today: moment(item.User_Slot.date).isSame(current, 'day'),
-      User_Slots: [item.User_Slot as User_Event]
+      User_Slots: [item.User_Slot as Participante]
     }
     week_slots.push(s)
   } else {
-    current.User_Slots.push(item.User_Slot as User_Event)
+    current.User_Slots.push(item.User_Slot as Participante)
     current.color = item.Slot.size > current.User_Slots.length ? 'green' : 'red'
   }
 })

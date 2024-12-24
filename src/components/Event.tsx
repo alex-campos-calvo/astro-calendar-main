@@ -6,6 +6,11 @@ export default function Event({ item }) {
   const end = Math.round(Number(item.end * 2))
   const column = 'sm:col-start-' + String(item.week_day)
   const color = 'bg-' + String(item.color) + '-50 hover:bg-' + String(item.color) + '-100'
+  const size = String(item.size)
+  const groupType = 'G' + String(item.size)
+  const participants = item.User_Slots?.length
+  const link =
+    '/slots/' + String(item.id) + '?date=' + moment(item.User_Slots[0]?.date).format('YYYY-MM-DD')
   const start_hour = moment({
     hour: Math.floor(item.start_hour),
     minute: Math.floor((item.start_hour % 1) * 60)
@@ -14,11 +19,6 @@ export default function Event({ item }) {
     hour: Math.floor(item.end_hour),
     minute: Math.floor((item.end_hour % 1) * 60)
   }).format('HH:mm')
-  const size = String(item.size)
-  const groupType = 'G' + String(item.size)
-  const participants = item.User_Slots?.length
-  const link =
-    '/slots/' + String(item.id) + '?date=' + moment(item.User_Slots[0]?.date).format('YYYY-MM-DD')
 
   return (
     <li

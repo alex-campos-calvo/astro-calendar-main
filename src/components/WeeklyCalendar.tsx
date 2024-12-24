@@ -1,5 +1,5 @@
 import Event from './Event'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import {
   ChevronLeftIcon,
@@ -8,18 +8,9 @@ import {
 } from '@heroicons/react/20/solid'
 
 export default function WeeklyCalendar({ today, week_days, week_slots }) {
-  const [selectedItemId, setSelectedItemId] = useState(null)
   const container = useRef<HTMLDivElement>(null)
   const containerNav = useRef<HTMLDivElement>(null)
   const containerOffset = useRef<HTMLDivElement>(null)
-
-  function eventSelect(e, item) {
-    e.target.classList.toggle('bg-' + item.color + '-50')
-    e.target.classList.toggle('hover:bg-' + item.color + '-100')
-    e.target.classList.toggle('bg-blue-200')
-    e.target.classList.toggle('hover:bg-blue-200')
-    setSelectedItemId(item)
-  }
 
   useEffect(() => {
     // Set the container scroll position based on the current time.

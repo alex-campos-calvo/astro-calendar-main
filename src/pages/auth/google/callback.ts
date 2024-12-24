@@ -1,5 +1,5 @@
 import { google, lucia } from '@/lib/auth'
-import { decodeIdToken, generateCodeVerifier, OAuth2RequestError, OAuth2Tokens } from 'arctic'
+import { OAuth2RequestError } from 'arctic'
 import { generateId } from 'lucia'
 
 import type { APIContext } from 'astro'
@@ -49,6 +49,10 @@ export async function GET(context: APIContext): Promise<Response> {
         await db.update(User).set({ google_id: googleUser.sub }).where(eq(User.id, existingUser.id))
       }
 
+      if (!existingUser.is_active) {
+        return context.redirect('/')
+      }
+
       const session = await lucia.createSession(existingUser.id, {
         is_admin: existingUser.is_admin
       })
@@ -63,7 +67,8 @@ export async function GET(context: APIContext): Promise<Response> {
       name: googleUser.name,
       email: googleUser.email.toLowerCase(),
       google_id: googleUser.sub,
-      is_admin: false
+      is_admin: false,
+      is_active: true
     })
 
     const session = await lucia.createSession(userId, { is_admin: false })

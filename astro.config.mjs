@@ -4,7 +4,6 @@ import vercel from '@astrojs/vercel'
 import react from '@astrojs/react'
 import db from '@astrojs/db'
 
-
 export default defineConfig({
   integrations: [react(), tailwind(), db()],
   output: 'server',

@@ -1,67 +1,91 @@
 ---
-import Layout from '@/layouts/Layout.astro'
-import CardMembers from '@/components/Member'
-import { and, db, eq, Slot, User_Slot } from 'astro:db'
 import moment from 'moment'
 import 'moment/locale/es'
+import Layout from '@/layouts/Layout.astro'
+import Member from '@/components/Member'
+import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
+import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 
-interface Event {
-  Slot: {
-    id: string
-    week_day: number
-    start_hour: number
-    end_hour: number
-    size: number
-  }
-  User_Slot: {
-    id: string
-    user_id: string
-    slot_id: string
-    default: boolean
-    date: Date | null
-  } | null
-}
-
-const id = Astro.params.id
-const date = Astro.url.searchParams.get('date')
+const id: string | undefined = Astro.params.id
+const date: string | null = Astro.url.searchParams.get('date')
 
 if (!id || !date || (date && !moment(date, 'YYYY-MM-DD').isValid())) {
   return Astro.redirect('/dashboard')
 }
 
-let slots: Event[] = []
-let { start_hour_text, end_hour_text, size_text, type_text, participants_text } = {
-  start_hour_text: '',
-  end_hour_text: '',
-  size_text: '',
-  type_text: 'G',
-  participants_text: ''
+let data: Clase = {
+  id: '',
+  user_id: '',
+  week_day: 0,
+  start_hour: 0,
+  end_hour: 0,
+  size: 0,
+  start: 0,
+  end: 0,
+  color: '',
+  today: false,
+  User_Slots: []
 }
-const current = moment(date, 'YYYY-MM-DD')
+const slot_date = moment(date, 'YYYY-MM-DD')
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
 if (id) {
-  slots = await db
+  const slots = await db
     .select()
     .from(Slot)
     .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-    .where(and(eq(Slot.id, id), eq(User_Slot.default, false), eq(User_Slot.date, current.toDate())))
+    .where(
+      and(
+        eq(Slot.id, id),
+        eq(User_Slot.default, false),
+        eq(User_Slot.date, slot_date.format('YYYY-MM-DD'))
+      )
+    )
     .all()
 
+  const user_ids: string[] = []
   if (slots && slots.length === 0) {
     return Astro.redirect('/dashboard')
   } else {
-    if (slots[0]?.Slot) {
-      const item = slots[0]?.Slot
-      start_hour_text = moment({
-        hour: Math.floor(item.start_hour),
-        minute: Math.floor((item.start_hour % 1) * 60)
-      }).format('HH:mm')
-      end_hour_text = moment({
-        hour: Math.floor(item.end_hour),
-        minute: Math.floor((item.end_hour % 1) * 60)
-      }).format('HH:mm')
-      size_text = String(item.size)
-      type_text = 'G' + String(item.size)
-      participants_text = slots?.length.toString()
+    slots?.forEach((item) => {
+      const current = data && data.id === item.Slot.id ? data : null
+      if (!current) {
+        data = {
+          id: item.Slot.id,
+          user_id: item.Slot.user_id,
+          week_day: item.Slot.week_day,
+          start_hour: item.Slot.start_hour,
+          end_hour: item.Slot.end_hour,
+          size: item.Slot.size,
+          start: Number(item.Slot.start_hour) - 7,
+          end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
+          color: item.Slot.size > 1 ? 'green' : 'red',
+          today: moment().isSame(slot_date, 'day'),
+          User_Slots: []
+        }
+        data['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
+        data['end_hour_text'] = moment(item.Slot.end_hour, 'HH:mm').format('HH:mm')
+        data['tipo_text'] = item.Slot.size <= 1 ? 'P' : 'G' + item.Slot.size
+        user_ids.push(item.Slot.user_id)
+
+        if (item.User_Slot) {
+          data.User_Slots.push(item.User_Slot as Participante)
+          user_ids.push(item.User_Slot.user_id)
+        }
+      } else if (item.User_Slot) {
+        current.User_Slots.push(item.User_Slot as Participante)
+        current.color = item.Slot.size > current.User_Slots.length ? 'green' : 'red'
+        user_ids.push(item.User_Slot.user_id)
+      }
+    })
+  }
+
+  if (user_ids && user_ids.length > 0) {
+    const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+
+    if (users && users.length > 0) {
+      users.forEach((user) => {
+        user_map.set(user.id, user)
+      })
     }
   }
 }
@@ -71,28 +95,40 @@ if (id) {
   <div class="overflow-hidden bg-white shadow sm:rounded-lg">
     <div class="px-4 py-6 sm:px-6">
       <div class="gap-4 items-center">
-        <h3 class="text-base/7 font-semibold text-gray-900">Lunes 9</h3>
-        <span class="text-gray-400">{start_hour_text} - {end_hour_text}</span>
+        <h3 class="text-base/7 font-semibold text-gray-900">
+          <span class="capitalize">{slot_date.format('dddd[,]')}</span>
+          <span>{slot_date.format('DD [de] MMMM [de] YYYY')}</span>
+          <span
+            class="inline-flex items-center gap-x-1.5 rounded-md bg-blue-100 mx-2 px-2 py-1 text-xs font-medium text-blue-700"
+          >
+            {user_map.get(data.user_id)?.name}
+          </span>
+        </h3>
+        <span class="text-gray-400">{data['start_hour_text']} - {data['end_hour_text']}</span>
       </div>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2">
+    <div class="grid grid-cols-1 sm:grid-cols-4">
       <dl class="divide-y divide-gray-100">
         <div class="px-4 py-6 sm:px-6 flex border-t border-gray-100">
-          <dt class="text-sm font-medium text-gray-900">Instructor:</dt>
-          <dd class="text-sm text-gray-400 ml-2"></dd>
+          <dt class="text-sm font-medium text-gray-900">Tamaño del grupo:</dt>
+          <dd class="text-sm text-gray-400 ml-2">{data['tipo_text']}</dd>
         </div>
         <div class="px-4 py-6 sm:px-6 flex border-t border-gray-100">
-          <dt class="text-sm font-medium text-gray-900">Tipo:</dt>
-          <dd class="text-sm text-gray-400 ml-2">{type_text}</dd>
+          <!--<dt class="text-sm font-medium text-gray-900">Instructor:</dt>
+          <dd class="text-sm text-gray-400 ml-2"></dd> -->
         </div>
       </dl>
-      <div class="px-4 py-6 grid sm:px-6 border-t sm:border-l border-gray-100">
+      <div class="px-4 py-6 grid sm:col-span-3 sm:px-6 border-t sm:border-l border-gray-100">
         <dt class="text-sm font-medium text-gray-900">
-          Participantes ({participants_text}/{size_text})
+          Participantes ({data.User_Slots.length}/{data.size})
         </dt>
         <dd class="mt-6 text-sm/6 text-gray-700">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {slots.map((slot) => <CardMembers user={slot?.User_Slot?.user_id} client:load />)}
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {
+              data.User_Slots.map((user_slot) => (
+                <Member user={user_map.get(user_slot.user_id)} client:load />
+              ))
+            }
           </div>
         </dd>
       </div>

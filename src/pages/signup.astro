@@ -54,7 +54,8 @@ if (Astro.request.method === 'POST') {
           name: name,
           email: email.toLowerCase(),
           password: hashedPassword,
-          is_admin: false
+          is_admin: false,
+          is_active: true
         })
 
         const session = await lucia.createSession(userId, { is_admin: false })
