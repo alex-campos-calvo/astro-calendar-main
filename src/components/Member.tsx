@@ -1,64 +1,25 @@
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { EllipsisHorizontalIcon } from '@heroicons/react/20/solid'
-
-export default function Member({ user }) {
-  // Función para determinar el color de fondo según el nivel
-  const getBackgroundColor = (level) => {
-    switch (level) {
-      case 'Principiante':
-        return 'bg-green-100'
-      case 'Intermedio':
-        return 'bg-yellow-100'
-      case 'Avanzado':
-        return 'bg-red-100'
-      case 'Novato':
-        return 'bg-blue-100'
-      default:
-        return 'bg-white'
-    }
-  }
-
+export default function Member({ user, is_admin }) {
   return (
     <div
       key={user.id}
-      className={`relative flex items-center space-x-3 rounded-lg border border-gray-300 px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400 ${getBackgroundColor(user.level)}`}
+      className="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500"
     >
       <div className="shrink-0">
-        <img alt={user.name} src={user.image} className="size-10 rounded-full" />
+        <span
+          className={
+            'inline-flex size-10 items-center justify-center rounded-full ' +
+            (is_admin ? 'bg-blue-300' : 'bg-gray-500')
+          }
+        >
+          <span className="text-lg font-medium text-white">{user['short_name']}</span>
+        </span>
       </div>
       <div className="min-w-0 flex-1">
-        <a href="#" className="focus:outline-none">
+        <a href={'/members/' + user.id} className="focus:outline-none">
           <span aria-hidden="true" className="absolute inset-0" />
           <p className="text-sm font-medium text-gray-900">{user.name}</p>
         </a>
       </div>
-      <Menu as="div" className="relative ml-auto">
-        <MenuButton className="-m-2.5 block p-2.5 text-gray-400 hover:text-gray-500">
-          <span className="sr-only">Abrir Opciones</span>
-          <EllipsisHorizontalIcon aria-hidden="true" className="size-5" />
-        </MenuButton>
-        <MenuItems
-          transition
-          className="absolute right-0 z-10 mt-0.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-        >
-          <MenuItem>
-            <a
-              href="#"
-              className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-            >
-              Cambiar Clase<span className="sr-only">, {user.name}</span>
-            </a>
-          </MenuItem>
-          <MenuItem>
-            <a
-              href="#"
-              className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-            >
-              Editar Datos<span className="sr-only">, {user.name}</span>
-            </a>
-          </MenuItem>
-        </MenuItems>
-      </Menu>
     </div>
   )
 }

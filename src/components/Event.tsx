@@ -22,7 +22,7 @@ export default function Event({ item }) {
 
   return (
     <li
-      className={'relative mt-px ' + (!item.today ? 'hidden' : null) + ' sm:flex ' + column}
+      className={'relative mt-px ' + (!item.today ? 'hidden ' : '') + 'sm:flex ' + column}
       style={{ gridRow: row + ' / span ' + end, viewTransitionName: item.id }}
     >
       <a

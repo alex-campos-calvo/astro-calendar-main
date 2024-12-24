@@ -1,6 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro'
-import MembersList from '@/components/Members'
+import Members from '@/components/Members'
 import { db, desc, User } from 'astro:db'
 
 const people = await db
@@ -14,5 +14,5 @@ const people = await db
 ---
 
 <Layout title="Listado de miembros">
-  <MembersList users={people} client:load />
+  <Members users={people} client:load />
 </Layout>
