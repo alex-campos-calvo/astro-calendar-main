@@ -12,7 +12,10 @@ const current = date && moment(date, 'YYYY-MM-DD').isValid() ? moment(date) : mo
 const today = {
   date_name: current.format('YYYY-MM'),
   month_name: current.format('MMMM'),
-  year_name: current.format('YYYY')
+  year_name: current.format('YYYY'),
+  today_date: moment().format('YYYY-MM-DD'),
+  next_week_date: current.clone().add(7, 'days').startOf('week').format('YYYY-MM-DD'),
+  previus_week_date: current.clone().add(-7, 'days').startOf('week').format('YYYY-MM-DD')
 }
 
 const { monday, tuesday, wednesday, thursday, friday } = {

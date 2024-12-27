@@ -102,30 +102,29 @@ if (id) {
     <div class="flex justify-between px-4 py-6 sm:px-6">
       <div class="gap-4">
         <h3 class="text-base/7 font-semibold text-gray-900">
-          <span class="capitalize">{slot_date.format('dddd[,]')}</span>
-          <span>{slot_date.format('DD [de] MMMM [de] YYYY')}</span>
+          <span class="uppercase">{slot_date.format('dddd[,] DD [de] MMMM [de] YYYY')}</span>
         </h3>
         <span class="text-gray-400">{data['start_hour_text']} - {data['end_hour_text']}</span>
       </div>
       <a
-        href={'/slots/swap?slot1=' + data.id}
-        class="m-2 bg-transparent font-semibold py-2 px-4 border border-gray-300 hover:border-fuchsia-500 rounded shadow"
+        href={'/slots/swap?slot1=' + data.id + '&date1=' + slot_date.format('YYYY-MM-DD')}
+        class="mx-2 content-center bg-transparent font-semibold px-4 border border-gray-300 hover:border-fuchsia-500 rounded shadow"
         >Mover miembros</a
       >
     </div>
-    <dl class="grid grid-cols-1 sm:grid-cols-4">
+    <dl class="grid grid-cols-1 lg:grid-cols-4">
       <div class="divide-y divide-gray-100">
         <div class="px-4 py-6 sm:px-6 flex border-t border-gray-100">
-          <dt class="text-sm font-medium text-gray-900">Tamaño del grupo:</dt>
+          <dt class="text-sm font-medium text-gray-900 uppercase">Tamaño del grupo:</dt>
           <dd class="text-sm text-gray-400 ml-2">{data['tipo_text']}</dd>
         </div>
       </div>
       <div
         class="px-4 py-6 grid sm:col-span-3 sm:px-6 border-t sm:border-l border-gray-100 gap-y-3"
       >
-        <dt class="text-sm font-medium text-gray-900">Profesor</dt>
+        <dt class="text-sm font-medium text-gray-900 uppercase">Profesor</dt>
         <dd class="text-sm/6 text-gray-700">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
             <Member
               user={user_map.get(data.user_id)}
               is_admin={user_map.get(data.user_id)?.is_admin}
@@ -133,11 +132,11 @@ if (id) {
             />
           </div>
         </dd>
-        <dt class="text-sm font-medium text-gray-900">
+        <dt class="text-sm font-medium text-gray-900 uppercase">
           Participantes ({data.User_Slots.length}/{data.size})
         </dt>
         <dd class="text-sm/6 text-gray-700">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
             {
               data.User_Slots.map((user_slot) => (
                 <Member

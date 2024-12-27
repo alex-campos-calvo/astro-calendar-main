@@ -1,3 +1,7 @@
+export interface ClaseByDate {
+  [date: string]: Clase[]
+}
+
 export interface Clase {
   id: string
   user_id: string
