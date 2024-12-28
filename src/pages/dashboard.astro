@@ -94,7 +94,7 @@ const slots = await db
 
 const week_slots: Clase[] = []
 slots?.forEach((item) => {
-  const current_slot = week_slots.find((slot) => slot.id === item.Slot.id)
+  let current_slot = week_slots.find((slot) => slot.id === item.Slot.id)
   if (!current_slot) {
     const s: Clase = {
       id: item.Slot.id,
@@ -108,10 +108,14 @@ slots?.forEach((item) => {
           ? Number(item.Slot.start_hour) - 7
           : Number(item.Slot.start_hour) - 8,
       end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
-      color: item.Slot.size > 1 ? 'green' : 'red',
+      color: 'green',
       today: item.Slot.week_day === current.weekday() + 1,
       date: week_days.find((day) => day.week_day === item.Slot.week_day)?.date,
-      User_Slots: item.User_Slot ? [item.User_Slot as Participante] : []
+      User_Slots: []
+    }
+    if (item.User_Slot) {
+      s.User_Slots.push(item.User_Slot as Participante)
+      s.color = item.Slot.size > s.User_Slots.length ? 'green' : 'red'
     }
     week_slots.push(s)
   } else {
