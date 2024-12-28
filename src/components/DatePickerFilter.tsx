@@ -44,12 +44,6 @@ export default function DatePickerFilter({ slot1, date1 }) {
             setDate(moment(e).format('YYYY-MM-DD'))
           }}
         ></Datepicker>
-        <button
-          className="mx-2 content-center bg-transparent font-semibold px-4 border border-gray-300 hover:border-fuchsia-500 rounded shadow"
-          id="prueba"
-        >
-          Filtrar
-        </button>
       </div>
       <ul role="list" className="mx-5 divide-y divide-gray-100">
         {slots &&

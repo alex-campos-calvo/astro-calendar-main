@@ -14,6 +14,7 @@ const errors = {
   password: ''
 }
 if (Astro.request.method === 'POST') {
+  //TODO Comprobar password y usuario activo
   try {
     const data = await Astro.request.formData()
     const email = (data.get('email') as string)?.trim()

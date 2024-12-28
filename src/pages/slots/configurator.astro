@@ -5,8 +5,6 @@ import Layout from '@/layouts/Layout.astro'
 import { and, db, Slot, User, User_Slot, eq, inArray } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 
-let classes: Clase[] = []
-
 // Obtener clases y usuarios de la base de datos
 const slots = await db
   .select()
@@ -18,13 +16,11 @@ const slots = await db
 const user_map: Map<string, Usuario> = new Map<string, Usuario>()
 const user_ids: string[] = []
 
+let classes: Clase[] = []
 if (slots) {
-  // Agrupar las clases por ID de Slot
-  const classesMap: Map<string, Clase> = new Map()
-
   slots.forEach((item) => {
     // Verificar si la clase ya existe en el mapa
-    const existingClass = classesMap.get(item.Slot.id)
+    const existingClass = classes.find((slot) => slot.id === item.Slot.id)
 
     if (!existingClass) {
       // Crear una nueva clase si no existe
@@ -39,15 +35,19 @@ if (slots) {
         end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
         color: item.Slot.size > 1 ? 'green' : 'red',
         today: moment().isSame(moment(), 'day'),
-        User_Slots: [],
-        date: moment().day(item.Slot.week_day).format('DDDD')
+        date: moment()
+          .startOf('week')
+          .add(item.Slot.week_day - 1, 'days')
+          .format('dddd'),
+        User_Slots: []
       }
       if (item.User_Slot) {
         // Agregar participante si existe
         newClass.User_Slots.push(item.User_Slot as Participante)
         user_ids.push(item.User_Slot.user_id) // Guardar IDs de usuarios
       }
-      classesMap.set(item.Slot.id, newClass)
+
+      classes.push(newClass)
     } else {
       if (item.User_Slot) {
         // Agregar participante a una clase existente
@@ -57,9 +57,6 @@ if (slots) {
       }
     }
   })
-
-  // Convertir el mapa en un array de clases
-  classes = Array.from(classesMap.values())
 }
 
 if (user_ids.length > 0) {
@@ -88,18 +85,24 @@ if (user_ids.length > 0) {
     </div>
 
     {
-      classes.length > 0 ? (
+      classes && classes.length > 0 ? (
         <dt>
-          {Object.entries((grouped, cls) => {
-            return cls.date
-          }).map(([dateKey, dayClasses]: [string, Clase[]]) => (
-            <div id={dateKey} class="mb-8">
+          {Object.entries(
+            classes.reduce((grouped, cls) => {
+              if (!cls.date) return grouped
+              const dateKey = cls.date
+              if (!grouped[dateKey]) grouped[dateKey] = []
+              grouped[dateKey].push(cls)
+              return grouped
+            }, {})
+          ).map(([dia, clases]: [string, Clase[]]) => (
+            <div class="mb-8">
               <h2 class="text-lg font-semibold text-gray-700 uppercase mb-4 bg-yellow-200 rounded-lg p-2">
-                {moment(dateKey, 'YYYY-MM-DD').format('dddd[,] DD [de] MMMM [de] YYYY')}
+                {dia}
               </h2>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                {dayClasses.map((cls) => (
-                  <div id={dateKey} class="border rounded-lg shadow p-6">
+                {clases.map((cls) => (
+                  <div class="border rounded-lg shadow p-6">
                     <div class="flex justify-between items-center">
                       <div class="text-gray-400">
                         {moment(cls.start_hour, 'HH:mm').format('HH:mm')} -{' '}

@@ -2,7 +2,6 @@
 import moment from 'moment'
 import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
-import Member from '@/components/Member'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 
@@ -128,11 +127,29 @@ if (id) {
         <dt class="text-sm font-medium text-gray-900 uppercase">Profesor</dt>
         <dd class="text-sm/6 text-gray-700">
           <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
-            <Member
-              user={user_map.get(data.user_id)}
-              is_admin={user_map.get(data.user_id)?.is_admin}
-              client:load
-            />
+            <a
+              href={'/members/' + user_map.get(data.user_id)?.id}
+              class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500"
+            >
+              <div class="shrink-0">
+                <span
+                  class={'inline-flex size-10 items-center justify-center rounded-full ' +
+                    (user_map.get(data.user_id)?.is_admin ? 'bg-blue-300' : 'bg-gray-500')}
+                >
+                  <span class="text-lg font-medium text-white"
+                    >{user_map.get(data.user_id)?.['short_name']}</span
+                  >
+                </span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="focus:outline-none">
+                  <span aria-hidden="true" class="absolute inset-0"></span>
+                  <p class="text-sm font-medium text-gray-900">
+                    {user_map.get(data.user_id)?.name}
+                  </p>
+                </div>
+              </div>
+            </a>
           </div>
         </dd>
         <dt class="text-sm font-medium text-gray-900 uppercase">
@@ -142,11 +159,31 @@ if (id) {
           <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
             {
               data.User_Slots.map((user_slot) => (
-                <Member
-                  user={user_map.get(user_slot.user_id)}
-                  is_admin={user_map.get(user_slot.user_id)?.is_admin}
-                  client:load
-                />
+                <a
+                  href={'/members/' + user_map.get(user_slot.user_id)?.id}
+                  class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500"
+                >
+                  <div class="shrink-0">
+                    <span
+                      class={
+                        'inline-flex size-10 items-center justify-center rounded-full ' +
+                        (user_map.get(user_slot.user_id)?.is_admin ? 'bg-blue-300' : 'bg-gray-500')
+                      }
+                    >
+                      <span class="text-lg font-medium text-white">
+                        {user_map.get(user_slot.user_id)?.['short_name']}
+                      </span>
+                    </span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="focus:outline-none">
+                      <span aria-hidden="true" class="absolute inset-0" />
+                      <p class="text-sm font-medium text-gray-900">
+                        {user_map.get(user_slot.user_id)?.name}
+                      </p>
+                    </div>
+                  </div>
+                </a>
               ))
             }
           </div>
