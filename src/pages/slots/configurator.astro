@@ -1,132 +1,150 @@
 ---
-import Layout from '@/layouts/Layout.astro'
-import { and, db, eq, Slot, User_Slot, User } from 'astro:db'
 import moment from 'moment'
 import 'moment/locale/es'
+import Layout from '@/layouts/Layout.astro'
+import Member from '@/components/Member'
+import { db, Slot, User, User_Slot, eq, inArray } from 'astro:db'
+import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 
-interface Class {
-  id: string
-  week_day: number
-  start_hour: number
-  end_hour: number
-  size: number
-}
+let classes: Clase[] = []
 
-const date = Astro.url.searchParams.get('date') || moment().format('YYYY-MM-DD')
+// Obtener clases y usuarios de la base de datos
+const slots = await db.select().from(Slot).leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id)).all()
 
-if (!moment(date, 'YYYY-MM-DD').isValid()) {
-  return Astro.redirect('/dashboard')
-}
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
+const user_ids: string[] = []
 
-const currentDate = moment(date, 'YYYY-MM-DD').toDate()
+if (slots) {
+  const classesMap: Map<string, Clase> = new Map()
 
-let classes = (await db
-  .select()
-  .from(Slot)
-  .where(eq(Slot.week_day, currentDate.getDay()))
-  .all()) as Class[]
+  slots.forEach((item) => {
+    const existingClass = classesMap.get(item.Slot.id)
 
-// Agrupar clases por ID único (si hay duplicados tras el JOIN)
-const uniqueClasses: Class[] = Object.values(
-  classes.reduce(
-    (acc, classItem) => {
-      acc[classItem.id] = classItem
-      return acc
-    },
-    {} as Record<string, Class>
-  )
-)
-
-// Obtener usuarios
-let users = await db
-  .select()
-  .from(User_Slot)
-  .leftJoin(User, eq(User_Slot.user_id, User.id))
-  .where(and(eq(User_Slot.default, false), eq(User_Slot.date, moment(currentDate).format('YYYY-MM-DD'))))
-  .all()
-
-users = users.map((user) => ({
-  ...user,
-  User: user.User
-    ? {
-        ...user.User,
-        name: user.User.name || 'Sin Nombre',
-        email: user.User.email || 'Sin Email',
-        google_id: user.User.google_id || null,
-        password: user.User.password || null,
-        is_admin: user.User.is_admin ?? false
+    if (!existingClass) {
+      const newClass: Clase = {
+        id: item.Slot.id,
+        user_id: item.Slot.user_id,
+        week_day: item.Slot.week_day,
+        start_hour: item.Slot.start_hour,
+        end_hour: item.Slot.end_hour,
+        size: item.Slot.size,
+        start: Number(item.Slot.start_hour) - 7,
+        end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
+        color: item.Slot.size > 1 ? 'green' : 'red',
+        today: moment().isSame(moment(), 'day'),
+        User_Slots: []
       }
-    : null
-}))
+      if (item.User_Slot) {
+        newClass.User_Slots.push(item.User_Slot as Participante)
+        user_ids.push(item.User_Slot.user_id)
+      }
+      classesMap.set(item.Slot.id, newClass)
+    } else {
+      if (item.User_Slot) {
+        existingClass.User_Slots.push(item.User_Slot as Participante)
+        existingClass.color = item.Slot.size > existingClass.User_Slots.length ? 'green' : 'red'
+        user_ids.push(item.User_Slot.user_id)
+      }
+    }
+  })
+
+  classes = Array.from(classesMap.values())
+}
+
+if (user_ids.length > 0) {
+  const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+  users?.forEach((user) => user_map.set(user.id, user))
+}
 ---
 
-<Layout>
-    <div class="relative p-8">
-      <!-- Contenedor de botones (Posicionados en la parte superior derecha) -->
-      <div class="grid grid-cols-2 gap-4 absolute top-8 right-8 mb-4">
-        <button class="bg-gray-500 text-white px-3 py-2 rounded-lg shadow-md hover:bg-blue-600 text-sm">
-          Crear Clase
-        </button>
-        <button class="bg-gray-300 text-white px-3 py-2 rounded-lg shadow-md hover:bg-yellow-600 text-sm">
-          Modificar Clase
-        </button>
-      </div>
-  
-      <div class="grid grid-cols-2 gap-8">
-        <!-- Listado de Clases -->
-        <div class="bg-white shadow-lg rounded-lg p-6 mt-4 mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Listado de Clases</h2>
-          <div class="space-y-4">
-            {
-              uniqueClasses.map((classItem) => {
-                const classDate = moment(date, 'YYYY-MM-DD')
-                  .day(classItem.week_day)
-                  .format('dddd, DD [de] MMMM [de] YYYY')
-                const startTime = moment({
-                  hour: Math.floor(classItem.start_hour),
-                  minute: Math.floor((classItem.start_hour % 1) * 60)
-                }).format('HH:mm')
-                const endTime = moment({
-                  hour: Math.floor(classItem.end_hour),
-                  minute: Math.floor((classItem.end_hour % 1) * 60)
-                }).format('HH:mm')
-  
-                return (
-                  <div class="border rounded-lg p-4 shadow-sm" data-key={classItem.id}>
-                    <h3 class="text-gray-800 font-semibold">{classDate}</h3>
-                    <p class="text-sm text-gray-600">
-                      Horario: {startTime} - {endTime}
-                    </p>
-                    <p class="text-sm text-gray-600">Capacidad: {classItem.size}</p>
+<Layout title="Configurador de clases">
+  <section class="p-6">
+    <h1 class="text-xl font-bold mb-6">Clases Programadas</h1>
+    {
+      classes.length > 0 ? (
+        <dt>
+          {Object.entries(
+            classes.reduce((grouped, cls) => {
+              const dateKey = moment().day(cls.week_day).format('YYYY-MM-DD')
+              if (!grouped[dateKey]) grouped[dateKey] = []
+              grouped[dateKey].push(cls)
+              return grouped
+            }, {})
+          ).map(([dateKey, dayClasses]: [string, Clase[]]) => (
+            <div id={dateKey} class="mb-8">
+              <h2 class="text-lg font-semibold text-gray-700 uppercase mb-4 bg-yellow-200 rounded-lg p-2">
+                {moment(dateKey, 'YYYY-MM-DD').format('dddd[,] DD [de] MMMM [de] YYYY')}
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                {dayClasses.map((cls) => (
+                  <div id={dateKey} class="border rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center">
+                      <div class="text-gray-400">
+                        {moment(cls.start_hour, 'HH:mm').format('HH:mm')} -{' '}
+                        {moment(cls.end_hour, 'HH:mm').format('HH:mm')} h
+                       </div>
+                      <div class="text-right">
+                        {cls.size <= 1 ? 'P' + cls.size : 'G' + cls.size}
+                      </div>
+                    </div>
+
+                    {/* Profesor*/}
+                    <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">Profesor</p>
+                    <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 bg-blue-100 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
+                      <div class={`inline-flex size-10 items-center justify-center rounded-full bg-gray-500 text-white`}>
+                        {user_map.get(cls.user_id)?.name.charAt(0)}{' '}
+                        {/* Mostrar inicial del nombre del profesor */}
+                      </div>
+                      <p class="text-sm font-medium text-gray-900">
+                        {user_map.get(cls.user_id)?.name}
+                      </p>
+                    </div>
+
+                    {cls.User_Slots.length > 0 && (
+                      <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">
+                        Participantes
+                      </p>
+                    )}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                      {cls.User_Slots.length > 0 ? (
+                        cls.User_Slots.map((user_slot) => {
+                          const user = user_map.get(user_slot.user_id)
+                          const isDefault = user_slot.default // Verificar si el participante es 'default'
+                          return (
+                            <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
+                              <div class="flex items-center gap-2">
+                                {/* Mostrar inicial del nombre */}
+                                <div class={`inline-flex size-10 items-center justify-center rounded-full bg-gray-500 text-white`}>
+
+                                  {user?.name.charAt(0)}
+                                </div>
+
+                              
+                                <p class="text-sm text-gray-900">{user?.name}</p>
+                                 {/* Mostrar etiqueta "Default" si es el participante predeterminado */}
+                                 {isDefault ? (
+                                  <span class="inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs text-right font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                    Default
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          )
+                        })
+                      ) : (
+                        <p class="text-sm text-gray-400">Sin participantes</p>
+                      )}
+                    </div>
                   </div>
-                )
-              })
-            }
-          </div>
-        </div>
-  
-        <!-- Listado de Usuarios -->
-        <div class="bg-white shadow-lg rounded-lg p-6 mt-4 mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Listado de Usuarios</h2>
-          <div class="space-y-4">
-            {
-              users.map((user) => (
-                <div
-                  id={user.User?.id}
-                  class="flex items-center space-x-4 border rounded-lg p-4 shadow-sm"
-                >
-                  <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center text-lg font-semibold">
-                    {user.User?.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 class="text-gray-800 font-semibold">{user.User?.name}</h3>
-                    <p class="text-sm text-gray-600">{user.User?.email}</p>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-  </Layout>
+                ))}
+              </div>
+            </div>
+          ))}
+        </dt>
+      ) : (
+        <p>No hay clases disponibles en este momento.</p>
+      )
+    }
+  </section>
+</Layout>
