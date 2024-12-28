@@ -1,7 +1,6 @@
 ---
 import moment from 'moment'
 import 'moment/locale/es'
-import Member from '@/components/Member'
 import Layout from '@/layouts/Layout.astro'
 import DatePickerFilter from '@/components/DatePickerFilter'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
@@ -12,11 +11,11 @@ const date1: string | null = Astro.url.searchParams.get('date1')
 const slot2: string | null = Astro.url.searchParams.get('slot2')
 const date2: string | null = Astro.url.searchParams.get('date2')
 
-if (!slot1 || !date1 || (date1 && !moment(date1, 'YYYY-MM-DD').isValid())) {
+if (!slot1 || !date1 || (date1 && !moment(date1, 'YYYY-MM-DD', true).isValid())) {
   return Astro.redirect('/dashboard')
 }
 
-if (slot2 && (!date2 || !moment(date2, 'YYYY-MM-DD').isValid())) {
+if (slot2 && (!date2 || !moment(date2, 'YYYY-MM-DD', true).isValid())) {
   return Astro.redirect('/dashboard')
 }
 
@@ -31,6 +30,7 @@ let data1: Clase = {
   end: 0,
   color: '',
   today: false,
+  date: '',
   User_Slots: []
 }
 
@@ -45,26 +45,27 @@ let data2: Clase = {
   end: 0,
   color: '',
   today: false,
+  date: '',
   User_Slots: []
 }
 
 const slot_date1 = moment(date1, 'YYYY-MM-DD')
 const slot_date2 = moment(date2, 'YYYY-MM-DD')
 
-console.log(slot_date1, slot_date2)
 const user_map: Map<string, Usuario> = new Map<string, Usuario>()
 if (slot1) {
   const slots = await db
     .select()
     .from(Slot)
-    .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-    .where(
+    .leftJoin(
+      User_Slot,
       and(
-        eq(Slot.id, slot1),
+        eq(User_Slot.slot_id, Slot.id),
         eq(User_Slot.default, false),
         eq(User_Slot.date, slot_date1.format('YYYY-MM-DD'))
       )
     )
+    .where(eq(Slot.id, slot1))
     .all()
 
   const user_ids: string[] = []
@@ -85,6 +86,7 @@ if (slot1) {
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
           color: item.Slot.size > 1 ? 'green' : 'red',
           today: moment().isSame(slot_date1, 'day'),
+          date: slot_date1.format('YYYY-MM-DD'),
           User_Slots: []
         }
         data1['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
@@ -122,21 +124,20 @@ if (slot1) {
   }
 }
 
-if (slot2 && date2 && moment(date2, 'YYYY-MM-DD').isValid()) {
+if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
   const slots = await db
     .select()
     .from(Slot)
-    .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-    .where(
+    .leftJoin(
+      User_Slot,
       and(
-        eq(Slot.id, slot2),
+        eq(User_Slot.slot_id, Slot.id),
         eq(User_Slot.default, false),
         eq(User_Slot.date, slot_date2.format('YYYY-MM-DD'))
       )
     )
+    .where(eq(Slot.id, slot2))
     .all()
-
-  console.log('Data2', slots)
 
   const user_ids: string[] = []
   if (slots && slots.length === 0) {
@@ -156,6 +157,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD').isValid()) {
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
           color: item.Slot.size > 1 ? 'green' : 'red',
           today: moment().isSame(slot_date2, 'day'),
+          date: slot_date2.format('YYYY-MM-DD'),
           User_Slots: []
         }
         data2['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
@@ -211,14 +213,41 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD').isValid()) {
             Participantes ({data1.User_Slots.length}/{data1.size})
           </dt>
           <dd class="text-sm/6 text-gray-700">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div
+              id="draggable1"
+              data-id={data1.id}
+              data-date={slot_date1.format('YYYY-MM-DD')}
+              class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20"
+            >
               {
-                data1.User_Slots.map((user_slot) => (
-                  <Member
-                    user={user_map.get(user_slot.user_id)}
-                    is_admin={user_map.get(user_slot.user_id)?.is_admin}
-                    client:load
-                  />
+                data1.User_Slots.map((user_slot1) => (
+                  <div
+                    data-id={user_slot1.id}
+                    class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500"
+                  >
+                    <div class="shrink-0">
+                      <span
+                        class={
+                          'inline-flex size-10 items-center justify-center rounded-full ' +
+                          (user_map.get(user_slot1.user_id)?.is_admin
+                            ? 'bg-blue-300'
+                            : 'bg-gray-500')
+                        }
+                      >
+                        <span class="text-lg font-medium text-white">
+                          {user_map.get(user_slot1.user_id)?.['short_name']}
+                        </span>
+                      </span>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="focus:outline-none">
+                        <span aria-hidden="true" class="absolute inset-0" />
+                        <p class="text-sm font-medium text-gray-900">
+                          {user_map.get(user_slot1.user_id)?.name}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ))
               }
             </div>
@@ -264,13 +293,40 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD').isValid()) {
                 Participantes ({data2.User_Slots.length}/{data2.size})
               </dt>
               <dd class="text-sm/6 text-gray-700">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {data2.User_Slots.map((user_slot) => (
-                    <Member
-                      user={user_map.get(user_slot.user_id)}
-                      is_admin={user_map.get(user_slot.user_id)?.is_admin}
-                      client:load
-                    />
+                <div
+                  id="draggable2"
+                  data-id={data2.id}
+                  data-date={slot_date2.format('YYYY-MM-DD')}
+                  class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20"
+                >
+                  {data2.User_Slots.map((user_slot2) => (
+                    <div
+                      data-id={user_slot2.id}
+                      class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500"
+                    >
+                      <div class="shrink-0">
+                        <span
+                          class={
+                            'inline-flex size-10 items-center justify-center rounded-full ' +
+                            (user_map.get(user_slot2.user_id)?.is_admin
+                              ? 'bg-blue-300'
+                              : 'bg-gray-500')
+                          }
+                        >
+                          <span class="text-lg font-medium text-white">
+                            {user_map.get(user_slot2.user_id)?.['short_name']}
+                          </span>
+                        </span>
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <div class="focus:outline-none">
+                          <span aria-hidden="true" class="absolute inset-0" />
+                          <p class="text-sm font-medium text-gray-900">
+                            {user_map.get(user_slot2.user_id)?.name}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </dd>
@@ -281,3 +337,60 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD').isValid()) {
     }
   </div>
 </Layout>
+
+<script type="module" src="/js/modules/Sortable.min.js"></script>
+<script type="module" data-astro-rerun>
+  const el1 = document.getElementById('draggable1')
+  const el2 = document.getElementById('draggable2')
+
+  if (el1 && el2) {
+    async function postChanges({ to_slot, to_date, user_slot }) {
+      const response = await fetch('/slots/api/change-user-slot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to_slot,
+          to_date,
+          user_slot
+        })
+      })
+
+      if (!response.ok) {
+        console.error(response)
+      } else {
+        window.location.reload()
+      }
+    }
+
+    new Sortable(el1, {
+      group: 'shared',
+      animation: 150,
+      ghostClass: 'bg-blue-100',
+      onAdd: function (event) {
+        if (event.to.dataset.id && event.from.dataset.id && event.item.dataset.id) {
+          postChanges({
+            to_slot: event.to.dataset.id,
+            to_date: event.to.dataset.date,
+            user_slot: event.item.dataset.id
+          })
+        }
+      }
+    })
+    new Sortable(el2, {
+      group: 'shared',
+      animation: 150,
+      ghostClass: 'bg-blue-100',
+      onAdd: function (event) {
+        if (event.to.dataset.id && event.from.dataset.id && event.item.dataset.id) {
+          postChanges({
+            to_slot: event.to.dataset.id,
+            to_date: event.to.dataset.date,
+            user_slot: event.item.dataset.id
+          })
+        }
+      }
+    })
+  }
+</script>

@@ -1,10 +1,10 @@
 /* empty css                                     */
-import { c as createComponent, r as renderTemplate, a as addAttribute, e as renderComponent, f as renderHead, g as renderSlot, d as createAstro, m as maybeRenderHead } from '../chunks/astro/server_vUHW0twu.mjs';
+import { c as createComponent, r as renderTemplate, a as addAttribute, e as renderComponent, f as renderHead, g as renderSlot, d as createAstro, m as maybeRenderHead } from '../chunks/astro/server_BSCH7m8o.mjs';
 import { Argon2id } from 'oslo/password';
-import { l as lucia } from '../chunks/index_BFB6Q139.mjs';
-import { d as db, U as User } from '../chunks/_astro_db_DexOsEvT.mjs';
+import { l as lucia } from '../chunks/index_CnmuTgJx.mjs';
+import { d as db, U as User } from '../chunks/_astro_db_O5c1qmJs.mjs';
 /* empty css                                     */
-import { $ as $$ClientRouter } from '../chunks/ClientRouter_VHxCPBSV.mjs';
+import { $ as $$ClientRouter } from '../chunks/ClientRouter_B7qvxBs7.mjs';
 import { eq } from '@astrojs/db/dist/runtime/virtual.js';
 export { renderers } from '../renderers.mjs';
 
@@ -19,7 +19,7 @@ const $$Astro = createAstro();
 const $$Index = createComponent(async ($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
   Astro2.self = $$Index;
-  const user = Astro2.locals.user;
+  const user = Astro2.locals.user || null;
   if (user) {
     return Astro2.redirect("/dashboard");
   }

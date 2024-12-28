@@ -54,7 +54,8 @@ if (Astro.request.method === 'POST') {
           name: name,
           email: email.toLowerCase(),
           password: hashedPassword,
-          is_admin: false
+          is_admin: false,
+          is_active: true
         })
 
         const session = await lucia.createSession(userId, { is_admin: false })
@@ -87,6 +88,7 @@ if (Astro.request.method === 'POST') {
             name="name"
             type="text"
             placeholder="Nombre"
+            autocomplete="name"
             required
           />
         </div>
@@ -99,6 +101,7 @@ if (Astro.request.method === 'POST') {
             name="email"
             type="email"
             placeholder="Dirección de email"
+            autocomplete="email"
             required
           />
         </div>
@@ -111,6 +114,7 @@ if (Astro.request.method === 'POST') {
             name="password"
             type="password"
             placeholder="Contraseña"
+            autocomplete="current-password"
             required
           />
         </div>
