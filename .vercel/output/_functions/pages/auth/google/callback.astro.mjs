@@ -1,7 +1,7 @@
-import { g as google, l as lucia } from '../../../chunks/index_BFB6Q139.mjs';
+import { g as google, l as lucia } from '../../../chunks/index_CnmuTgJx.mjs';
 import { OAuth2RequestError } from 'arctic';
 import { generateId } from 'lucia';
-import { d as db, U as User } from '../../../chunks/_astro_db_DexOsEvT.mjs';
+import { d as db, U as User } from '../../../chunks/_astro_db_O5c1qmJs.mjs';
 import { or, eq } from '@astrojs/db/dist/runtime/virtual.js';
 export { renderers } from '../../../renderers.mjs';
 
@@ -33,6 +33,9 @@ async function GET(context) {
       if (existingUser.google_id == null) {
         await db.update(User).set({ google_id: googleUser.sub }).where(eq(User.id, existingUser.id));
       }
+      if (!existingUser.is_active) {
+        return context.redirect("/");
+      }
       const session2 = await lucia.createSession(existingUser.id, {
         is_admin: existingUser.is_admin
       });
@@ -46,7 +49,8 @@ async function GET(context) {
       name: googleUser.name,
       email: googleUser.email.toLowerCase(),
       google_id: googleUser.sub,
-      is_admin: false
+      is_admin: false,
+      is_active: true
     });
     const session = await lucia.createSession(userId, { is_admin: false });
     const sessionCookie = lucia.createSessionCookie(session.id);

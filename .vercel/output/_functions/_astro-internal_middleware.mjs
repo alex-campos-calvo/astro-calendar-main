@@ -1,6 +1,6 @@
-import { l as lucia } from './chunks/index_BFB6Q139.mjs';
-import './chunks/astro-designed-error-pages_BPpXGPAu.mjs';
-import { s as sequence } from './chunks/index_D00Vy947.mjs';
+import { l as lucia } from './chunks/index_CnmuTgJx.mjs';
+import './chunks/astro-designed-error-pages_B42JI4ZU.mjs';
+import { s as sequence } from './chunks/index_J8iTnjnf.mjs';
 
 async function auth(context, next) {
   const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
@@ -30,7 +30,7 @@ async function permissions(context, next) {
   if (user && context.url.pathname === "/" && context.url.pathname === "/signup") {
     return await context.redirect("/dashboard");
   }
-  if (user && user.is_admin && context.url.pathname.startsWith("/slots")) {
+  if (user && user.is_admin && (context.url.pathname.startsWith("/slots") || context.url.pathname.startsWith("/users"))) {
     return await context.redirect("/dashboard");
   }
   return await next();

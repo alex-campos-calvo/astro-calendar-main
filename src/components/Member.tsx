@@ -15,10 +15,10 @@ export default function Member({ user, is_admin }) {
         </span>
       </div>
       <div className="min-w-0 flex-1">
-        <a href={'/members/' + user.id} className="focus:outline-none">
+        <div className="focus:outline-none">
           <span aria-hidden="true" className="absolute inset-0" />
           <p className="text-sm font-medium text-gray-900">{user.name}</p>
-        </a>
+        </div>
       </div>
     </div>
   )

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { Datepicker } from 'flowbite-react'
 import moment from 'moment'
 import 'moment/locale/es'
-import { data } from 'tailwindcss/defaultTheme'
 
 export default function DatePickerFilter({ slot1, date1 }) {
   const [date, setDate] = useState('')
@@ -12,7 +11,7 @@ export default function DatePickerFilter({ slot1, date1 }) {
   let data: ClaseByDate = {}
   useEffect(() => {
     const fetchSlots = async () => {
-      const response = await fetch('/slots/api/load-more', {
+      const response = await fetch('/slots/api/find-slots', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

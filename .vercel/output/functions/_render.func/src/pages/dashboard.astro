@@ -3,42 +3,109 @@ import moment from 'moment'
 import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
 import WeeklyCalendar from '@/components/WeeklyCalendar'
-import { and, between, db, eq, Slot } from 'astro:db'
-import { User_Slot } from 'astro:db'
+import type { Clase, Participante } from '@/lib/types/bbdd.ts'
+import { and, or, db, eq, Slot, User_Slot } from 'astro:db'
 
-const current = moment()
-const monday = current.clone().startOf('week')
-const friday = monday.clone().add(4, 'days')
+const date: string | null = Astro.url.searchParams.get('date')
+const current = date && moment(date, 'YYYY-MM-DD', true).isValid() ? moment(date) : moment()
 
-const week_slots_from_slot = await db
+const now = moment()
+const today = {
+  date_name: current.format('YYYY-MM'),
+  day_name: current.format('dddd[,] DD'),
+  month_name: current.format('MMMM'),
+  year_name: current.format('YYYY'),
+  today_date: now.format('YYYY-MM-DD'),
+  next_day_date: current.clone().add(+1, 'days').format('YYYY-MM-DD'),
+  next_week_date: current.clone().add(7, 'days').startOf('week').format('YYYY-MM-DD'),
+  previus_day_date: current.clone().add(-1, 'days').format('YYYY-MM-DD'),
+  previus_week_date: current.clone().add(-7, 'days').startOf('week').format('YYYY-MM-DD')
+}
+
+const { monday, tuesday, wednesday, thursday, friday } = {
+  monday: current.clone().startOf('week'),
+  tuesday: current.clone().startOf('week').add(1, 'days'),
+  wednesday: current.clone().startOf('week').add(2, 'days'),
+  thursday: current.clone().startOf('week').add(3, 'days'),
+  friday: current.clone().startOf('week').add(4, 'days')
+}
+
+const week_days = [
+  {
+    name: monday.format('ddd'),
+    short_name: monday.format('d'),
+    number: monday.format('DD'),
+    today: monday.isSame(now, 'day')
+  },
+  {
+    name: tuesday.format('ddd'),
+    short_name: tuesday.format('d'),
+    number: tuesday.format('DD'),
+    today: tuesday.isSame(now, 'day')
+  },
+  {
+    name: wednesday.format('ddd'),
+    short_name: wednesday.format('d'),
+    number: wednesday.format('DD'),
+    today: wednesday.isSame(now, 'day')
+  },
+  {
+    name: thursday.format('ddd'),
+    short_name: thursday.format('d'),
+    number: thursday.format('DD'),
+    today: thursday.isSame(now, 'day')
+  },
+  {
+    name: friday.format('ddd'),
+    short_name: friday.format('d'),
+    number: friday.format('DD'),
+    today: friday.isSame(now, 'day')
+  }
+]
+
+const slots = await db
   .select()
   .from(Slot)
-  .innerJoin(
-    User_Slot,
+  .innerJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
+  .where(
     and(
-      eq(User_Slot.slot_id, Slot.id),
       eq(User_Slot.default, false),
-      between(User_Slot.date, monday.toDate(), friday.toDate())
+      or(
+        eq(User_Slot.date, monday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, tuesday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, wednesday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, thursday.format('YYYY-MM-DD')),
+        eq(User_Slot.date, friday.format('YYYY-MM-DD'))
+      )
     )
   )
   .all()
-console.log(week_slots_from_slot)
 
-const week_slots_from_user_slot = await db
-  .select()
-  .from(User_Slot)
-  .fullJoin(
-    Slot,
-    and(
-      eq(User_Slot.slot_id, Slot.id),
-      eq(User_Slot.default, false),
-      between(User_Slot.date, monday.toDate(), friday.toDate())
-    )
-  )
-  .all()
-console.log(week_slots_from_user_slot)
+const week_slots: Clase[] = []
+slots?.forEach((item) => {
+  const current_slot = week_slots.find((slot) => slot.id === item.Slot.id)
+  if (!current_slot) {
+    const s: Clase = {
+      id: item.Slot.id,
+      user_id: item.Slot.user_id,
+      week_day: moment(item.User_Slot.date).weekday() + 1,
+      start_hour: item.Slot.start_hour,
+      end_hour: item.Slot.end_hour,
+      size: item.Slot.size,
+      start: Number(item.Slot.start_hour) - 7,
+      end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
+      color: item.Slot.size > 1 ? 'green' : 'red',
+      today: moment(item.User_Slot.date).isSame(current, 'day'),
+      User_Slots: [item.User_Slot as Participante]
+    }
+    week_slots.push(s)
+  } else {
+    current_slot.User_Slots.push(item.User_Slot as Participante)
+    current_slot.color = item.Slot.size > current_slot.User_Slots.length ? 'green' : 'red'
+  }
+})
 ---
 
 <Layout title="Panel semanal">
-  <!--<WeeklyCalendar slots={week_slots} client:load />  -->
+  <WeeklyCalendar today={today} week_days={week_days} week_slots={week_slots} client:load />
 </Layout>
