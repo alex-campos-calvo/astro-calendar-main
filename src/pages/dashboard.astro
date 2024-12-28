@@ -32,30 +32,40 @@ const { monday, tuesday, wednesday, thursday, friday } = {
 
 const week_days = [
   {
+    week_day: 1,
+    date: monday.format('YYYY-MM-DD'),
     name: monday.format('ddd'),
     short_name: monday.format('d'),
     number: monday.format('DD'),
     today: monday.isSame(now, 'day')
   },
   {
+    week_day: 2,
+    date: tuesday.format('YYYY-MM-DD'),
     name: tuesday.format('ddd'),
     short_name: tuesday.format('d'),
     number: tuesday.format('DD'),
     today: tuesday.isSame(now, 'day')
   },
   {
+    week_day: 3,
+    date: wednesday.format('YYYY-MM-DD'),
     name: wednesday.format('ddd'),
     short_name: wednesday.format('d'),
     number: wednesday.format('DD'),
     today: wednesday.isSame(now, 'day')
   },
   {
+    week_day: 4,
+    date: thursday.format('YYYY-MM-DD'),
     name: thursday.format('ddd'),
     short_name: thursday.format('d'),
     number: thursday.format('DD'),
     today: thursday.isSame(now, 'day')
   },
   {
+    week_day: 5,
+    date: friday.format('YYYY-MM-DD'),
     name: friday.format('ddd'),
     short_name: friday.format('d'),
     number: friday.format('DD'),
@@ -66,9 +76,10 @@ const week_days = [
 const slots = await db
   .select()
   .from(Slot)
-  .innerJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-  .where(
+  .leftJoin(
+    User_Slot,
     and(
+      eq(User_Slot.slot_id, Slot.id),
       eq(User_Slot.default, false),
       or(
         eq(User_Slot.date, monday.format('YYYY-MM-DD')),
@@ -88,15 +99,19 @@ slots?.forEach((item) => {
     const s: Clase = {
       id: item.Slot.id,
       user_id: item.Slot.user_id,
-      week_day: moment(item.User_Slot.date).weekday() + 1,
+      week_day: item.Slot.week_day,
       start_hour: item.Slot.start_hour,
       end_hour: item.Slot.end_hour,
       size: item.Slot.size,
-      start: Number(item.Slot.start_hour) - 7,
+      start:
+        item.Slot.start_hour < 14
+          ? Number(item.Slot.start_hour) - 7
+          : Number(item.Slot.start_hour) - 8,
       end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
       color: item.Slot.size > 1 ? 'green' : 'red',
-      today: moment(item.User_Slot.date).isSame(current, 'day'),
-      User_Slots: [item.User_Slot as Participante]
+      today: item.Slot.week_day === current.weekday() + 1,
+      date: week_days.find((day) => day.week_day === item.Slot.week_day)?.date,
+      User_Slots: item.User_Slot ? [item.User_Slot as Participante] : []
     }
     week_slots.push(s)
   } else {

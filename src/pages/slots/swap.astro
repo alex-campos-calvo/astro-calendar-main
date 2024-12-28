@@ -30,6 +30,7 @@ let data1: Clase = {
   end: 0,
   color: '',
   today: false,
+  date: '',
   User_Slots: []
 }
 
@@ -44,6 +45,7 @@ let data2: Clase = {
   end: 0,
   color: '',
   today: false,
+  date: '',
   User_Slots: []
 }
 
@@ -55,14 +57,15 @@ if (slot1) {
   const slots = await db
     .select()
     .from(Slot)
-    .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-    .where(
+    .leftJoin(
+      User_Slot,
       and(
-        eq(Slot.id, slot1),
+        eq(User_Slot.slot_id, Slot.id),
         eq(User_Slot.default, false),
         eq(User_Slot.date, slot_date1.format('YYYY-MM-DD'))
       )
     )
+    .where(eq(Slot.id, slot1))
     .all()
 
   const user_ids: string[] = []
@@ -83,6 +86,7 @@ if (slot1) {
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
           color: item.Slot.size > 1 ? 'green' : 'red',
           today: moment().isSame(slot_date1, 'day'),
+          date: slot_date1.format('YYYY-MM-DD'),
           User_Slots: []
         }
         data1['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
@@ -124,14 +128,15 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
   const slots = await db
     .select()
     .from(Slot)
-    .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-    .where(
+    .leftJoin(
+      User_Slot,
       and(
-        eq(Slot.id, slot2),
+        eq(User_Slot.slot_id, Slot.id),
         eq(User_Slot.default, false),
         eq(User_Slot.date, slot_date2.format('YYYY-MM-DD'))
       )
     )
+    .where(eq(Slot.id, slot2))
     .all()
 
   const user_ids: string[] = []
@@ -152,6 +157,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
           color: item.Slot.size > 1 ? 'green' : 'red',
           today: moment().isSame(slot_date2, 'day'),
+          date: slot_date2.format('YYYY-MM-DD'),
           User_Slots: []
         }
         data2['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
@@ -339,7 +345,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
   if (el1 && el2) {
     async function postChanges({ to_slot, to_date, user_slot }) {
-      await fetch('/slots/api/change-user-slot', {
+      const response = await fetch('/slots/api/change-user-slot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -350,6 +356,12 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
           user_slot
         })
       })
+
+      if (!response.ok) {
+        console.error(response)
+      } else {
+        window.location.reload()
+      }
     }
 
     new Sortable(el1, {

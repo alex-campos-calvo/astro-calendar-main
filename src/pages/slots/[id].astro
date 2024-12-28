@@ -24,6 +24,7 @@ let data: Clase = {
   end: 0,
   color: '',
   today: false,
+  date: '',
   User_Slots: []
 }
 const slot_date = moment(date, 'YYYY-MM-DD')
@@ -32,14 +33,15 @@ if (id) {
   const slots = await db
     .select()
     .from(Slot)
-    .leftJoin(User_Slot, eq(User_Slot.slot_id, Slot.id))
-    .where(
+    .leftJoin(
+      User_Slot,
       and(
-        eq(Slot.id, id),
+        eq(User_Slot.slot_id, Slot.id),
         eq(User_Slot.default, false),
         eq(User_Slot.date, slot_date.format('YYYY-MM-DD'))
       )
     )
+    .where(eq(Slot.id, id))
     .all()
 
   const user_ids: string[] = []
@@ -60,6 +62,7 @@ if (id) {
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
           color: item.Slot.size > 1 ? 'green' : 'red',
           today: moment().isSame(slot_date, 'day'),
+          date: slot_date.format('YYYY-MM-DD'),
           User_Slots: []
         }
         data['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')

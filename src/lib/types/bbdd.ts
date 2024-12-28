@@ -1,5 +1,5 @@
 export interface ClaseByDate {
-  [date: string]: Clase[]
+  [date: string]: Clase[] | undefined
 }
 
 export interface Clase {
@@ -13,6 +13,7 @@ export interface Clase {
   end: number
   color: string
   today: boolean
+  date: string | undefined
   User_Slots: Participante[]
 }
 

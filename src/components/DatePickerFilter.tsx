@@ -17,7 +17,7 @@ export default function DatePickerFilter({ slot1, date1 }) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          dates: [date]
+          date: date
         })
       })
       data = await response.json()
@@ -35,7 +35,7 @@ export default function DatePickerFilter({ slot1, date1 }) {
         <Datepicker
           id="date-selector"
           weekStart={1}
-          minDate={moment(date1).add(1, 'days').toDate()}
+          minDate={moment().toDate()}
           language="es"
           placeholder="Selecciona una fecha"
           showTodayButton={false}
@@ -78,7 +78,7 @@ export default function DatePickerFilter({ slot1, date1 }) {
                       </p>
                     </div>
                   </div>
-                  <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+                  <div className="shrink-0 flex flex-col items-end">
                     <p className="text-sm/6">{clase.User_Slots?.length + '/' + clase.size}</p>
                   </div>
                 </a>
