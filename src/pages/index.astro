@@ -1,7 +1,7 @@
 ---
 import { Argon2id } from 'oslo/password'
 import { lucia } from '@/lib/auth'
-import { db, eq, User } from 'astro:db'
+import { and, db, eq, User } from 'astro:db'
 import Layout from '@/layouts/Login.astro'
 
 const user = Astro.locals.user || null
@@ -14,7 +14,6 @@ const errors = {
   password: ''
 }
 if (Astro.request.method === 'POST') {
-  //TODO Comprobar password y usuario activo
   try {
     const data = await Astro.request.formData()
     const email = (data.get('email') as string)?.trim()
@@ -38,7 +37,7 @@ if (Astro.request.method === 'POST') {
       const existingUser = await db
         .select()
         .from(User)
-        .where(eq(User.email, email.toLowerCase()))
+        .where(and(eq(User.email, email.toLowerCase()), eq(User.is_active, true)))
         .get()
 
       if (
