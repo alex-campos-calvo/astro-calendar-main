@@ -5,7 +5,7 @@ export default function Event({ item }) {
   const row = Number(item.start) * 2
   const end = Math.round(Number(item.end * 2))
   const event_date = moment(item.date, 'YYYY-MM-DD', true)
-  const isFuture = moment().isSameOrBefore(event_date)
+  const isFuture = event_date.isSameOrAfter(moment(), 'day')
 
   const column = 'sm:col-start-' + String(item.week_day)
   const color = isFuture
@@ -14,9 +14,7 @@ export default function Event({ item }) {
   const size = String(item.size)
   const groupType = 'G' + String(item.size)
   const participants = item.User_Slots?.length
-  const link = isFuture
-    ? '/slots/' + String(item.id) + '?date=' + event_date.format('YYYY-MM-DD')
-    : '/dashboard'
+  const link = '/slots/' + String(item.id) + '?date=' + event_date.format('YYYY-MM-DD')
   const start_hour = moment({
     hour: Math.floor(item.start_hour),
     minute: Math.floor((item.start_hour % 1) * 60)
@@ -33,7 +31,7 @@ export default function Event({ item }) {
     >
       <a
         href={link}
-        style={!isFuture ? { pointerEvents: 'none' } : {}}
+        /*style={!isFuture ? { pointerEvents: 'none' } : {}}*/
         className={
           'group absolute inset-1 flex flex-col overflow-hidden rounded-lg p-5 justify-between ' +
           color

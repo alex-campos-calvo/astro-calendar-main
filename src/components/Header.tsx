@@ -131,7 +131,7 @@ export default function Header() {
               <div className="inline-flex items-center gap-x-1">
                 <AdjustmentsHorizontalIcon
                   aria-hidden="true"
-                  className="size-6 text-gray-600 group-hover:text-indigo-600"
+                  className="size-6 text-gray-600 group-hover:text-fuchsia-600"
                 />
                 <span>PANELES</span>
               </div>
@@ -179,7 +179,7 @@ export default function Header() {
                     <div className="inline-flex items-center gap-x-1">
                       <AdjustmentsHorizontalIcon
                         aria-hidden="true"
-                        className="size-6 text-gray-600 group-hover:text-indigo-600"
+                        className="size-6 text-gray-600 group-hover:text-fuchsia-600"
                       />
                       <span>PANELES</span>
                     </div>

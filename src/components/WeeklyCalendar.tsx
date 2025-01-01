@@ -9,13 +9,13 @@ import {
 export default function WeeklyCalendar({ today, week_days, week_slots }) {
   return (
     <div className="flex flex-col h-full">
-      <header className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
-        <h1 className="text-base font-semibold text-gray-900">
+      <header className="border-b border-gray-200 py-4 sm:flex sm:items-center sm:justify-between sm:px-6">
+        <h1 className="text-center font-semibold text-gray-900 py-2 sm:py-0">
           <time className="uppercase" dateTime={today.date_name}>
             {today.day_name + ' ' + today.month_name + ' ' + today.year_name}
           </time>
         </h1>
-        <div className="flex items-center">
+        <div className="flex justify-center">
           <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
             <a
               href={'/dashboard?date=' + today.previus_week_date}
@@ -36,9 +36,9 @@ export default function WeeklyCalendar({ today, week_days, week_slots }) {
             <a
               href={'/dashboard?date=' + today.today_date}
               type="button"
-              className="flex h-9 w-12 items-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative "
+              className="flex items-center text-sm font-semibold h-9 px-3.5 border-y border-x border-gray-300 text-gray-900 hover:bg-gray-50 focus:relative"
             >
-              <span>Hoy</span>
+              Hoy
             </a>
             <a
               href={'/dashboard?date=' + today.next_day_date}
