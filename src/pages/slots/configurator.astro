@@ -101,7 +101,7 @@ if (user_ids.length > 0) {
                 <h2 class="text-lg font-semibold text-gray-700 uppercase mb-4 bg-gray-200 rounded-lg p-2 text-center">
                   {dia}
                 </h2>
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {clases.map((cls) => (
                     <div class="border rounded-lg shadow p-6">
                       <div class="flex justify-between items-center">
@@ -133,7 +133,7 @@ if (user_ids.length > 0) {
                         </p>
                       )}
 
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                      <div class="grid grid-cols-1 gap-2 mt-2">
                         {cls.User_Slots.length > 0 ? (
                           cls.User_Slots.map((user_slot) => {
                             const user = user_map.get(user_slot.user_id)
