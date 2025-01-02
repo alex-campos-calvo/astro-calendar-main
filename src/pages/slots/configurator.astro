@@ -87,90 +87,82 @@ if (user_ids.length > 0) {
     {
       classes && classes.length > 0 ? (
         <dt>
-          {Object.entries(
-            classes.reduce((grouped, cls) => {
-              if (!cls.date) return grouped
-              const dateKey = cls.date
-              if (!grouped[dateKey]) grouped[dateKey] = []
-              grouped[dateKey].push(cls)
-              return grouped
-            }, {})
-          ).map(([dia, clases]: [string, Clase[]]) => (
-            <div class="mb-8">
-              <h2 class="text-lg font-semibold text-gray-700 uppercase mb-4 bg-gray-200 rounded-lg p-2 text-center">
-                {dia}
-              </h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                {clases.map((cls) => (
-                  <div class="border rounded-lg shadow p-6">
-                    <div class="flex justify-between items-center">
-                      <div class="text-gray-400">
-                        {moment(cls.start_hour, 'HH:mm').format('HH:mm')} -{' '}
-                        {moment(cls.end_hour, 'HH:mm').format('HH:mm')} h
+          <div class="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+            {Object.entries(
+              classes.reduce((grouped, cls) => {
+                if (!cls.date) return grouped
+                const dateKey = cls.date
+                if (!grouped[dateKey]) grouped[dateKey] = []
+                grouped[dateKey].push(cls)
+                return grouped
+              }, {})
+            ).map(([dia, clases]: [string, Clase[]]) => (
+              <div class="w-full flex-shrink-0 snap-center">
+                <h2 class="text-lg font-semibold text-gray-700 uppercase mb-4 bg-gray-200 rounded-lg p-2 text-center">
+                  {dia}
+                </h2>
+                <div class="grid grid-cols-2 gap-6">
+                  {clases.map((cls) => (
+                    <div class="border rounded-lg shadow p-6">
+                      <div class="flex justify-between items-center">
+                        <div class="text-gray-400">
+                          {moment(cls.start_hour, 'HH:mm').format('HH:mm')} -{' '}
+                          {moment(cls.end_hour, 'HH:mm').format('HH:mm')} h
+                        </div>
+                        <div class="text-right">
+                          {cls.size <= 1 ? 'P' + cls.size : 'G' + cls.size}
+                        </div>
                       </div>
-                      <div class="text-right">
-                        {cls.size <= 1 ? 'P' + cls.size : 'G' + cls.size}
+
+                      {/* Profesor */}
+                      <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">Profesor</p>
+                      <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
+                        <div
+                          class={`inline-flex size-10 items-center justify-center rounded-full bg-gray-500 text-white`}
+                        >
+                          {user_map.get(cls.user_id)?.name.charAt(0)}
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">
+                          {user_map.get(cls.user_id)?.name}
+                        </p>
                       </div>
-                    </div>
 
-                    {/* Profesor*/}
-                    <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">Profesor</p>
-                    <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
-                      <div
-                        class={`inline-flex size-10 items-center justify-center rounded-full bg-gray-500 text-white`}
-                      >
-                        {user_map.get(cls.user_id)?.name.charAt(0)}{' '}
-                        {/* Mostrar inicial del nombre del profesor */}
-                      </div>
-                      <p class="text-sm font-medium text-gray-900">
-                        {user_map.get(cls.user_id)?.name}
-                      </p>
-                    </div>
-
-                    {cls.User_Slots.length > 0 && (
-                      <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">
-                        Participantes ({cls.User_Slots.length}/{cls.size})
-                      </p>
-                    )}
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                      {cls.User_Slots.length > 0 ? (
-                        cls.User_Slots.map((user_slot) => {
-                          const user = user_map.get(user_slot.user_id)
-                          //const isDefault = user_slot.default // Verificar si el participante es 'default'
-                          return (
-                            <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
-                              <div class="flex items-center gap-2">
-                                {/* Mostrar inicial del nombre */}
-                                <div
-                                  class={`inline-flex size-10 items-center justify-center rounded-full bg-gray-500 text-white`}
-                                >
-                                  {user?.name.charAt(0)}
-                                </div>
-
-                                <p class="text-sm text-gray-900">{user?.name}</p>
-                                {/* Mostrar etiqueta "Default" si es el participante predeterminado 
-                                {isDefault ? (
-                                  <span class="inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs text-right font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                                    Default
-                                  </span>
-                                ) : null}*/}
-                              </div>
-                            </div>
-                          )
-                        })
-                      ) : (
-                        <p class="text-sm text-gray-400">
-                          {' '}
+                      {cls.User_Slots.length > 0 && (
+                        <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">
                           Participantes ({cls.User_Slots.length}/{cls.size})
                         </p>
                       )}
+
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                        {cls.User_Slots.length > 0 ? (
+                          cls.User_Slots.map((user_slot) => {
+                            const user = user_map.get(user_slot.user_id)
+                            return (
+                              <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
+                                <div class="flex items-center gap-2">
+                                  <div
+                                    class={`inline-flex size-10 items-center justify-center rounded-full bg-gray-500 text-white`}
+                                  >
+                                    {user?.name.charAt(0)}
+                                  </div>
+                                  <p class="text-sm text-gray-900">{user?.name}</p>
+                                </div>
+                              </div>
+                            )
+                          })
+                        ) : (
+                          <p class="text-sm text-gray-400">
+                            {' '}
+                            Participantes ({cls.User_Slots.length}/{cls.size})
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </dt>
       ) : (
         <p>No hay clases disponibles en este momento.</p>
