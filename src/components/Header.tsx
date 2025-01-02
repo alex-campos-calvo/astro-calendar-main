@@ -29,19 +29,22 @@ const items = {
       name: 'Panel semanal',
       description: 'Vista semanal de tu negocio',
       href: '/dashboard',
-      icon: CalendarDaysIcon
+      icon: CalendarDaysIcon,
+      is_admin: false
     },
     {
       name: 'Configurador de clases',
       description: 'Configura las clases semanales disponibles para tus clientes',
       href: '/slots/configurator',
-      icon: ChartPieIcon
+      icon: ChartPieIcon,
+      is_admin: true
     },
     {
       name: 'Listado de miembros',
       description: 'Consulta y modifica los datos tus clientes',
       href: '/members/users',
-      icon: UserGroupIcon
+      icon: UserGroupIcon,
+      is_admin: true
     }
   ],
   buttons: {
@@ -100,7 +103,7 @@ function LogoutButton(props) {
   return null
 }
 
-export default function Header() {
+export default function Header({ is_admin }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -143,9 +146,11 @@ export default function Header() {
               className="absolute inset-x-0 top-0 -z-10 bg-white pt-14 shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:-translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
             >
               <div className="mx-auto grid max-w-7xl grid-cols-4 gap-x-4 px-6 py-10 lg:px-8 xl:gap-x-8">
-                {items.links.map((item) => (
-                  <Link key={item.name} item={item} />
-                ))}
+                {items.links.map((item) =>
+                  !item.is_admin || (item.is_admin && is_admin) ? (
+                    <Link key={item.name} item={item} />
+                  ) : null
+                )}
               </div>
             </PopoverPanel>
           </Popover>
