@@ -87,7 +87,10 @@ if (user_ids.length > 0) {
     {
       classes && classes.length > 0 ? (
         <dt>
-          <div class="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+          <div
+            id="scroll-container"
+            class="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+          >
             {Object.entries(
               classes.reduce((grouped, cls) => {
                 if (!cls.date) return grouped
@@ -101,7 +104,7 @@ if (user_ids.length > 0) {
                 <h2 class="text-lg font-semibold text-gray-700 uppercase mb-4 bg-gray-200 rounded-lg p-2 text-center">
                   {dia}
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="grid configurator grid-cols-1 sm:grid-cols-2 gap-6">
                   {clases.map((cls) => (
                     <div class="border rounded-lg shadow p-6">
                       <div class="flex justify-between items-center">
@@ -114,7 +117,6 @@ if (user_ids.length > 0) {
                         </div>
                       </div>
 
-                      {/* Profesor */}
                       <p class="text-sm font-medium text-gray-900 uppercase mt-4 mb-2">Profesor</p>
                       <div class="relative flex items-center space-x-3 rounded-lg shadow border border-gray-300 px-6 py-5 focus-within:ring-2 focus-within:ring-fuchsia-500 focus-within:ring-offset-2 hover:border-fuchsia-500">
                         <div
@@ -133,7 +135,7 @@ if (user_ids.length > 0) {
                         </p>
                       )}
 
-                      <div class="grid grid-cols-1 gap-2 mt-2">
+                      <div class="grid configurator grid-cols-1 gap-2 mt-2">
                         {cls.User_Slots.length > 0 ? (
                           cls.User_Slots.map((user_slot) => {
                             const user = user_map.get(user_slot.user_id)

@@ -23,7 +23,7 @@ body, html {
     scroll-snap-align: center;
   }
   
-  .grid {
+  .grid.configurator {
     display: grid;
     gap: 1.5rem; /* Ajustar espacio entre elementos */
   }
