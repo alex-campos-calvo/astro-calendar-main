@@ -33,6 +33,15 @@ const Slot = defineTable({
   }
 })
 
+const Slot_Setting = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true, optional: false, unique: true }),
+    start_date: column.text({ optional: false }),
+    end_date: column.text({ optional: false }),
+    is_active: column.boolean({ optional: false, default: true })
+  }
+})
+
 const Session = defineTable({
   columns: {
     id: column.text({ primaryKey: true }),
@@ -43,5 +52,5 @@ const Session = defineTable({
 
 // https://astro.build/db/config
 export default defineDb({
-  tables: { User, Slot, User_Slot, Session }
+  tables: { User, Slot, User_Slot, Session, Slot_Setting }
 })
