@@ -1,0 +1,25 @@
+body, html {
+    scrollbar-width: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+  
+  .snap-x {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .snap-center {
+    scroll-snap-align: center;
+  }
+  
+  .grid.configurator {
+    display: grid;
+    gap: 1.5rem; /* Ajustar espacio entre elementos */
+  }
