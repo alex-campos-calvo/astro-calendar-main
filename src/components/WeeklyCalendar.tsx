@@ -5,6 +5,7 @@ import {
   ChevronRightIcon,
   ChevronDoubleRightIcon
 } from '@heroicons/react/20/solid'
+import SearchBar from './SearchBar'
 
 export default function WeeklyCalendar({ today, week_days, week_slots, user_map }) {
   return (
@@ -15,6 +16,9 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             {today.day_name + ' ' + today.month_name + ' ' + today.year_name}
           </time>
         </h1>
+        <div>
+          <SearchBar />
+        </div>
         <div className="flex justify-center">
           <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
             <a

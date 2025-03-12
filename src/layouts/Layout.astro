@@ -2,6 +2,7 @@
 import '@/styles/global.css'
 import Header from '@/components/Header'
 import { ClientRouter } from 'astro:transitions'
+import SpeedInsights from '@vercel/speed-insights/astro'
 
 const title = Astro.props.title || 'Motion Leon'
 
@@ -30,5 +31,6 @@ const is_admin = Astro.locals?.user?.is_admin ? true : false
         </div>
       </div>
     </article>
+    <SpeedInsights />
   </body>
 </html>

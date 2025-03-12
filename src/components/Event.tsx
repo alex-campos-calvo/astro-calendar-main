@@ -2,8 +2,6 @@ import moment from 'moment'
 import 'moment/locale/es'
 
 export default function Event({ item, user }) {
-  console.log(user)
-
   const row = Number(item.start) * 2
   const end = Math.round(Number(item.end * 2))
   const event_date = moment(item.date, 'YYYY-MM-DD', true)

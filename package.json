@@ -21,6 +21,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@libsql/client": "^0.14.0",
+    "@vercel/speed-insights": "^1.2.0",
     "arctic": "^2.3.3",
     "astro": "^5.1.1",
     "flowbite-react": "^0.10.2",
