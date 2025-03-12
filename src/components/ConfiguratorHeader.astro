@@ -1,0 +1,30 @@
+---
+import { getWeekDayMobileNames, getWeekDayNames } from '@/lib/types/utils'
+
+const { day_number } = Astro.props
+
+const week_days_map = getWeekDayNames()
+const week_days_mobile_map = getWeekDayMobileNames()
+---
+
+<div class="text-center uppercase font-semibold p-4">
+  <div class="flex justify-center">
+    <div class="grid grid-cols-5">
+      {
+        Object.keys(week_days_map).map((key) => (
+          <a
+            href={'/slots/configurator?week_day=' + key}
+            type="button"
+            class={
+              'flex items-center h-9 px-3.5 mx-2 justify-center rounded-md border border-black text-black hover:bg-gray-100 focus:relative ' +
+              (day_number === parseInt(key) ? 'border-fuchsia-500 text-fuchsia-500' : '')
+            }
+          >
+            <span class="md:hidden">{week_days_mobile_map[key]}</span>
+            <span class="hidden md:inline">{week_days_map[key]}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</div>

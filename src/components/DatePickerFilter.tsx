@@ -1,4 +1,3 @@
-import type { ClaseByDate } from '@/lib/types/bbdd'
 import { useEffect, useState } from 'react'
 import { Datepicker } from 'flowbite-react'
 import moment from 'moment'
@@ -8,7 +7,6 @@ export default function DatePickerFilter({ slot1, date1 }) {
   const [date, setDate] = useState('')
   const [slots, setSlots] = useState({})
 
-  let data: ClaseByDate = {}
   useEffect(() => {
     const fetchSlots = async () => {
       const response = await fetch('/slots/api/find-slots', {
@@ -20,8 +18,12 @@ export default function DatePickerFilter({ slot1, date1 }) {
           date: date
         })
       })
-      data = await response.json()
-      setSlots(data)
+
+      if (response.ok) {
+        setSlots(await response.json())
+      } else {
+        console.error(response)
+      }
     }
 
     if (date) {
@@ -31,7 +33,7 @@ export default function DatePickerFilter({ slot1, date1 }) {
 
   return (
     <nav aria-label="Directory">
-      <div className="flex top-0 z-10 border-y border-b-gray-200 border-t-gray-100 bg-gray-50 px-3 py-1.5 text-sm/6 font-semibold text-gray-900">
+      <div className="flex z-10 border-y border-b-gray-200 border-t-gray-100 bg-gray-50 px-3 py-1.5 text-sm/6 font-semibold text-gray-900">
         <Datepicker
           id="date-selector"
           weekStart={1}
@@ -66,10 +68,10 @@ export default function DatePickerFilter({ slot1, date1 }) {
                 >
                   <div className="flex min-w-0 gap-x-4">
                     <div className="min-w-0 flex-auto">
-                      <p className="uppercase text-sm/6 font-semibold">{clase.date_text}</p>
-                      <p className="mt-1 truncate text-xs/5 text-gray-500">
-                        {clase.start_hour_text + ' - ' + clase.end_hour_text}
+                      <p className="uppercase text-sm/8 font-semibold">
+                        {clase.start_hour_text + ' - ' + clase.end_hour_text}{' '}
                       </p>
+                      <p className="mt-1 truncate text-xs/5 text-gray-500">{clase.date_text}</p>
                     </div>
                   </div>
                   <div className="shrink-0 flex flex-col items-end">

@@ -35,7 +35,7 @@ const items = {
     {
       name: 'Configurador de clases',
       description: 'Configura las clases semanales disponibles para tus clientes',
-      href: '/slots/configurator',
+      href: '/slots/configurator?week_day=1',
       icon: ChartPieIcon,
       is_admin: true
     },

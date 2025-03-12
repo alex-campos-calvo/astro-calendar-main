@@ -3,8 +3,9 @@ import moment from 'moment'
 import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
 import WeeklyCalendar from '@/components/WeeklyCalendar'
-import type { Clase, Participante } from '@/lib/types/bbdd.ts'
-import { and, or, db, eq, Slot, User_Slot } from 'astro:db'
+import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
+import { and, db, eq, Slot, User_Slot, inArray, User } from 'astro:db'
+import { getWeekDayNames } from '@/lib/types/utils'
 
 const date: string | null = Astro.url.searchParams.get('date')
 const current = date && moment(date, 'YYYY-MM-DD', true).isValid() ? moment(date) : moment()
@@ -73,26 +74,32 @@ const week_days = [
   }
 ]
 
+const week_days_map: number[] = Object.keys(getWeekDayNames()).map(Number)
+const dates: string[] = [
+  monday.format('YYYY-MM-DD'),
+  tuesday.format('YYYY-MM-DD'),
+  wednesday.format('YYYY-MM-DD'),
+  thursday.format('YYYY-MM-DD'),
+  friday.format('YYYY-MM-DD')
+]
+
 const slots = await db
   .select()
   .from(Slot)
+  .where(inArray(Slot.week_day, week_days_map))
   .leftJoin(
     User_Slot,
     and(
       eq(User_Slot.slot_id, Slot.id),
       eq(User_Slot.default, false),
-      or(
-        eq(User_Slot.date, monday.format('YYYY-MM-DD')),
-        eq(User_Slot.date, tuesday.format('YYYY-MM-DD')),
-        eq(User_Slot.date, wednesday.format('YYYY-MM-DD')),
-        eq(User_Slot.date, thursday.format('YYYY-MM-DD')),
-        eq(User_Slot.date, friday.format('YYYY-MM-DD'))
-      )
+      inArray(User_Slot.date, dates)
     )
   )
   .all()
 
+const user_ids: string[] = []
 const week_slots: Clase[] = []
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
 slots?.forEach((item) => {
   let current_slot = week_slots.find((slot) => slot.id === item.Slot.id)
   if (!current_slot) {
@@ -117,14 +124,31 @@ slots?.forEach((item) => {
       s.User_Slots.push(item.User_Slot as Participante)
       s.color = item.Slot.size > s.User_Slots.length ? 'green' : 'red'
     }
+    user_ids.push(item.Slot.user_id)
     week_slots.push(s)
   } else {
     current_slot.User_Slots.push(item.User_Slot as Participante)
     current_slot.color = item.Slot.size > current_slot.User_Slots.length ? 'green' : 'red'
   }
 })
+
+if (user_ids && user_ids.length > 0) {
+  const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+
+  if (users && users.length > 0) {
+    users.forEach((user) => {
+      user_map.set(user.id, user)
+    })
+  }
+}
 ---
 
 <Layout title="Panel semanal">
-  <WeeklyCalendar today={today} week_days={week_days} week_slots={week_slots} client:load />
+  <WeeklyCalendar
+    today={today}
+    week_days={week_days}
+    week_slots={week_slots}
+    user_map={user_map}
+    client:load
+  />
 </Layout>

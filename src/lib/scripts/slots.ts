@@ -2,7 +2,7 @@ import moment from 'moment'
 import { generateId } from 'lucia'
 import { and, asc, db, eq, inArray, Slot, Slot_Setting, User_Slot } from 'astro:db'
 
-export default async function calculateSlots() {
+export async function GET(request: Request) {
   moment.updateLocale('es', {
     week: {
       dow: 1 // Monday is the first day of the week
@@ -98,8 +98,6 @@ export default async function calculateSlots() {
         })
       })
 
-      console.log(values)
-
       await db.insert(User_Slot).values(values).run()
       await db
         .update(Slot_Setting)
@@ -108,4 +106,5 @@ export default async function calculateSlots() {
         .run()
     }
   }
+  return Response.json({ message: 'ok' })
 }

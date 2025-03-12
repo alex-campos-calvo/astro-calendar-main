@@ -114,10 +114,8 @@ if (slot1) {
     if (users && users.length > 0) {
       users.forEach((user) => {
         const fullname = user.name.split(' ')
-        if (fullname && fullname[0]) {
-          if (fullname && fullname[0][0]) {
-            user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-          }
+        if (fullname && fullname[0] && fullname[0][0]) {
+          user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
         }
         user_map.set(user.id, user)
       })
@@ -185,10 +183,8 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     if (users && users.length > 0) {
       users.forEach((user) => {
         const fullname = user.name.split(' ')
-        if (fullname && fullname[0]) {
-          if (fullname && fullname[0][0]) {
-            user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-          }
+        if (fullname && fullname[0] && fullname[0][0]) {
+          user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
         }
         user_map.set(user.id, user)
       })
@@ -199,7 +195,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
 <Layout title="Intercambio de miembros">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+    <div class="overflow-hidden bg-white border border-black shadow sm:rounded-lg">
       <div class="flex justify-between px-4 py-6 sm:px-6">
         <div class="gap-4">
           <h3 class="text-base/7 font-semibold text-gray-900">
@@ -208,7 +204,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
           <span class="text-gray-400">{data1['start_hour_text']} - {data1['end_hour_text']}</span>
         </div>
       </div>
-      <dl class="border-t border-gray-100">
+      <dl class="border-t border-black">
         <div class="px-4 py-6 grid sm:col-span-3 sm:px-6 gap-y-3">
           <dt class="text-sm font-medium text-gray-900 uppercase">
             Participantes ({data1.User_Slots.length}/{data1.size})
@@ -222,7 +218,9 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
             >
               {
                 data1.User_Slots.map((user_slot1) => (
-                  <Member user={user_map.get(user_slot1.user_id)} />
+                  <div data-id={user_slot1.id}>
+                    <Member user={user_map.get(user_slot1.user_id)} />
+                  </div>
                 ))
               }
             </div>
@@ -232,7 +230,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     </div>
     {
       (!slot2 || !date2) && (
-        <div class="bg-white shadow sm:rounded-lg">
+        <div class="bg-white border border-black shadow sm:rounded-lg">
           <div class="flex justify-between px-4 py-6 sm:px-6">
             <div class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
@@ -243,7 +241,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
               </span>
             </div>
           </div>
-          <dl class="border-t border-gray-100">
+          <dl class="border-t border-black">
             <DatePickerFilter slot1={slot1} date1={date1} client:only="react" />
           </dl>
         </div>
@@ -251,7 +249,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     }
     {
       slot2 && date2 && (
-        <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+        <div class="overflow-hidden bg-white border border-black shadow sm:rounded-lg">
           <div class="flex justify-between px-4 py-6 sm:px-6">
             <div class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
@@ -262,7 +260,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
               </span>
             </div>
           </div>
-          <dl class="border-t border-gray-100">
+          <dl class="border-t border-black">
             <div class="px-4 py-6 grid sm:col-span-3 sm:px-6 gap-y-3">
               <dt class="text-sm font-medium text-gray-900 uppercase">
                 Participantes ({data2.User_Slots.length}/{data2.size})
@@ -275,7 +273,9 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
                   class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20"
                 >
                   {data2.User_Slots.map((user_slot2) => (
-                    <Member user={user_map.get(user_slot2.user_id)} />
+                    <div data-id={user_slot2.id}>
+                      <Member user={user_map.get(user_slot2.user_id)} />
+                    </div>
                   ))}
                 </div>
               </dd>

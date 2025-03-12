@@ -1,0 +1,137 @@
+---
+import moment from 'moment'
+import Layout from '@/layouts/Layout.astro'
+import { PencilSquareIcon } from '@heroicons/react/24/outline'
+import ConfiguratorHeader from '@/components/ConfiguratorHeader.astro'
+import { and, db, Slot, User, User_Slot, eq, inArray } from 'astro:db'
+import type { Clase, Usuario, Participante } from '@/lib/types/bbdd.ts'
+import 'moment/locale/es'
+
+const week_day_text: string | null = Astro.url.searchParams.get('week_day')
+if (!week_day_text || parseInt(week_day_text) < 1 || parseInt(week_day_text) > 7) {
+  return Astro.redirect('/slots/configurator?week_day=1')
+}
+
+const day_number: number = parseInt(week_day_text)
+
+const slots = await db
+  .select()
+  .from(Slot)
+  .leftJoin(User_Slot, and(eq(User_Slot.slot_id, Slot.id), eq(User_Slot.default, true)))
+  .where(eq(Slot.week_day, day_number))
+  .orderBy(Slot.start_hour)
+  .all()
+
+const user_ids: string[] = []
+const default_slots: Clase[] = []
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
+if (slots) {
+  slots.forEach((slot) => {
+    let current_slot = default_slots.find((item) => item.id === slot.Slot.id)
+    if (!current_slot) {
+      const s: Clase = {
+        id: slot.Slot.id,
+        user_id: slot.Slot.user_id,
+        week_day: slot.Slot.week_day,
+        start_hour: slot.Slot.start_hour,
+        end_hour: slot.Slot.end_hour,
+        size: slot.Slot.size,
+        start:
+          slot.Slot.start_hour < 14
+            ? Number(slot.Slot.start_hour) - 7
+            : Number(slot.Slot.start_hour) - 8,
+        end: Number(slot.Slot.end_hour) - Number(slot.Slot.start_hour),
+        color: 'green',
+        today: false,
+        date: '',
+        User_Slots: []
+      }
+      s['start_hour_text'] = moment(slot.Slot.start_hour, 'HH:mm').format('HH:mm')
+      s['end_hour_text'] = moment(slot.Slot.end_hour, 'HH:mm').format('HH:mm')
+      s['tipo_text'] = slot.Slot.size <= 1 ? 'P' : 'G' + slot.Slot.size
+      user_ids.push(slot.Slot.user_id)
+
+      if (slot.User_Slot) {
+        s.User_Slots.push(slot.User_Slot as Participante)
+        s.color = slot.Slot.size > s.User_Slots.length ? 'green' : 'red'
+        user_ids.push(slot.User_Slot.user_id)
+      }
+      default_slots.push(s)
+    } else if (slot.User_Slot) {
+      current_slot.User_Slots.push(slot.User_Slot as Participante)
+      current_slot.color = slot.Slot.size > current_slot.User_Slots.length ? 'green' : 'red'
+      user_ids.push(slot.User_Slot.user_id)
+    }
+  })
+}
+
+if (user_ids && user_ids.length > 0) {
+  const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+
+  if (users && users.length > 0) {
+    users.forEach((user) => {
+      const fullname = user.name.split(' ')
+      if (fullname && fullname[0] && fullname[0][0]) {
+        user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
+      }
+
+      user_map.set(user.id, user)
+    })
+  }
+}
+---
+
+<Layout title="Configurador de clases">
+  <ConfiguratorHeader day_number={day_number} />
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border border-black sm:rounded-lg">
+    {
+      default_slots && default_slots.length > 0 ? (
+        default_slots.map((slot) => (
+          <div class="bg-white px-4 py-5 sm:px-6 rounded-lg border border-black">
+            <div class="flex space-x-3 border-b border-gray-300 pb-3">
+              <div class="shrink-0">
+                <span
+                  class={'inline-flex size-10 items-center justify-center rounded-full bg-gray-500'}
+                >
+                  <span class="text-lg font-medium text-white uppercase">{slot['tipo_text']}</span>
+                </span>
+              </div>
+              <div class="flex w-full justify-between">
+                <div class="flex-1">
+                  <p class="text-md font-semibold">
+                    {slot['start_hour_text']} - {slot['end_hour_text']}
+                  </p>
+                  <div>
+                    <span class="text-sm font-semibold mr-6">
+                      {slot.User_Slots.length} / {slot.size}
+                    </span>
+                    <span class="text-sm font-semibold">{user_map.get(slot.user_id)?.name}</span>
+                  </div>
+                </div>
+                <div class="flex-none">
+                  <a
+                    href={'/slots/configurator/' + slot.id}
+                    class="hover:text-fuchsia-500 focus-within:text-fuchsia-500"
+                  >
+                    <PencilSquareIcon className="size-5" aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div class="font-semibold">
+          <p>No hay clases disponibles en este momento.</p>
+        </div>
+      )
+    }
+  </div>
+  <div class="w-full flex justify-center gap-x-6">
+    <a
+      href={'/slots/configurator/create-slot'}
+      class="rounded-md bg-green-500 px-3 py-2 mt-4 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
+      >Añadir clase</a
+    >
+  </div>
+</Layout>

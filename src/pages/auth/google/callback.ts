@@ -46,7 +46,11 @@ export async function GET(context: APIContext): Promise<Response> {
 
     if (existingUser) {
       if (existingUser.google_id == null) {
-        await db.update(User).set({ google_id: googleUser.sub }).where(eq(User.id, existingUser.id))
+        await db
+          .update(User)
+          .set({ google_id: googleUser.sub })
+          .where(eq(User.id, existingUser.id))
+          .run()
       }
 
       if (!existingUser.is_active) {

@@ -12,10 +12,8 @@ const members = {
 if (people) {
   people.forEach((person) => {
     const fullname = person.name.split(' ')
-    if (fullname && fullname[0]) {
-      if (fullname && fullname[0][0]) {
-        person['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-      }
+    if (fullname && fullname[0] && fullname[0][0]) {
+      person['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
     }
 
     if (person.is_admin) {
@@ -58,7 +56,7 @@ if (people) {
                     (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                   }
                 >
-                  <span class="text-lg font-medium text-white">{user['short_name']}</span>
+                  <span class="text-lg font-medium text-white uppercase">{user['short_name']}</span>
                 </span>
               </div>
               <div class="min-w-0 flex-1">
@@ -104,13 +102,15 @@ if (people) {
                     (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                   }
                 >
-                  <span class="text-lg font-medium text-white">{user['short_name']}</span>
+                  <span class="text-lg font-medium text-white uppercase">{user['short_name']}</span>
                 </span>
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex-1 truncate">
                   <div class="flex items-center space-x-3">
-                    <h3 class="truncate text-sm font-medium text-gray-900">{user.name}</h3>
+                    <h3 class="truncate text-sm font-medium text-gray-900 capitalize">
+                      {user.name}
+                    </h3>
                   </div>
                   <p class="mt-1 truncate text-sm text-gray-500">{user.email}</p>
                 </div>

@@ -1,0 +1,373 @@
+---
+import moment from 'moment'
+import Layout from '@/layouts/Layout.astro'
+import Member from '@/components/Member.astro'
+import type { Usuario, Participante } from '@/lib/types/bbdd'
+import { getHours, getSizeNames, getWeekDayNames } from '@/lib/types/utils'
+import { validateWeekday, validateSize, validateHour } from '@/lib/validations/type-validations'
+import { and, db, eq, Slot, User, User_Slot, inArray, not } from 'astro:db'
+import ConfiguratorHeader from '@/components/ConfiguratorHeader.astro'
+import MemberPickerFilter from '@/components/MemberPickerFilter'
+import TeacherPickerFilter from '@/components/TeacherPickerFilter'
+
+const slot_id: string | undefined = Astro.params.id
+
+if (!slot_id) {
+  return Astro.redirect('/slots/configurator')
+}
+
+const slot = await db
+  .select()
+  .from(Slot)
+  .where(eq(Slot.id, slot_id))
+  .leftJoin(User_Slot, and(eq(User_Slot.slot_id, Slot.id), eq(User_Slot.default, true)))
+  .all()
+
+if (!slot || !slot[0]) {
+  return Astro.redirect('/slots/configurator')
+}
+
+const hours = getHours()
+const size_names = getSizeNames()
+const week_day_names = getWeekDayNames()
+const user_ids: string[] = []
+const user_slots: Participante[] = []
+const slot_data = {
+  info: {
+    id: '',
+    user_id: '',
+    week_day: 1,
+    start_hour: 1,
+    end_hour: 1,
+    size: 1,
+    start_hour_text: '',
+    end_hour_text: '',
+    tipo_text: '',
+    user: {
+      id: '',
+      name: '',
+      email: '',
+      is_admin: false,
+      is_active: false,
+      short_name: ''
+    },
+    user_slots: user_slots
+  },
+  errors: {
+    week_day: '',
+    size: '',
+    start_hour: ''
+  }
+}
+
+if (Astro.request.method === 'POST') {
+  const data = await Astro.request.formData()
+  slot_data.info.week_day = parseInt((data.get('week_day') as string)?.trim())
+  slot_data.info.size = parseInt((data.get('size') as string)?.trim())
+  slot_data.info.start_hour = parseInt((data.get('start_hour') as string)?.trim())
+
+  if (!validateWeekday(slot_data.info.week_day)) {
+    slot_data.errors.week_day = 'Por favor, introduce un día de la semana válido (Entre 1 y 7).'
+  }
+
+  if (!validateSize(slot_data.info.size)) {
+    slot_data.errors.size = 'Por favor, introduce un tamaño de clase válido (1, 4 u 8).'
+  }
+
+  if (!validateHour(slot_data.info.start_hour)) {
+    slot_data.errors.start_hour = 'Por favor, introduce un valor horario válido (Entre 8 y 22).'
+  }
+
+  const existingSlot = await db
+    .select()
+    .from(Slot)
+    .where(
+      and(
+        not(eq(Slot.id, slot_id)),
+        eq(Slot.week_day, slot_data.info.week_day),
+        eq(Slot.start_hour, slot_data.info.start_hour)
+      )
+    )
+    .get()
+
+  if (existingSlot) {
+    slot_data.errors.start_hour = 'Ya existe una clase en ese horario.'
+  }
+
+  const hasErrors = Object.values(slot_data.errors).some((e) => e)
+  if (!hasErrors) {
+    await db
+      .update(Slot)
+      .set({
+        week_day: slot_data.info.week_day,
+        size: slot_data.info.size,
+        start_hour: slot_data.info.start_hour,
+        end_hour: slot_data.info.start_hour + 1
+      })
+      .where(eq(Slot.id, slot_id))
+      .run()
+    return Astro.redirect('/slots/configurator?week_day=' + slot_data.info.week_day)
+  }
+}
+
+slot_data.info.id = slot[0].Slot.id
+slot_data.info.user_id = slot[0].Slot.user_id
+slot_data.info.week_day = slot[0].Slot.week_day
+slot_data.info.start_hour = slot[0].Slot.start_hour
+slot_data.info.end_hour = slot[0].Slot.end_hour
+slot_data.info.size = slot[0].Slot.size
+slot_data.info.start_hour_text = moment(slot[0].Slot.start_hour, 'HH:mm').format('HH:mm')
+slot_data.info.end_hour_text = moment(slot[0].Slot.end_hour, 'HH:mm').format('HH:mm')
+slot_data.info.tipo_text = slot[0].Slot.size <= 1 ? 'P' : 'G' + slot[0].Slot.size
+user_ids.push(slot[0].Slot.user_id)
+
+if (slot && slot.length > 0) {
+  slot.forEach((user_slot) => {
+    if (user_slot.User_Slot) {
+      user_ids.push(user_slot.User_Slot.user_id)
+      slot_data.info.user_slots.push({
+        id: user_slot.User_Slot.id,
+        user_id: user_slot.User_Slot.user_id,
+        slot_id: user_slot.User_Slot.slot_id,
+        default: user_slot.User_Slot.default,
+        date: ''
+      } as Participante)
+    }
+  })
+}
+
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
+if (user_ids && user_ids.length > 0) {
+  const users = await db
+    .select()
+    .from(User)
+    .where(and(inArray(User.id, user_ids), eq(User.is_active, true)))
+    .all()
+
+  const user = users.filter((user) => user.id === slot_data.info.user_id)
+  if (users && user[0]) {
+    const fullname = user[0]?.name?.split(' ')
+
+    slot_data.info.user.id = user[0].id
+    slot_data.info.user.name = user[0].name
+    slot_data.info.user.email = user[0].email
+    slot_data.info.user.is_admin = user[0].is_admin
+    slot_data.info.user.is_active = user[0].is_active
+
+    if (fullname && fullname[0] && fullname[0][0]) {
+      slot_data.info.user.short_name = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
+    }
+
+    users.forEach((user) => {
+      const fullname = user.name.split(' ')
+      if (fullname && fullname[0] && fullname[0][0]) {
+        user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
+      }
+      user_map.set(user.id, user)
+    })
+  }
+}
+---
+
+<Layout title="Detalles de la clase">
+  <ConfiguratorHeader day_number={slot_data.info.week_day} />
+  <div class="bg-white shadow border border-black sm:rounded-lg">
+    <form id="slot_form" action="#" method="POST" class="p-4">
+      <div class="space-y-12">
+        <h2
+          class="text-base/7 font-semibold text-gray-900 uppercase text-center pb-4 border-b border-black"
+        >
+          Detalle de la clase
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-6">
+          <div class="lg:col-span-1 px-5 mb-5 lg:border-r lg:border-black">
+            <div class="grid grid-cols-1 gap-y-3">
+              <div class="col-span-1">
+                <label for="week_day" class="block text-sm/6 font-medium text-gray-900"
+                  >Dia de la semana</label
+                >
+                <div class="mt-2">
+                  <select
+                    id="week_day"
+                    name="week_day"
+                    autocomplete="Dia de la semana"
+                    form="slot_form"
+                    class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                  >
+                    {
+                      Object.keys(week_day_names).map((key) => {
+                        if (parseInt(key) != slot_data.info.week_day) {
+                          return <option value={key}>{week_day_names[key]}</option>
+                        } else {
+                          return (
+                            <option value={key} selected>
+                              {week_day_names[key]}
+                            </option>
+                          )
+                        }
+                      })
+                    }
+                  </select>
+                </div>
+                <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.week_day}</span
+                >
+              </div>
+              <div class="col-span-1">
+                <label for="size" class="block text-sm/6 font-medium text-gray-900"
+                  >Tamaño de la clase</label
+                >
+                <div class="mt-2">
+                  <select
+                    id="size"
+                    name="size"
+                    autocomplete="Tamaño de la clase"
+                    form="slot_form"
+                    class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                  >
+                    {
+                      Object.keys(size_names).map((key) => {
+                        if (parseInt(key) != slot_data.info.size) {
+                          return <option value={key}>{size_names[key]}</option>
+                        } else {
+                          return (
+                            <option value={key} selected>
+                              {size_names[key]}
+                            </option>
+                          )
+                        }
+                      })
+                    }
+                  </select>
+                </div>
+                <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.size}</span>
+              </div>
+              <div class="col-span-1">
+                <label for="start_hour" class="block text-sm/6 font-medium text-gray-900"
+                  >Hora de comienzo</label
+                >
+                <div class="mt-2">
+                  <select
+                    id="start_hour"
+                    name="start_hour"
+                    autocomplete="Hora de comienzo"
+                    form="slot_form"
+                    class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                  >
+                    {
+                      Object.keys(hours).map((key) => {
+                        if (parseInt(key) != slot_data.info.start_hour) {
+                          return <option value={key}>{hours[key]}</option>
+                        } else {
+                          return (
+                            <option value={key} selected>
+                              {hours[key]}
+                            </option>
+                          )
+                        }
+                      })
+                    }
+                  </select>
+                </div>
+                <span class="text-red-500 text-sm/6 font-semibold"
+                  >{slot_data.errors.start_hour}</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-2 px-5 mb-5 lg:border-r lg:border-black">
+            <div class="grid grid-cols-1">
+              <div class="col-span-1">
+                <label class="block text-sm/6 font-medium text-gray-900 mb-2">
+                  Profesor de la clase
+                </label>
+                <TeacherPickerFilter slot_id={slot_data.info.id} client:only="react" />
+              </div>
+              <div class="col-span-1">
+                <Member user={user_map.get(slot_data.info.user_id)} />
+              </div>
+            </div>
+          </div>
+          {
+            slot_data.info.user_slots && (
+              <div class="lg:col-span-3 px-5 mb-5">
+                <div class="grid grid-cols-1">
+                  <div class="col-span-1">
+                    <label class="block text-sm/6 font-medium text-gray-900 mb-2">
+                      Participantes de la clase
+                    </label>
+                    <MemberPickerFilter slot={slot_data.info.id} date={null} client:only="react" />
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-2 gap-y-4">
+                  {slot_data.info.user_slots.map((user_slot) => (
+                    <Member user={user_map.get(user_slot.user_id)} user_slot={user_slot} />
+                  ))}
+                </div>
+              </div>
+            )
+          }
+        </div>
+      </div>
+      <div class="mx-4 mt-7 pt-5 flex items-center border-t border-black">
+        {
+          slot_data.info.id && (
+            <button
+              id="delete"
+              data-id={slot_data.info.id}
+              type="button"
+              class="place-self-start rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            >
+              Eliminar
+            </button>
+          )
+        }
+        <input type="hidden" name="id" value={slot_data.info.id} />
+        <div class="w-full flex justify-end gap-x-6">
+          <a
+            href={'/slots/configurator?week_day=' + slot_data.info.week_day}
+            class="content-center px-2 text-sm font-semibold text-gray-900">Cancelar</a
+          >
+          <button
+            type="submit"
+            class="rounded-md bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
+            >Guardar</button
+          >
+        </div>
+      </div>
+    </form>
+  </div>
+</Layout>
+
+<script type="module" slot-astro-rerun>
+  const delete_button = document.getElementById('delete')
+  delete_button?.addEventListener('click', () => {
+    fetch('/slots/api/delete-default-slot', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: delete_button.dataset.id
+      })
+    }).then(() => {
+      window.location.reload()
+    })
+  })
+
+  const delete_buttons = document.querySelectorAll('#delete-member-button')
+  delete_buttons.forEach((button) => {
+    button?.addEventListener('click', () => {
+      fetch('/slots/api/delete-user-slot', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: button.dataset.id
+        })
+      }).then(() => {
+        window.location.reload()
+      })
+    })
+  })
+</script>

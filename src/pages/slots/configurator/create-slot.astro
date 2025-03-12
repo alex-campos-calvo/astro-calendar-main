@@ -1,0 +1,202 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { getHours, getSizeNames, getWeekDayNames } from '@/lib/types/utils'
+import ConfiguratorHeader from '@/components/ConfiguratorHeader.astro'
+import { validateWeekday, validateSize, validateHour } from '@/lib/validations/type-validations'
+import { and, db, eq, Slot, User } from 'astro:db'
+import { generateId } from 'lucia'
+
+const hours = getHours()
+const size_names = getSizeNames()
+const week_day_names = getWeekDayNames()
+
+const slot_data = {
+  info: {
+    week_day: 1,
+    size: 1,
+    start_hour: 8
+  },
+  errors: {
+    week_day: '',
+    size: '',
+    start_hour: ''
+  }
+}
+
+if (Astro.request.method === 'POST') {
+  const data = await Astro.request.formData()
+  slot_data.info.week_day = parseInt((data.get('week_day') as string)?.trim())
+  slot_data.info.size = parseInt((data.get('size') as string)?.trim())
+  slot_data.info.start_hour = parseInt((data.get('start_hour') as string)?.trim())
+
+  if (!validateWeekday(slot_data.info.week_day)) {
+    slot_data.errors.week_day = 'Por favor, introduce un día de la semana válido (Entre 1 y 7).'
+  }
+
+  if (!validateSize(slot_data.info.size)) {
+    slot_data.errors.size = 'Por favor, introduce un tamaño de clase válido (1, 4 u 8).'
+  }
+
+  if (!validateHour(slot_data.info.start_hour)) {
+    slot_data.errors.start_hour = 'Por favor, introduce un valor horario válido (Entre 8 y 22).'
+  }
+
+  const existingSlot = await db
+    .select()
+    .from(Slot)
+    .where(
+      and(
+        eq(Slot.week_day, slot_data.info.week_day),
+        eq(Slot.start_hour, slot_data.info.start_hour)
+      )
+    )
+    .get()
+
+  if (existingSlot) {
+    slot_data.errors.start_hour = 'Ya existe una clase en ese horario.'
+  }
+
+  const hasErrors = Object.values(slot_data.errors).some((e) => e)
+  if (!hasErrors) {
+    const existingUser = await db
+      .select()
+      .from(User)
+      .where(and(eq(User.is_active, true), eq(User.is_admin, true)))
+      .get()
+    if (existingUser) {
+      const slotId = generateId(15)
+      await db.insert(Slot).values({
+        id: slotId,
+        user_id: existingUser.id,
+        week_day: slot_data.info.week_day,
+        size: slot_data.info.size,
+        start_hour: slot_data.info.start_hour,
+        end_hour: slot_data.info.start_hour + 1
+      })
+      return Astro.redirect('/slots/configurator?week_day=' + slot_data.info.week_day)
+    }
+  }
+}
+
+console.log(slot_data)
+---
+
+<Layout title="Detalles de la clase">
+  <ConfiguratorHeader day_number={slot_data.info.week_day} />
+  <div class="bg-white shadow border border-black sm:rounded-lg">
+    <form id="slot_form" action="#" method="POST" class="p-4">
+      <div class="space-y-12">
+        <div class="border-b border-black pb-12">
+          <h2
+            class="text-base/7 font-semibold text-gray-900 uppercase text-center pb-4 border-b border-black"
+          >
+            Detalle de la clase
+          </h2>
+          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3">
+            <div class="col-span-1 lg:col-start-2">
+              <label for="week_day" class="block text-sm/6 font-medium text-gray-900"
+                >Dia de la semana</label
+              >
+              <div class="mt-2">
+                <select
+                  id="week_day"
+                  name="week_day"
+                  autocomplete="Dia de la semana"
+                  form="slot_form"
+                  class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                >
+                  {
+                    Object.keys(week_day_names).map((key) => {
+                      if (parseInt(key) != slot_data.info.week_day) {
+                        return <option value={key}>{week_day_names[key]}</option>
+                      } else {
+                        return (
+                          <option value={key} selected>
+                            {week_day_names[key]}
+                          </option>
+                        )
+                      }
+                    })
+                  }
+                </select>
+              </div>
+              <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.week_day}</span>
+            </div>
+            <div class="col-span-1 lg:col-start-2">
+              <label for="size" class="block text-sm/6 font-medium text-gray-900"
+                >Tamaño de la clase</label
+              >
+              <div class="mt-2">
+                <select
+                  id="size"
+                  name="size"
+                  autocomplete="Tamaño de la clase"
+                  form="slot_form"
+                  class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                >
+                  {
+                    Object.keys(size_names).map((key) => {
+                      if (parseInt(key) != slot_data.info.size) {
+                        return <option value={key}>{size_names[key]}</option>
+                      } else {
+                        return (
+                          <option value={key} selected>
+                            {size_names[key]}
+                          </option>
+                        )
+                      }
+                    })
+                  }
+                </select>
+              </div>
+              <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.size}</span>
+            </div>
+            <div class="col-span-1 lg:col-start-2">
+              <label for="start_hour" class="block text-sm/6 font-medium text-gray-900"
+                >Hora de comienzo</label
+              >
+              <div class="mt-2">
+                <select
+                  id="start_hour"
+                  name="start_hour"
+                  autocomplete="Hora de comienzo"
+                  form="slot_form"
+                  class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                >
+                  {
+                    Object.keys(hours).map((key) => {
+                      if (parseInt(key) != slot_data.info.start_hour) {
+                        return <option value={key}>{hours[key]}</option>
+                      } else {
+                        return (
+                          <option value={key} selected>
+                            {hours[key]}
+                          </option>
+                        )
+                      }
+                    })
+                  }
+                </select>
+              </div>
+              <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.start_hour}</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mx-4 my-5 flex items-center">
+        <div class="w-full flex justify-end gap-x-6">
+          <a
+            href={'/slots/configurator?week_day=' + slot_data.info.week_day}
+            class="content-center px-2 text-sm font-semibold text-gray-900">Cancelar</a
+          >
+          <button
+            type="submit"
+            class="rounded-md bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
+            >Guardar</button
+          >
+        </div>
+      </div>
+    </form>
+  </div>
+</Layout>

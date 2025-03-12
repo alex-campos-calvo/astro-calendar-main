@@ -1,0 +1,110 @@
+---
+import moment from 'moment'
+import 'moment/locale/es'
+import { db, eq, and, User_Slot, inArray, Slot, User } from 'astro:db'
+import { getWeekDayNames } from '@/lib/types/utils'
+import type { Usuario } from '@/lib/types/bbdd'
+
+const { member } = Astro.props
+
+const now = moment()
+const dates: string[] = []
+const week_days_map: number[] = Object.keys(getWeekDayNames()).map(Number)
+
+for (let i = 0; i <= 20; i++) {
+  dates.push(now.clone().add(i, 'days').format('YYYY-MM-DD'))
+}
+
+const slots = await db
+  .select()
+  .from(Slot)
+  .where(inArray(Slot.week_day, week_days_map))
+  .innerJoin(
+    User_Slot,
+    and(
+      eq(User_Slot.slot_id, Slot.id),
+      eq(User_Slot.default, false),
+      eq(User_Slot.user_id, member.id),
+      inArray(User_Slot.date, dates)
+    )
+  )
+  .limit(6)
+  .all()
+
+const user_ids: string[] = []
+for (const slot of slots) {
+  if (slot.Slot && slot.Slot.user_id) {
+    user_ids.push(slot.Slot.user_id)
+  }
+}
+
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
+if (user_ids && user_ids.length > 0) {
+  const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+
+  if (users && users.length > 0) {
+    users.forEach((user) => {
+      user_map.set(user.id, user)
+    })
+  }
+}
+---
+
+<div>
+  <label for="name" class="block text-sm/6 font-medium text-gray-900">Listado de clases</label>
+  <ul
+    role="list"
+    class="divide-y divide-black overflow-hidden bg-white ring-1 shadow-xs ring-black sm:rounded-xl mt-2"
+  >
+    {
+      (slots &&
+        slots.length > 0 &&
+        slots.map((slot) => (
+          <li class="relative flex justify-between gap-x-6 px-4 py-4 hover:bg-gray-50 sm:px-6">
+            <div class="flex min-w-0 gap-x-4">
+              <div class="min-w-0 flex-auto">
+                <p class="text-sm/6 font-semibold text-gray-900">
+                  <a href={'/slots/' + slot.Slot.id + '?date=' + slot.User_Slot.date}>
+                    <span class="absolute inset-x-0 -top-px bottom-0" />
+                    <span class="uppercase">
+                      {moment(slot?.User_Slot?.date).format('dddd, DD [de] MMMM [de] YYYY')}
+                    </span>
+                  </a>
+                </p>
+                <div class="mt-1 flex text-md/5 text-gray-700">
+                  <div class="grid grid-cols-2 gap-x-8">
+                    <span>
+                      {moment({
+                        hour: Math.floor(slot.Slot.start_hour),
+                        minute: Math.floor((slot.Slot.start_hour % 1) * 60)
+                      }).format('HH:mm')}
+                    </span>
+                    <span>{user_map.get(slot.Slot.user_id)?.name}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex shrink-0 items-center gap-x-4">
+              <svg
+                class="size-5 flex-none text-gray-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+                data-slot="icon"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </li>
+        ))) || (
+        <li class="px-4 py-4 sm:px-6">
+          <div class="text-center text-gray-500">No hay clases programadas</div>
+        </li>
+      )
+    }
+  </ul>
+</div>

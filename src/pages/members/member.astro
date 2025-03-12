@@ -1,6 +1,6 @@
 ---
 import { generateId } from 'lucia'
-import { db, eq, User } from 'astro:db'
+import { db, eq, and, User, User_Slot, Session } from 'astro:db'
 import Layout from '@/layouts/Layout.astro'
 import { validateName, validateEmail } from '@/lib/validations/type-validations'
 
@@ -20,6 +20,7 @@ const member_data = {
     email: ''
   }
 }
+
 if (Astro.request.method === 'POST') {
   const data = await Astro.request.formData()
   const id = (data.get('id') as string)?.trim()
@@ -68,40 +69,42 @@ if (Astro.request.method === 'POST') {
       }
     }
   }
-} else {
-  if (member_id) {
-    const member = await db.select().from(User).where(eq(User.id, member_id)).all()
+} else if (member_id) {
+  const member = await db.select().from(User).where(eq(User.id, member_id)).all()
 
-    if (member && member.length > 0 && member[0]) {
-      member_data.info.id = member[0].id
-      member_data.info.name = member[0].name
-      member_data.info.email = member[0].email
-      member_data.info.is_admin = member[0].is_admin
-      member_data.info.is_active = member[0].is_active
-    }
+  if (member && member.length > 0 && member[0]) {
+    member_data.info.id = member[0].id
+    member_data.info.name = member[0].name
+    member_data.info.email = member[0].email
+    member_data.info.is_admin = member[0].is_admin
+    member_data.info.is_active = member[0].is_active
+  }
 
-    if (role === 'delete') {
-      try {
-        await db.delete(User).where(eq(User.id, member_id))
-        return Astro.redirect('/members/users')
-      } catch (error) {
-        console.error(error)
-        member_data.errors.name = 'No se ha podido eliminar el usuario, tiene clases asociadas.'
-      }
+  if (role === 'delete') {
+    try {
+      await db
+        .delete(User_Slot)
+        .where(and(eq(User_Slot.user_id, member_id), eq(User_Slot.default, false)))
+      await db.delete(Session).where(eq(Session.userId, member_id))
+      await db.delete(User).where(eq(User.id, member_id))
+      return Astro.redirect('/members/users')
+    } catch (error) {
+      console.error(error)
+      member_data.errors.name = 'No se ha podido eliminar el usuario, es un administrador.'
     }
   }
 }
 ---
 
 <Layout title="Listado de miembros">
-  <div class="overflow-hidden bg-white border border-gray-200 shadow sm:rounded-lg">
+  <div class="overflow-hidden bg-white border border-black shadow sm:rounded-lg">
     <form class="p-4" method="POST">
       <div class="space-y-12">
-        <div class="border-b border-gray-900/10 pb-12">
+        <div class="border-b border-black pb-12">
           <h2
-            class="text-base/7 font-semibold text-gray-900 uppercase text-center pb-4 border-b border-gray-900/10"
+            class="text-base/7 font-semibold text-gray-900 uppercase text-center pb-4 border-b border-black"
           >
-            Creación de nuevo usuario
+            Detalle del usuario
           </h2>
           <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3">
             <div class="col-span-1 lg:col-start-2">
@@ -116,7 +119,7 @@ if (Astro.request.method === 'POST') {
                   autocomplete="name"
                   required
                   value={member_data.info.name}
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"
+                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
                 />
               </div>
               <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.name}</span>
@@ -134,7 +137,7 @@ if (Astro.request.method === 'POST') {
                   autocomplete="email"
                   required
                   value={member_data.info.email}
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"
+                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
                 />
               </div>
               <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.email}</span>
@@ -152,24 +155,6 @@ if (Astro.request.method === 'POST') {
                       checked={member_data.info.is_admin}
                       class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                     />
-                    <svg
-                      class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                    >
-                      <path
-                        class="opacity-0 group-has-[:checked]:opacity-100"
-                        d="M3 8L6 11L11 3.5"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-                      <path
-                        class="opacity-0 group-has-[:indeterminate]:opacity-100"
-                        d="M3 7H11"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-                    </svg>
                   </div>
                 </div>
                 <div class="text-sm/6">
@@ -196,24 +181,6 @@ if (Astro.request.method === 'POST') {
                       checked={member_data.info.is_active}
                       class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                     />
-                    <svg
-                      class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                    >
-                      <path
-                        class="opacity-0 group-has-[:checked]:opacity-100"
-                        d="M3 8L6 11L11 3.5"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-                      <path
-                        class="opacity-0 group-has-[:indeterminate]:opacity-100"
-                        d="M3 7H11"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-                    </svg>
                   </div>
                 </div>
                 <div class="text-sm/6">
@@ -244,8 +211,8 @@ if (Astro.request.method === 'POST') {
         }
         <input type="hidden" name="id" value={member_data.info.id} />
         <div class="w-full flex justify-end gap-x-6">
-          <button id="cancel" type="button" class="text-sm/6 font-semibold text-gray-900"
-            >Cancelar</button
+          <a href="/members/users" class="content-center px-2 text-sm font-semibold text-gray-900"
+            >Cancelar</a
           >
           <button
             type="submit"
@@ -262,8 +229,5 @@ if (Astro.request.method === 'POST') {
   const delete_button = document.getElementById('delete')
   delete_button?.addEventListener('click', () => {
     window.location.href = '/members/member?id=' + delete_button.dataset.id + '&role=delete'
-  })
-  document.getElementById('cancel')?.addEventListener('click', () => {
-    window.location.href = '/members/users'
   })
 </script>
