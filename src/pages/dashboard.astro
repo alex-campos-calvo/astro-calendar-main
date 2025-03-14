@@ -2,7 +2,7 @@
 import moment from 'moment'
 import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
-import WeeklyCalendar from '@/components/WeeklyCalendar'
+import WeeklyCalendar from '@/components/react/WeeklyCalendar'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 import { and, db, eq, Slot, User_Slot, inArray, User } from 'astro:db'
 import { getWeekDayNames } from '@/lib/types/utils'
@@ -16,6 +16,7 @@ const today = {
   day_name: current.format('dddd[,] DD'),
   month_name: current.format('MMMM'),
   year_name: current.format('YYYY'),
+  current_date: current.format('YYYY-MM-DD'),
   today_date: now.format('YYYY-MM-DD'),
   next_day_date: current.clone().add(+1, 'days').format('YYYY-MM-DD'),
   next_week_date: current.clone().add(7, 'days').startOf('week').format('YYYY-MM-DD'),

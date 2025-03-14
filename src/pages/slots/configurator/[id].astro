@@ -1,14 +1,14 @@
 ---
 import moment from 'moment'
 import Layout from '@/layouts/Layout.astro'
-import Member from '@/components/Member.astro'
+import Member from '@/components/astro/Member.astro'
 import type { Usuario, Participante } from '@/lib/types/bbdd'
 import { getHours, getSizeNames, getWeekDayNames } from '@/lib/types/utils'
 import { validateWeekday, validateSize, validateHour } from '@/lib/validations/type-validations'
 import { and, db, eq, Slot, User, User_Slot, inArray, not } from 'astro:db'
-import ConfiguratorHeader from '@/components/ConfiguratorHeader.astro'
-import MemberPickerFilter from '@/components/MemberPickerFilter'
-import TeacherPickerFilter from '@/components/TeacherPickerFilter'
+import ConfiguratorHeader from '@/components/astro/ConfiguratorHeader.astro'
+import MemberPickerFilter from '@/components/react/MemberPickerFilter'
+import TeacherPickerFilter from '@/components/react/TeacherPickerFilter'
 
 const slot_id: string | undefined = Astro.params.id
 

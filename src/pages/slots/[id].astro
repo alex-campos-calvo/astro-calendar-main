@@ -1,9 +1,9 @@
 ---
 import moment from 'moment'
 import Layout from '@/layouts/Layout.astro'
-import Member from '@/components/Member.astro'
-import MemberPickerFilter from '@/components/MemberPickerFilter.tsx'
-import TeacherPickerFilter from '@/components/TeacherPickerFilter.tsx'
+import Member from '@/components/astro/Member.astro'
+import MemberPickerFilter from '@/components/react/MemberPickerFilter'
+import TeacherPickerFilter from '@/components/react/TeacherPickerFilter'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 import 'moment/locale/es'
@@ -113,8 +113,8 @@ if (user_ids && user_ids.length > 0) {
       </div>
       <a
         href={'/slots/swap?slot1=' + data.id + '&date1=' + slot_date.format('YYYY-MM-DD')}
-        class="content-center text-center bg-transparent font-semibold px-1 lg:px-2 border border-gray-300 hover:border-fuchsia-500 rounded shadow"
-        >Gestionar miembros</a
+        class="content-center text-center bg-transparent font-semibold px-2 border border-gray-300 hover:border-fuchsia-500 rounded shadow"
+        >Intercambiar</a
       >
     </div>
     <dl class="grid grid-cols-1 lg:grid-cols-4">
@@ -125,10 +125,12 @@ if (user_ids && user_ids.length > 0) {
         </div>
       </div>
       <div class="px-4 py-6 grid sm:col-span-3 sm:px-6 border-t lg:border-l border-black gap-y-3">
-        <dt class="text-sm font-medium text-gray-900 uppercase border-b border-gray-300 pb-3">
-          <div class="flex justify-between items-center">
-            <span> Profesor </span>
-            <TeacherPickerFilter slot_id={id} client:only="react" />
+        <dt class="text-sm font-medium text-gray-900 uppercase border-b border-gray-300">
+          <div class="items-center lg:flex lg:justify-between">
+            <span class="mr-2">Profesor</span>
+            <div class="mt-2 lg:mt-0">
+              <TeacherPickerFilter slot_id={id} client:only="react" />
+            </div>
           </div>
         </dt>
         <dd class="text-sm/6 text-gray-700">
@@ -137,11 +139,13 @@ if (user_ids && user_ids.length > 0) {
           </div>
         </dd>
         <dt class="text-sm font-medium text-gray-900 uppercase border-b border-gray-300">
-          <div class="flex justify-between items-center">
-            <span>
+          <div class="items-center lg:flex lg:justify-between">
+            <span class="mr-2">
               Participantes ({data.User_Slots.length}/{data.size})
             </span>
-            <MemberPickerFilter slot={id} date={date} client:only="react" />
+            <div class="mt-2 lg:mt-0">
+              <MemberPickerFilter slot={id} date={date} client:only="react" />
+            </div>
           </div>
         </dt>
         <dd class="text-sm/6 text-gray-700">

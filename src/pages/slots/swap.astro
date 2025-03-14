@@ -2,10 +2,10 @@
 import moment from 'moment'
 import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
-import DatePickerFilter from '@/components/DatePickerFilter'
+import SwapSlotDatePicker from '@/components/react/SwapSlotDatePicker'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
-import Member from '@/components/Member.astro'
+import Member from '@/components/astro/Member.astro'
 
 const slot1: string | null = Astro.url.searchParams.get('slot1')
 const date1: string | null = Astro.url.searchParams.get('date1')
@@ -242,7 +242,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
             </div>
           </div>
           <dl class="border-t border-black">
-            <DatePickerFilter slot1={slot1} date1={date1} client:only="react" />
+            <SwapSlotDatePicker slot1={slot1} date1={date1} client:only="react" />
           </dl>
         </div>
       )

@@ -31,6 +31,7 @@ async function permissions(context, next) {
     !user &&
     context.url.pathname !== '/' &&
     context.url.pathname !== '/signup' &&
+    context.url.pathname !== '/api/generate-slots' &&
     !context.url.pathname.startsWith('/auth')
   ) {
     return await context.redirect('/')

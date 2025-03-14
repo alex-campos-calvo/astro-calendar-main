@@ -3,7 +3,7 @@ import { Datepicker } from 'flowbite-react'
 import moment from 'moment'
 import 'moment/locale/es'
 
-export default function DatePickerFilter({ slot1, date1 }) {
+export default function SwapSlotDatePicker({ slot1, date1 }) {
   const [date, setDate] = useState('')
   const [slots, setSlots] = useState({})
 

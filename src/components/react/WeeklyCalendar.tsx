@@ -1,11 +1,6 @@
 import Event from './Event'
-import {
-  ChevronLeftIcon,
-  ChevronDoubleLeftIcon,
-  ChevronRightIcon,
-  ChevronDoubleRightIcon
-} from '@heroicons/react/20/solid'
-import SearchBar from './SearchBar'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
+import SearchBar from './WeeklyCalendarSearchBar'
 
 export default function WeeklyCalendar({ today, week_days, week_slots, user_map }) {
   return (
@@ -16,48 +11,30 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             {today.day_name + ' ' + today.month_name + ' ' + today.year_name}
           </time>
         </h1>
-        <div>
-          <SearchBar />
-        </div>
+        <SearchBar />
         <div className="flex justify-center">
-          <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
-            <a
-              href={'/dashboard?date=' + today.previus_week_date}
-              type="button"
-              className="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pr-0"
-            >
-              <span className="sr-only">Semana anterior</span>
-              <ChevronDoubleLeftIcon className="size-5" aria-hidden="true" />
-            </a>
+          <div className="relative flex items-center">
             <a
               href={'/dashboard?date=' + today.previus_day_date}
               type="button"
-              className="flex h-9 w-12 items-center justify-center border-y border-l border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pr-0"
+              className="flex w-12 h-8 items-center justify-center rounded-l-md border-y border-l border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pr-0"
             >
               <span className="sr-only">Dia anterior</span>
-              <ChevronLeftIcon className="size-5" aria-hidden="true" />
+              <ChevronDoubleLeftIcon className="size-5" aria-hidden="true" />
             </a>
             <a
               href={'/dashboard?date=' + today.today_date}
               type="button"
-              className="flex items-center text-sm font-semibold h-9 px-3.5 border-y border-x border-black text-black hover:bg-gray-100 focus:relative"
+              className="flex items-center h-8 text-sm font-semibold px-3.5 border-y border-x border-black text-black hover:bg-gray-100 focus:relative"
             >
               Hoy
             </a>
             <a
               href={'/dashboard?date=' + today.next_day_date}
               type="button"
-              className="flex h-9 w-12 items-center justify-center border-y border-r border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pl-0"
+              className="flex w-12 h-8 items-center justify-center rounded-r-md border-y border-r border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pl-0"
             >
               <span className="sr-only">Dia siguiente</span>
-              <ChevronRightIcon className="size-5" aria-hidden="true" />
-            </a>
-            <a
-              href={'/dashboard?date=' + today.next_week_date}
-              type="button"
-              className="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pl-0"
-            >
-              <span className="sr-only">Semana siguiente</span>
               <ChevronDoubleRightIcon className="size-5" aria-hidden="true" />
             </a>
           </div>
@@ -75,7 +52,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
                   {day.name + ' '}
                   <span
                     className={
-                      'mt-1 flex size-8 items-center justify-center font-semibold ' +
+                      'mt-1 flex size-6 items-center justify-center font-semibold ' +
                       (day.today ? 'rounded-full bg-black text-white' : 'text-black')
                     }
                   >
@@ -86,7 +63,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             </div>
 
             <div className="-mr-px hidden grid-cols-5 divide-x divide-black border-r border-black text-sm/6 text-black sm:grid">
-              <div className="col-end-1 w-14" />
+              <div className="col-end-1 w-8" />
               {week_days.map((day) => (
                 <div key={day.name} className="flex items-center justify-center py-3 capitalize">
                   <span className={day.today ? 'flex items-baseline' : ''}>
@@ -95,7 +72,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
                       className={
                         'items-center justify-center font-semibold ' +
                         (day.today
-                          ? 'ml-1.5 flex size-8 rounded-full bg-black text-white'
+                          ? 'ml-1.5 flex size-6 rounded-full bg-black text-white'
                           : 'text-black')
                       }
                     >
@@ -107,7 +84,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             </div>
           </div>
           <div className="flex flex-auto">
-            <div className="sticky left-0 z-10 w-14 flex-none bg-white ring-1 ring-black" />
+            <div className="sticky left-0 z-10 w-8 flex-none bg-white ring-1 ring-black" />
             <div className="grid flex-auto grid-cols-1 grid-rows-1">
               {/* Horizontal lines */}
               <div
@@ -116,89 +93,89 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
               >
                 <div className="row-end-1 h-7"></div>
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     8
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     9
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     10
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     11
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     12
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     13
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     14
                   </div>
                 </div>
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     -
                   </div>
                 </div>
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     16
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     17
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     18
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     19
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     20
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     21
                   </div>
                 </div>
                 <div />
                 <div>
-                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-black">
+                  <div className="sticky left-0 z-20 -ml-14 -mt-2.5 w-8 pr-2 text-right text-xs/5 text-black">
                     22
                   </div>
                 </div>
