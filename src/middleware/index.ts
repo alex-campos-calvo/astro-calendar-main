@@ -29,16 +29,16 @@ async function permissions(context, next) {
   const user = context.locals.user
   if (
     !user &&
-    context.url.pathname !== '/' &&
+    context.url.pathname !== '/login' &&
     context.url.pathname !== '/signup' &&
     context.url.pathname !== '/api/generate-slots' &&
     !context.url.pathname.startsWith('/auth')
   ) {
-    return await context.redirect('/')
+    return await context.redirect('/login')
   }
 
-  if (user && context.url.pathname === '/' && context.url.pathname === '/signup') {
-    return await context.redirect('/dashboard')
+  if (user && (context.url.pathname === '/login' || context.url.pathname === '/signup')) {
+    return await context.redirect('/')
   }
 
   //TODO - change 'user.is_admin' to '!user.is_admin'
@@ -47,7 +47,7 @@ async function permissions(context, next) {
     !user.is_admin &&
     (context.url.pathname.startsWith('/slots') || context.url.pathname.startsWith('/members'))
   ) {
-    return await context.redirect('/dashboard')
+    return await context.redirect('/')
   }
 
   return await next()

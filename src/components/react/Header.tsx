@@ -28,7 +28,7 @@ const items = {
     {
       name: 'Panel semanal',
       description: 'Vista semanal de tu negocio',
-      href: '/dashboard',
+      href: '/',
       icon: CalendarDaysIcon,
       is_admin: false
     },
@@ -113,7 +113,7 @@ export default function Header({ is_admin }) {
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       >
         <div className="flex lg:flex-1">
-          <a href="/dashboard" className="-m-1.5 p-1.5">
+          <a href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">MOTION-LEON</span>
             <img alt="" src="/img/logo_inverted.webp" className="h-8 w-auto" />
           </a>

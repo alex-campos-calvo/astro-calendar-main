@@ -12,7 +12,7 @@ const id: string | undefined = Astro.params.id
 const date: string | null = Astro.url.searchParams.get('date')
 
 if (!id || !date || (date && !moment(date, 'YYYY-MM-DD', true).isValid())) {
-  return Astro.redirect('/dashboard')
+  return Astro.redirect('/')
 }
 
 let data: Clase = {
@@ -49,7 +49,7 @@ const slots = await db
 
 const user_ids: string[] = []
 if (slots && slots.length === 0) {
-  return Astro.redirect('/dashboard')
+  return Astro.redirect('/')
 }
 
 slots?.forEach((item) => {

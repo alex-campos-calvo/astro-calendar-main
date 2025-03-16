@@ -1,21 +1,40 @@
 import Event from './Event'
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
 import SearchBar from './WeeklyCalendarSearchBar'
+import { useState } from 'react'
 
 export default function WeeklyCalendar({ today, week_days, week_slots, user_map }) {
+  const [date, setDate] = useState('')
   return (
     <div className="flex flex-col h-full">
-      <header className="border-b border-black py-4 sm:flex sm:items-center sm:justify-between sm:px-6">
-        <h1 className="text-center font-semibold text-black py-2 sm:py-0">
+      <div className="grid grid-cols-1 gap-y-2 lg:grid-cols-3 border-b border-black py-4">
+        <h1 className="text-center font-semibold text-black">
           <time className="uppercase" dateTime={today.date_name}>
             {today.day_name + ' ' + today.month_name + ' ' + today.year_name}
           </time>
         </h1>
         <SearchBar />
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-x-3">
+          <input
+            id="date-selector"
+            type="date"
+            className="rounded-md h-8 border-b border-black"
+            defaultValue={today.current_date}
+            onChange={(e) => setDate(e.target.value)}
+          ></input>
+          <button
+            className="mr-3"
+            onClick={() => {
+              if (date) {
+                window.location.href = '?date=' + date
+              }
+            }}
+          >
+            Ir
+          </button>
           <div className="relative flex items-center">
             <a
-              href={'/dashboard?date=' + today.previus_day_date}
+              href={'?date=' + today.previus_day_date}
               type="button"
               className="flex w-12 h-8 items-center justify-center rounded-l-md border-y border-l border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pr-0"
             >
@@ -23,14 +42,14 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
               <ChevronDoubleLeftIcon className="size-5" aria-hidden="true" />
             </a>
             <a
-              href={'/dashboard?date=' + today.today_date}
+              href={'?date=' + today.today_date}
               type="button"
               className="flex items-center h-8 text-sm font-semibold px-3.5 border-y border-x border-black text-black hover:bg-gray-100 focus:relative"
             >
               Hoy
             </a>
             <a
-              href={'/dashboard?date=' + today.next_day_date}
+              href={'?date=' + today.next_day_date}
               type="button"
               className="flex w-12 h-8 items-center justify-center rounded-r-md border-y border-r border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pl-0"
             >
@@ -39,7 +58,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             </a>
           </div>
         </div>
-      </header>
+      </div>
       <div className="isolate flex flex-auto flex-col overflow-auto bg-white border-b border-black">
         <div
           style={{ width: '165%' }}

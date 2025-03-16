@@ -90,7 +90,7 @@ export default function WeeklyCalendarDatePicker({ today }) {
   const [date, setDate] = useState('')
   useEffect(() => {
     if (date) {
-      window.location.href = '/dashboard?date=' + date
+      window.location.href = '?date=' + date
     }
   }, [date])
 

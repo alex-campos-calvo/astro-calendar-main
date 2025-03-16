@@ -7,7 +7,7 @@ import { Argon2id } from 'oslo/password'
 
 const user = Astro.locals.user
 if (user) {
-  return Astro.redirect('/dashboard')
+  return Astro.redirect('/')
 }
 
 const errors = {
@@ -61,7 +61,7 @@ if (Astro.request.method === 'POST') {
         const session = await lucia.createSession(userId, { is_admin: false })
         const sessionCookie = lucia.createSessionCookie(session.id)
         Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-        return Astro.redirect('/dashboard')
+        return Astro.redirect('/')
       } else {
         errors.name = 'Por favor, introduce un nombre válido.'
         errors.email = 'Por favor, introduce una dirección de email válida.'

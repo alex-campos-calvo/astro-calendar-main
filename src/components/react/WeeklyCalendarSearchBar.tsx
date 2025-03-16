@@ -42,7 +42,7 @@ export default function WeeklyCalendarSearchBar() {
     >
       <div className="relative mb-2 mx-2 sm:mb-0">
         <ComboboxInput
-          className="block w-full rounded-md bg-white py-1.5 text-sm outline-gray-300 placeholder:text-gray-400"
+          className="block w-full rounded-md bg-white py-1.5 text-sm border border-black placeholder:text-gray-400"
           onChange={(event) => {
             setName(event.target.value)
           }}

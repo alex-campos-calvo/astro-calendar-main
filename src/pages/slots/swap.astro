@@ -13,11 +13,11 @@ const slot2: string | null = Astro.url.searchParams.get('slot2')
 const date2: string | null = Astro.url.searchParams.get('date2')
 
 if (!slot1 || !date1 || (date1 && !moment(date1, 'YYYY-MM-DD', true).isValid())) {
-  return Astro.redirect('/dashboard')
+  return Astro.redirect('/')
 }
 
 if (slot2 && (!date2 || !moment(date2, 'YYYY-MM-DD', true).isValid())) {
-  return Astro.redirect('/dashboard')
+  return Astro.redirect('/')
 }
 
 let data1: Clase = {
@@ -71,7 +71,7 @@ if (slot1) {
 
   const user_ids: string[] = []
   if (slots && slots.length === 0) {
-    return Astro.redirect('/dashboard')
+    return Astro.redirect('/')
   } else {
     slots?.forEach((item) => {
       let current = data1 && data1.id === item.Slot.id ? data1 : null
@@ -140,7 +140,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
   const user_ids: string[] = []
   if (slots && slots.length === 0) {
-    return Astro.redirect('/dashboard')
+    return Astro.redirect('/')
   } else {
     slots?.forEach((item) => {
       let current = data2 && data2.id === item.Slot.id ? data2 : null

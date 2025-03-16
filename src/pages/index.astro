@@ -1,204 +1,155 @@
 ---
-import { Argon2id } from 'oslo/password'
-import { lucia } from '@/lib/auth'
-import { and, db, eq, User } from 'astro:db'
-import Layout from '@/layouts/Login.astro'
+import moment from 'moment'
+import 'moment/locale/es'
+import Layout from '@/layouts/Layout.astro'
+import WeeklyCalendar from '@/components/react/WeeklyCalendar'
+import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
+import { and, db, eq, Slot, User_Slot, inArray, User } from 'astro:db'
+import { getWeekDayNames } from '@/lib/types/utils'
 
-const user = Astro.locals.user || null
-if (user) {
-  return Astro.redirect('/dashboard')
+const date: string | null = Astro.url.searchParams.get('date')
+const current = date && moment(date, 'YYYY-MM-DD', true).isValid() ? moment(date) : moment()
+
+const now = moment()
+const today = {
+  date_name: current.format('YYYY-MM'),
+  day_name: current.format('dddd[,] DD'),
+  month_name: current.format('MMMM'),
+  year_name: current.format('YYYY'),
+  current_date: current.format('YYYY-MM-DD'),
+  today_date: now.format('YYYY-MM-DD'),
+  next_day_date: current.clone().add(+1, 'days').format('YYYY-MM-DD'),
+  next_week_date: current.clone().add(7, 'days').startOf('week').format('YYYY-MM-DD'),
+  previus_day_date: current.clone().add(-1, 'days').format('YYYY-MM-DD'),
+  previus_week_date: current.clone().add(-7, 'days').startOf('week').format('YYYY-MM-DD')
 }
 
-const errors = {
-  email: '',
-  password: ''
+const { monday, tuesday, wednesday, thursday, friday } = {
+  monday: current.clone().startOf('week'),
+  tuesday: current.clone().startOf('week').add(1, 'days'),
+  wednesday: current.clone().startOf('week').add(2, 'days'),
+  thursday: current.clone().startOf('week').add(3, 'days'),
+  friday: current.clone().startOf('week').add(4, 'days')
 }
-if (Astro.request.method === 'POST') {
-  try {
-    const data = await Astro.request.formData()
-    const email = (data.get('email') as string)?.trim()
-    const password = (data.get('password') as string)?.trim()
 
-    if (
-      typeof email !== 'string' ||
-      email.length < 3 ||
-      email.length > 255 ||
-      !/.+@.+\..+/.test(email)
-    ) {
-      errors.email = 'Por favor, introduce una dirección de email válida.'
-    }
+const week_days = [
+  {
+    week_day: 1,
+    date: monday.format('YYYY-MM-DD'),
+    name: monday.format('ddd'),
+    short_name: monday.format('d'),
+    number: monday.format('DD'),
+    today: monday.isSame(now, 'day')
+  },
+  {
+    week_day: 2,
+    date: tuesday.format('YYYY-MM-DD'),
+    name: tuesday.format('ddd'),
+    short_name: tuesday.format('d'),
+    number: tuesday.format('DD'),
+    today: tuesday.isSame(now, 'day')
+  },
+  {
+    week_day: 3,
+    date: wednesday.format('YYYY-MM-DD'),
+    name: wednesday.format('ddd'),
+    short_name: wednesday.format('d'),
+    number: wednesday.format('DD'),
+    today: wednesday.isSame(now, 'day')
+  },
+  {
+    week_day: 4,
+    date: thursday.format('YYYY-MM-DD'),
+    name: thursday.format('ddd'),
+    short_name: thursday.format('d'),
+    number: thursday.format('DD'),
+    today: thursday.isSame(now, 'day')
+  },
+  {
+    week_day: 5,
+    date: friday.format('YYYY-MM-DD'),
+    name: friday.format('ddd'),
+    short_name: friday.format('d'),
+    number: friday.format('DD'),
+    today: friday.isSame(now, 'day')
+  }
+]
 
-    if (typeof password !== 'string' || password.length < 8 || password.length > 64) {
-      errors.password = 'Por favor, introduce una contraseña válida.'
-    }
+const week_days_map: number[] = Object.keys(getWeekDayNames()).map(Number)
+const dates: string[] = [
+  monday.format('YYYY-MM-DD'),
+  tuesday.format('YYYY-MM-DD'),
+  wednesday.format('YYYY-MM-DD'),
+  thursday.format('YYYY-MM-DD'),
+  friday.format('YYYY-MM-DD')
+]
 
-    const hasErrors = Object.values(errors).some((e) => e)
-    if (!hasErrors) {
-      const existingUser = await db
-        .select()
-        .from(User)
-        .where(and(eq(User.email, email.toLowerCase()), eq(User.is_active, true)))
-        .get()
+const slots = await db
+  .select()
+  .from(Slot)
+  .where(inArray(Slot.week_day, week_days_map))
+  .leftJoin(
+    User_Slot,
+    and(
+      eq(User_Slot.slot_id, Slot.id),
+      eq(User_Slot.default, false),
+      inArray(User_Slot.date, dates)
+    )
+  )
+  .all()
 
-      if (
-        existingUser &&
-        existingUser.password &&
-        (await new Argon2id().verify(existingUser.password, password))
-      ) {
-        const session = await lucia.createSession(existingUser.id, {
-          is_admin: existingUser.is_admin
-        })
-        const sessionCookie = lucia.createSessionCookie(session.id)
-        Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
-        return Astro.redirect('/dashboard')
-      } else {
-        errors.email = 'Por favor, introduce una dirección de email válida.'
-        errors.password = 'Por favor, introduce una contraseña válida.'
-      }
+const user_ids: string[] = []
+const week_slots: Clase[] = []
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
+slots?.forEach((item) => {
+  let current_slot = week_slots.find((slot) => slot.id === item.Slot.id)
+  if (!current_slot) {
+    const s: Clase = {
+      id: item.Slot.id,
+      user_id: item.Slot.user_id,
+      week_day: item.Slot.week_day,
+      start_hour: item.Slot.start_hour,
+      end_hour: item.Slot.end_hour,
+      size: item.Slot.size,
+      start:
+        item.Slot.start_hour < 14
+          ? Number(item.Slot.start_hour) - 7
+          : Number(item.Slot.start_hour) - 8,
+      end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
+      color: 'green',
+      today: item.Slot.week_day === current.weekday() + 1,
+      date: week_days.find((day) => day.week_day === item.Slot.week_day)?.date,
+      User_Slots: []
     }
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(e.message)
+    if (item.User_Slot) {
+      s.User_Slots.push(item.User_Slot as Participante)
+      s.color = item.Slot.size > s.User_Slots.length ? 'green' : 'red'
     }
+    user_ids.push(item.Slot.user_id)
+    week_slots.push(s)
+  } else {
+    current_slot.User_Slots.push(item.User_Slot as Participante)
+    current_slot.color = item.Slot.size > current_slot.User_Slots.length ? 'green' : 'red'
+  }
+})
+
+if (user_ids && user_ids.length > 0) {
+  const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+
+  if (users && users.length > 0) {
+    users.forEach((user) => {
+      user_map.set(user.id, user)
+    })
   }
 }
 ---
 
-<Layout>
-  <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <img class="mx-auto h-16 w-auto" src="/img/logo_inverted.webp" alt="Your Company" />
-      <h2 class="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-        Iniciar sesión en tu cuenta
-      </h2>
-    </div>
-
-    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-      <div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-        <form class="space-y-6" method="POST">
-          <div>
-            <label for="email" class="block text-sm/6 font-medium text-gray-900"
-              >Dirección de email</label
-            >
-            <div class="mt-2">
-              <input
-                type="email"
-                name="email"
-                id="email"
-                autocomplete="email"
-                required
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"
-              />
-            </div>
-          </div>
-          {errors.email}
-          <div>
-            <label for="password" class="block text-sm/6 font-medium text-gray-900"
-              >Contraseña</label
-            >
-            <div class="mt-2">
-              <input
-                type="password"
-                name="password"
-                id="password"
-                autocomplete="current-password"
-                required
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-fuchsia-600 sm:text-sm/6"
-              />
-            </div>
-          </div>
-          {errors.password}
-          <!--
-          <div class="flex items-center justify-between">
-            <div class="flex gap-3">
-              <div class="flex h-6 shrink-0 items-center">
-                <div class="group grid size-4 grid-cols-1">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-fuchsia-600 checked:bg-fuchsia-600 indeterminate:border-fuchsia-600 indeterminate:bg-fuchsia-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                  />
-                  <svg
-                    class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                  >
-                    <path
-                      class="opacity-0 group-has-[:checked]:opacity-100"
-                      d="M3 8L6 11L11 3.5"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"></path>
-                    <path
-                      class="opacity-0 group-has-[:indeterminate]:opacity-100"
-                      d="M3 7H11"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"></path>
-                  </svg>
-                </div>
-              </div>
-              <label for="remember-me" class="block text-sm/6 text-gray-900">Recuérdame</label>
-            </div>
-
-            <div class="text-sm/6">
-              <a href="#" class="font-semibold text-fuchsia-600 hover:text-fuchsia-500"
-                >¿Olvidaste la contraseña?</a
-              >
-            </div>
-          </div>
-          -->
-          <div>
-            <button
-              type="submit"
-              class="flex w-full justify-center rounded-md bg-fuchsia-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-fuchsia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
-              >Iniciar sesión</button
-            >
-          </div>
-        </form>
-
-        <div>
-          <div class="relative mt-10">
-            <div class="absolute inset-0 flex items-center" aria-hidden="true">
-              <div class="w-full border-t border-gray-200"></div>
-            </div>
-            <div class="relative flex justify-center text-sm/6 font-medium">
-              <span class="bg-white px-6 text-gray-900">O continúa con</span>
-            </div>
-          </div>
-
-          <div class="mt-6 grid grid-cols-1 gap-4">
-            <a
-              href="/auth/google/login"
-              class="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
-            >
-              <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
-                  fill="#EA4335"></path>
-                <path
-                  d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                  fill="#4285F4"></path>
-                <path
-                  d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                  fill="#FBBC05"></path>
-                <path
-                  d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                  fill="#34A853"></path>
-              </svg>
-              <span class="text-sm/6 font-semibold">Google</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <p class="mt-10 text-center text-sm/6 text-gray-500">
-        ¿Aun no eres miembro?
-        <span class="font-semibold text-fuchsia-600 hover:text-fuchsia-500"
-          >¡Contacta con nosotros!</span
-        >
-      </p>
-    </div>
-  </div>
+<Layout title="Panel semanal">
+  <WeeklyCalendar
+    today={today}
+    week_days={week_days}
+    week_slots={week_slots}
+    user_map={user_map}
+    client:idle
+  />
 </Layout>
