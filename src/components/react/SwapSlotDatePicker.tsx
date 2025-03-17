@@ -15,7 +15,8 @@ export default function SwapSlotDatePicker({ slot1, date1 }) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          date: date
+          date: date,
+          slot_id: slot1
         })
       })
 

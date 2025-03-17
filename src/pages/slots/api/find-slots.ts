@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro'
 import type { Clase, ClaseByDate, Participante } from '@/lib/types/bbdd'
-import { db, Slot, User_Slot, eq, and } from 'astro:db'
+import { db, Slot, User_Slot, eq, and, not } from 'astro:db'
 import moment from 'moment'
 
 interface Body {
   date: string
+  slot_id: string
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -14,6 +15,8 @@ export const POST: APIRoute = async ({ request }) => {
     const result: ClaseByDate = {}
     if (
       !body ||
+      !body.slot_id ||
+      body.slot_id === '' ||
       !body.date ||
       body.date === '' ||
       !moment(body.date, 'YYYY-MM-DD', true).isValid()
@@ -30,7 +33,12 @@ export const POST: APIRoute = async ({ request }) => {
       .from(Slot)
       .leftJoin(
         User_Slot,
-        and(eq(User_Slot.slot_id, Slot.id), eq(User_Slot.default, false), eq(User_Slot.date, date))
+        and(
+          eq(User_Slot.slot_id, Slot.id),
+          eq(User_Slot.default, false),
+          eq(User_Slot.date, date),
+          not(eq(User_Slot.slot_id, body.slot_id))
+        )
       )
       .where(eq(Slot.week_day, moment_date.weekday() + 1))
       .all()

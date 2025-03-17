@@ -1,5 +1,4 @@
 import { column, defineDb, defineTable } from 'astro:db'
-import { date } from 'astro:schema'
 
 const User = defineTable({
   columns: {
@@ -34,13 +33,21 @@ const Slot = defineTable({
   }
 })
 
-const Swap = defineTable({
+const Swap_History = defineTable({
   columns: {
     id: column.text({ primaryKey: true, optional: false, unique: true }),
+    type: column.text({ optional: false }),
     date: column.text({ optional: false }),
-    slot_id: column.text({ references: () => Slot.columns.id, optional: false }),
-    member_name: column.text({ optional: false }),
-    teacher_name: column.text({ optional: false })
+    date_to: column.text({ optional: true }),
+    date_from: column.text({ optional: true }),
+    slot_to: column.text({ references: () => Slot.columns.id, optional: false }),
+    slot_from: column.text({ references: () => Slot.columns.id, optional: false }),
+    user_slot: column.text({
+      references: () => User_Slot.columns.id,
+      optional: false
+    }),
+    member_id: column.text({ references: () => User.columns.id, optional: false }),
+    teacher_id: column.text({ references: () => User.columns.id, optional: false })
   }
 })
 
@@ -63,5 +70,5 @@ const Session = defineTable({
 
 // https://astro.build/db/config
 export default defineDb({
-  tables: { User, User_Slot, Slot, Swap, Slot_Setting, Session }
+  tables: { User, User_Slot, Slot, Swap_History, Slot_Setting, Session }
 })

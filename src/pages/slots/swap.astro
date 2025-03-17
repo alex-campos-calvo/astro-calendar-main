@@ -195,7 +195,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
 <Layout title="Intercambio de miembros">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <div class="overflow-hidden bg-white border border-black shadow sm:rounded-lg">
+    <div class="h-fit overflow-hidden bg-white border border-black shadow sm:rounded-lg">
       <div class="flex justify-between px-4 py-6 sm:px-6">
         <div class="gap-4">
           <h3 class="text-base/7 font-semibold text-gray-900">
@@ -214,7 +214,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
               id="draggable1"
               data-id={data1.id}
               data-date={slot_date1.format('YYYY-MM-DD')}
-              class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20"
+              class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20 bg-gray-100 rounded-lg"
             >
               {
                 data1.User_Slots.map((user_slot1) => (
@@ -230,7 +230,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     </div>
     {
       (!slot2 || !date2) && (
-        <div class="bg-white border border-black shadow sm:rounded-lg">
+        <div class="h-fit bg-white border border-black shadow sm:rounded-lg">
           <div class="flex justify-between px-4 py-6 sm:px-6">
             <div class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
@@ -249,7 +249,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     }
     {
       slot2 && date2 && (
-        <div class="overflow-hidden bg-white border border-black shadow sm:rounded-lg">
+        <div class="h-fit overflow-hidden bg-white border border-black shadow sm:rounded-lg">
           <div class="flex justify-between px-4 py-6 sm:px-6">
             <div class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
@@ -270,7 +270,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
                   id="draggable2"
                   data-id={data2.id}
                   data-date={slot_date2.format('YYYY-MM-DD')}
-                  class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20"
+                  class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20 bg-gray-100 rounded-lg"
                 >
                   {data2.User_Slots.map((user_slot2) => (
                     <div data-id={user_slot2.id}>

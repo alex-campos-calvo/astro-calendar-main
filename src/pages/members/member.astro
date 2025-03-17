@@ -34,7 +34,7 @@ if (Astro.request.method === 'POST') {
       'Por favor, introduce un nombre válido (Tamaño entre 3 y 255 caracteres).'
   }
 
-  if (!validateEmail(email)) {
+  if (email && !validateEmail(email)) {
     member_data.errors.email = 'Por favor, introduce una dirección de email válida.'
   }
 
@@ -54,7 +54,7 @@ if (Astro.request.method === 'POST') {
         .from(User)
         .where(eq(User.email, email.toLowerCase()))
         .get()
-      if (!existingUser) {
+      if (!email || (email && !existingUser)) {
         const userId = generateId(15)
         await db.insert(User).values({
           id: userId,
@@ -81,16 +81,15 @@ if (Astro.request.method === 'POST') {
   }
 
   if (role === 'delete') {
+    console.log(member_id)
     try {
-      await db
-        .delete(User_Slot)
-        .where(and(eq(User_Slot.user_id, member_id), eq(User_Slot.default, false)))
+      await db.delete(User_Slot).where(and(eq(User_Slot.user_id, member_id)))
       await db.delete(Session).where(eq(Session.userId, member_id))
       await db.delete(User).where(eq(User.id, member_id))
       return Astro.redirect('/members/users')
     } catch (error) {
       console.error(error)
-      member_data.errors.name = 'No se ha podido eliminar el usuario, es un administrador.'
+      member_data.errors.name = 'No se ha podido eliminar el usuario, aún aparece en alguna clase.'
     }
   }
 }
@@ -135,7 +134,6 @@ if (Astro.request.method === 'POST') {
                   name="email"
                   type="email"
                   autocomplete="email"
-                  required
                   value={member_data.info.email}
                   class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
                 />
@@ -225,7 +223,7 @@ if (Astro.request.method === 'POST') {
   </div>
 </Layout>
 
-<script>
+<script type="module" data-astro-rerun>
   const delete_button = document.getElementById('delete')
   delete_button?.addEventListener('click', () => {
     window.location.href = '/members/member?id=' + delete_button.dataset.id + '&role=delete'

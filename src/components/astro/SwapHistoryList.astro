@@ -1,0 +1,214 @@
+---
+import moment from 'moment'
+import 'moment/locale/es'
+import { db, eq, and, inArray, User, or, Slot } from 'astro:db'
+import type { Clase, Usuario } from '@/lib/types/bbdd'
+import { Swap_History } from 'astro:db'
+import { User_Slot } from 'astro:db'
+import { ForwardIcon } from '@heroicons/react/24/solid'
+import type { swap } from 'astro/virtual-modules/transitions-swap-functions.js'
+
+const id: string | undefined = Astro.params.id
+
+if (!id) {
+  return Astro.redirect('/')
+}
+
+const swaps = await db
+  .select()
+  .from(Swap_History)
+  .where(
+    and(
+      eq(Swap_History.type, 'SWAP'),
+      or(eq(Swap_History.slot_to, id), eq(Swap_History.slot_from, id))
+    )
+  )
+  .limit(10)
+  .all()
+
+const user_ids: string[] = []
+const slot_ids: string[] = []
+const user_slot_ids: string[] = []
+for (const swap of swaps) {
+  if (swap.member_id) {
+    user_ids.push(swap.member_id)
+  }
+
+  if (swap.teacher_id) {
+    user_ids.push(swap.teacher_id)
+  }
+
+  if (swap.slot_to) {
+    slot_ids.push(swap.slot_to)
+  }
+
+  if (swap.slot_from) {
+    slot_ids.push(swap.slot_from)
+  }
+
+  if (swap.user_slot) {
+    user_slot_ids.push(swap.user_slot)
+  }
+
+  if (swap.date_to) {
+    swap['day_text_to'] = moment(swap.date_to).format('dddd[,] DD [de] MMMM')
+  }
+
+  if (swap.date_from) {
+    swap['day_text_from'] = moment(swap.date_from).format('dddd[,] DD [de] MMMM')
+  }
+}
+
+const slot_map: Map<string, Clase> = new Map<string, Clase>()
+const user_map: Map<string, Usuario> = new Map<string, Usuario>()
+if (user_ids && user_ids.length > 0) {
+  const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
+
+  if (users && users.length > 0) {
+    users.forEach((user) => {
+      user_map.set(user.id, user)
+    })
+  }
+}
+
+if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0) {
+  const slots = await db
+    .select()
+    .from(Slot)
+    .where(inArray(Slot.id, slot_ids))
+    .leftJoin(User_Slot, and(inArray(User_Slot.id, user_slot_ids), eq(User_Slot.default, false)))
+    .all()
+
+  slots?.forEach((item) => {
+    let current_slot = slot_map.has(item.Slot.id) ? slot_map.get(item.Slot.id) : null
+    if (!current_slot) {
+      const s: Clase = {
+        id: item.Slot.id,
+        user_id: item.Slot.user_id,
+        week_day: item.Slot ? item.Slot.week_day : 0,
+        start_hour: item.Slot ? item.Slot.start_hour : 0,
+        end_hour: item.Slot ? item.Slot.end_hour : 0,
+        size: item.Slot ? item.Slot.size : 0,
+        start: 0,
+        end: 0,
+        color: '',
+        today: false,
+        date: '',
+        User_Slots: []
+      }
+      s['start_hour_text'] = moment({
+        hour: Math.floor(s.start_hour),
+        minute: Math.floor((s.start_hour % 1) * 60)
+      }).format('HH:mm')
+
+      slot_map.set(s.id, s)
+    }
+  })
+}
+
+console.log(slot_map)
+---
+
+<div>
+  <label for="name" class="block text-sm/6 font-medium text-gray-900">Listado de movimientos</label>
+  <ul
+    role="list"
+    class="overflow-hidden bg-white ring-1 shadow-xs ring-black sm:rounded-lg shadow mt-2 pt-2"
+  >
+    {
+      (swaps &&
+        swaps.length > 0 &&
+        swaps.map((swap) => (
+          <li class="px-4 py-2">
+            <div class="relative">
+              <span
+                class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
+                aria-hidden="true"
+              />
+              <div class="relative flex items-start space-x-3">
+                <div>
+                  <div class="relative px-1">
+                    <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-white">
+                      <ForwardIcon className="size-4" />
+                    </div>
+                  </div>
+                </div>
+                <div class="min-w-0 flex-1 py-1.5">
+                  <div class="text-sm text-gray-500">
+                    <a href="#" class="font-medium text-fuchsia-500">
+                      <span class="font-semibold">{user_map.get(swap.teacher_id)?.name}</span>
+                    </a>
+                    movío a
+                    <a href="#" class="font-semibold text-black">
+                      {user_map.get(swap.member_id)?.name}
+                    </a>
+                    <div class="mt-2 text-sm text-gray-700">
+                      {(swap.slot_to && swap.slot_from === id && (
+                        <p>
+                          <span>A la clase del</span>
+                          <span class="uppercase">{swap['day_text_to']}</span>
+                          <span>a las</span>
+                          <span class="font-semibold">
+                            {slot_map.get(swap.slot_to)?.['start_hour_text']}
+                          </span>
+                        </p>
+                      )) || (
+                        <p>
+                          <span>Desde la clase del</span>
+                          <span class="uppercase">{swap['day_text_from']}</span>
+                          <span>a las</span>
+                          <span class="font-semibold">
+                            {slot_map.get(swap.slot_from)?.['start_hour_text']}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        ))) || (
+        <li class="px-4 py-4 sm:px-6">
+          <div class="text-center text-gray-500">Aún no hay cambios sobre esta clase.</div>
+        </li>
+      )
+    }
+  </ul>
+</div>
+
+<!--<li class="relative flex justify-between gap-x-6 px-4 py-4 hover:bg-gray-50 sm:px-6">
+  <div class="flex min-w-0 gap-x-4">
+    <div class="min-w-0 flex-auto">
+      <p class="text-sm/6 text-gray-900">
+        <span class="absolute inset-x-0 -top-px bottom-0"></span>
+        <span class="uppercase">
+          <span class="font-semibold text-fuchsia-500">Intercambio</span>
+          de
+          <span class="font-semibold">{user_map.get(swap.teacher_id)?.name}</span>
+        </span>
+      </p>
+      <div class="mt-1 flex text-md/5 text-gray-700">
+        {
+          (swap.slot_to && swap.slot_from === id && (
+            <p>
+              <span class="font-semibold">{user_map.get(swap.member_id)?.name}</span>
+              <span>a</span>
+              <span class="uppercase">{swap['day_text_to']}</span>
+              <span>a las</span>
+              <span class="font-semibold">{slot_map.get(swap.slot_to)?.['start_hour_text']}</span>
+            </p>
+          )) || (
+            <p>
+              <span class="font-semibold">{user_map.get(swap.member_id)?.name}</span>
+              <span>desde</span>
+              <span class="uppercase">{swap['day_text_from']}</span>
+              <span>a las</span>
+              <span class="font-semibold">{slot_map.get(swap.slot_from)?.['start_hour_text']}</span>
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</li> -->

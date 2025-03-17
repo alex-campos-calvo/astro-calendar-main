@@ -33,18 +33,19 @@ export default function Event({ item, user }) {
           color
         }
       >
-        <div className="grid grid-cols-2">
-          <div className="2xl:flex">
-            <p className="font-semibold text-md/1">
+        <div className="flex justify-between">
+          <div className="flex flex-col justify-between">
+            <p className="font-semibold text-md">
               <time>{start_hour}</time>
             </p>
+            <p className="text-md mr-2">{user?.name}</p>
           </div>
-          <p className="text-md/1 text-right">
-            {participants}/{size}
-          </p>
-          <p className="text-md/5">{user?.name}</p>
-          <span></span>
-          <p className="text-md/5">{groupType}</p>
+          <div className="flex flex-col justify-between">
+            <p className="font-semibold text-md">{groupType}</p>
+            <p className="text-md text-right">
+              {participants}/{size}
+            </p>
+          </div>
         </div>
       </a>
     </li>
