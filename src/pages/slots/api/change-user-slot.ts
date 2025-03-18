@@ -42,15 +42,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       user_slot[0] &&
       locals?.session?.userId
     ) {
-      console.log('slot_to: ' + slot[0].id)
-      console.log('slot_from: ' + user_slot[0].slot_id)
-
       await db
         .insert(Swap_History)
         .values({
           id: generateId(15),
           type: 'SWAP',
-          date: moment().format('YYYY-MM-DD'),
           date_to: body.to_date,
           date_from: user_slot[0].date,
           slot_to: slot[0].id,

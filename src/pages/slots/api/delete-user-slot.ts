@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { db, eq, User_Slot } from 'astro:db'
+import { db, eq, Swap_History, User_Slot } from 'astro:db'
 
 interface Body {
   id: string
@@ -14,6 +14,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     }
 
     try {
+      await db.delete(Swap_History).where(eq(Swap_History.user_slot, body.id)).run()
       await db.delete(User_Slot).where(eq(User_Slot.id, body.id)).run()
       return new Response(null, { status: 200 })
     } catch (e) {

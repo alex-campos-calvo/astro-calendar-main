@@ -41,7 +41,6 @@ async function permissions(context, next) {
     return await context.redirect('/')
   }
 
-  //TODO - change 'user.is_admin' to '!user.is_admin'
   if (
     user &&
     !user.is_admin &&

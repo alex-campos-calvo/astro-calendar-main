@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import type { Clase, ClaseByDate, Participante } from '@/lib/types/bbdd'
-import { db, Slot, User_Slot, eq, and, not } from 'astro:db'
+import { db, Slot, User_Slot, eq, and } from 'astro:db'
 import moment from 'moment'
 
 interface Body {
@@ -33,12 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
       .from(Slot)
       .leftJoin(
         User_Slot,
-        and(
-          eq(User_Slot.slot_id, Slot.id),
-          eq(User_Slot.default, false),
-          eq(User_Slot.date, date),
-          not(eq(User_Slot.slot_id, body.slot_id))
-        )
+        and(eq(User_Slot.slot_id, Slot.id), eq(User_Slot.default, false), eq(User_Slot.date, date))
       )
       .where(eq(Slot.week_day, moment_date.weekday() + 1))
       .all()
@@ -100,6 +95,13 @@ export const POST: APIRoute = async ({ request }) => {
         current.color = item.Slot.size > current.User_Slots.length ? 'green' : 'red'
         user_ids.push(item.User_Slot.user_id)
       }
+    })
+
+    result[date] = result[date].filter((item) => {
+      const current_user_slot = item.User_Slots.find(
+        (user_slot) => user_slot.slot_id === body.slot_id && user_slot.date === date
+      )
+      return current_user_slot ? false : true
     })
 
     //Filtra solo los slots con hueco disponible, en principio no se limita por el tamaño del slot

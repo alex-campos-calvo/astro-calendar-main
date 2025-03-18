@@ -36,8 +36,7 @@ const Slot = defineTable({
 const Swap_History = defineTable({
   columns: {
     id: column.text({ primaryKey: true, optional: false, unique: true }),
-    type: column.text({ optional: false }),
-    date: column.text({ optional: false }),
+    date: column.date({ optional: false, default: new Date() }),
     date_to: column.text({ optional: true }),
     date_from: column.text({ optional: true }),
     slot_to: column.text({ references: () => Slot.columns.id, optional: false }),
@@ -46,6 +45,17 @@ const Swap_History = defineTable({
       references: () => User_Slot.columns.id,
       optional: false
     }),
+    member_id: column.text({ references: () => User.columns.id, optional: false }),
+    teacher_id: column.text({ references: () => User.columns.id, optional: false })
+  }
+})
+
+const Delete_History = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true, optional: false, unique: true }),
+    date: column.date({ optional: false, default: new Date() }),
+    slot_id: column.text({ references: () => Slot.columns.id, optional: false }),
+    slot_date: column.text({ optional: false }),
     member_id: column.text({ references: () => User.columns.id, optional: false }),
     teacher_id: column.text({ references: () => User.columns.id, optional: false })
   }

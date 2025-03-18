@@ -1,8 +1,9 @@
 ---
 import { generateId } from 'lucia'
-import { db, eq, and, User, User_Slot, Session } from 'astro:db'
+import { db, eq, or, and, User, User_Slot, Session } from 'astro:db'
 import Layout from '@/layouts/Layout.astro'
 import { validateName, validateEmail } from '@/lib/validations/type-validations'
+import { Swap_History } from 'astro:db'
 
 const member_id: string | null = Astro.url.searchParams.get('id')
 const role: string | null = Astro.url.searchParams.get('role')
@@ -81,8 +82,10 @@ if (Astro.request.method === 'POST') {
   }
 
   if (role === 'delete') {
-    console.log(member_id)
     try {
+      await db
+        .delete(Swap_History)
+        .where(or(eq(Swap_History.member_id, member_id), eq(Swap_History.teacher_id, member_id)))
       await db.delete(User_Slot).where(and(eq(User_Slot.user_id, member_id)))
       await db.delete(Session).where(eq(Session.userId, member_id))
       await db.delete(User).where(eq(User.id, member_id))

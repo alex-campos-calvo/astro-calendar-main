@@ -118,7 +118,7 @@ if (user_ids && user_ids.length > 0) {
     >
   </div>
   <dl class="lg:flex">
-    <div class="h-fit px-4 py-6 grid sm:col-span-2 sm:px-6 gap-y-3">
+    <div class="lg:w-2/3 h-fit px-4 py-6 grid sm:col-span-2 sm:px-6 gap-y-3">
       <div class="flex">
         <dt class="text-sm font-medium text-gray-900 uppercase">Tamaño del grupo:</dt>
         <dd class="text-sm text-gray-400 ml-2 font-semibold">{data['tipo_text']}</dd>
@@ -159,7 +159,7 @@ if (user_ids && user_ids.length > 0) {
       </dd>
     </div>
     <div class="flex-1 px-4 py-6 sm:px-6">
-      <SwapHistoryList />
+      <SwapHistoryList limit={5} />
     </div>
   </dl>
 </Layout>
