@@ -24,91 +24,99 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response('Invalid parameters', { status: 400 })
     }
 
-    const date: string = body.date
-    const moment_date = moment(body.date, 'YYYY-MM-DD', true)
-    result[date] = []
+    try {
+      const date: string = body.date
+      const moment_date = moment(body.date, 'YYYY-MM-DD', true)
+      result[date] = []
 
-    const slots = await db
-      .select()
-      .from(Slot)
-      .leftJoin(
-        User_Slot,
-        and(eq(User_Slot.slot_id, Slot.id), eq(User_Slot.default, false), eq(User_Slot.date, date))
-      )
-      .where(eq(Slot.week_day, moment_date.weekday() + 1))
-      .all()
+      const slots = await db
+        .select()
+        .from(Slot)
+        .leftJoin(
+          User_Slot,
+          and(
+            eq(User_Slot.slot_id, Slot.id),
+            eq(User_Slot.default, false),
+            eq(User_Slot.date, date)
+          )
+        )
+        .where(eq(Slot.week_day, moment_date.weekday() + 1))
+        .orderBy(Slot.start_hour)
+        .all()
 
-    if (slots && slots.length === 0) {
-      return new Response(JSON.stringify(result), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 206
-      })
-    }
+      if (slots && slots.length === 0) {
+        return new Response(JSON.stringify(result), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 206
+        })
+      }
 
-    const user_ids: string[] = []
-    let data: Clase = {
-      id: '',
-      user_id: '',
-      week_day: 0,
-      start_hour: 0,
-      end_hour: 0,
-      size: 0,
-      start: 0,
-      end: 0,
-      color: '',
-      today: false,
-      date: '',
-      User_Slots: []
-    }
+      const user_ids: string[] = []
+      let data: Clase = {
+        id: '',
+        user_id: '',
+        week_day: 0,
+        start_hour: 0,
+        end_hour: 0,
+        size: 0,
+        start: 0,
+        end: 0,
+        color: '',
+        today: false,
+        date: '',
+        User_Slots: []
+      }
 
-    slots?.forEach((item) => {
-      let current = result[date]?.find((slot) => slot.id === item.Slot.id)
-      if (!current) {
-        data = {
-          id: item.Slot.id,
-          user_id: item.Slot.user_id,
-          week_day: item.Slot.week_day,
-          start_hour: item.Slot.start_hour,
-          end_hour: item.Slot.end_hour,
-          size: item.Slot.size,
-          start: Number(item.Slot.start_hour) - 7,
-          end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
-          color: item.Slot.size > 1 ? 'green' : 'red',
-          today: false,
-          date: date,
-          User_Slots: []
-        }
-        data['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
-        data['end_hour_text'] = moment(item.Slot.end_hour, 'HH:mm').format('HH:mm')
-        data['date_text'] = moment_date.format('dddd DD [de] MMMM [de] yyyy')
-        data['tipo_text'] = item.Slot.size <= 1 ? 'P' : 'G' + item.Slot.size
-        user_ids.push(item.Slot.user_id)
+      slots?.forEach((item) => {
+        let current = result[date]?.find((slot) => slot.id === item.Slot.id)
+        if (!current) {
+          data = {
+            id: item.Slot.id,
+            user_id: item.Slot.user_id,
+            week_day: item.Slot.week_day,
+            start_hour: item.Slot.start_hour,
+            end_hour: item.Slot.end_hour,
+            size: item.Slot.size,
+            start: Number(item.Slot.start_hour) - 7,
+            end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
+            color: 'green',
+            today: false,
+            date: date,
+            User_Slots: []
+          }
+          data['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
+          data['end_hour_text'] = moment(item.Slot.end_hour, 'HH:mm').format('HH:mm')
+          data['date_text'] = moment_date.format('dddd DD [de] MMMM [de] yyyy')
+          data['tipo_text'] = item.Slot.size <= 1 ? 'P' : 'G' + item.Slot.size
+          user_ids.push(item.Slot.user_id)
 
-        if (item.User_Slot) {
-          data.User_Slots.push(item.User_Slot as Participante)
+          if (item.User_Slot) {
+            data.User_Slots.push(item.User_Slot as Participante)
+            data.color = item.Slot.size > data.User_Slots.length ? 'green' : 'red'
+            user_ids.push(item.User_Slot.user_id)
+          }
+          current = data
+          result[date]?.push(current)
+        } else if (item.User_Slot) {
+          current.User_Slots.push(item.User_Slot as Participante)
+          current.color = item.Slot.size > current.User_Slots.length ? 'green' : 'red'
           user_ids.push(item.User_Slot.user_id)
         }
-        current = data
-        result[date]?.push(current)
-      } else if (item.User_Slot) {
-        current.User_Slots.push(item.User_Slot as Participante)
-        current.color = item.Slot.size > current.User_Slots.length ? 'green' : 'red'
-        user_ids.push(item.User_Slot.user_id)
-      }
-    })
+      })
 
-    result[date] = result[date].filter((item) => {
-      const current_user_slot = item.User_Slots.find(
-        (user_slot) => user_slot.slot_id === body.slot_id && user_slot.date === date
-      )
-      return current_user_slot ? false : true
-    })
+      result[date] = result[date].filter((item) => {
+        return !(item.id === body.slot_id && item.date === date)
+      })
 
-    //Filtra solo los slots con hueco disponible, en principio no se limita por el tamaño del slot
-    /*Object.entries(result).forEach(([key]) => {
-          result[key] = result[key]?.filter((item) => item.User_Slots?.length < item.size)
-        })*/
-    return new Response(JSON.stringify(result), { status: 200 })
+      //Filtra solo los slots con hueco disponible, en principio no se limita por el tamaño del slot
+      /*Object.entries(result).forEach(([key]) => {
+        result[key] = result[key]?.filter((item) => item.User_Slots?.length < item.size)
+      })*/
+      return new Response(JSON.stringify(result), { status: 200 })
+    } catch (e) {
+      console.error(e)
+      return new Response(e?.message, { status: 500 })
+    }
   }
   return new Response('Invalid content type', { status: 400 })
 }

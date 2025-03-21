@@ -5,6 +5,7 @@ import ConfiguratorHeader from '@/components/astro/ConfiguratorHeader.astro'
 import { validateWeekday, validateSize, validateHour } from '@/lib/validations/type-validations'
 import { and, db, eq, Slot, User } from 'astro:db'
 import { generateId } from 'lucia'
+import TitleHeader from '@/components/astro/TitleHeader.astro'
 
 const hours = getHours()
 const size_names = getSizeNames()
@@ -79,110 +80,101 @@ if (Astro.request.method === 'POST') {
 }
 ---
 
-<Layout title="Detalles de la clase">
+<Layout title="Crear una clase">
   <ConfiguratorHeader day_number={slot_data.info.week_day} />
-  <div class="bg-white shadow border border-black sm:rounded-lg">
-    <form id="slot_form" action="#" method="POST" class="p-4">
-      <div class="space-y-12">
-        <div class="border-b border-black pb-12">
-          <h2
-            class="text-base/7 font-semibold text-gray-900 uppercase text-center pb-4 border-b border-black"
+  <TitleHeader title="Crear una clase" />
+  <div class="bg-white">
+    <form id="slot_form" action="#" method="POST">
+      <div class="grid grid-cols-1 gap-x-6 gap-y-6 lg:grid-cols-3">
+        <div class="col-span-1 lg:col-start-2">
+          <label for="week_day" class="block text-sm/6 font-medium text-gray-900"
+            >Dia de la semana</label
           >
-            Detalle de la clase
-          </h2>
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3">
-            <div class="col-span-1 lg:col-start-2">
-              <label for="week_day" class="block text-sm/6 font-medium text-gray-900"
-                >Dia de la semana</label
-              >
-              <div class="mt-2">
-                <select
-                  id="week_day"
-                  name="week_day"
-                  autocomplete="Dia de la semana"
-                  form="slot_form"
-                  class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
-                >
-                  {
-                    Object.keys(week_day_names).map((key) => {
-                      if (parseInt(key) != slot_data.info.week_day) {
-                        return <option value={key}>{week_day_names[key]}</option>
-                      } else {
-                        return (
-                          <option value={key} selected>
-                            {week_day_names[key]}
-                          </option>
-                        )
-                      }
-                    })
+          <div class="mt-2">
+            <select
+              id="week_day"
+              name="week_day"
+              autocomplete="Dia de la semana"
+              form="slot_form"
+              class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+            >
+              {
+                Object.keys(week_day_names).map((key) => {
+                  if (parseInt(key) != slot_data.info.week_day) {
+                    return <option value={key}>{week_day_names[key]}</option>
+                  } else {
+                    return (
+                      <option value={key} selected>
+                        {week_day_names[key]}
+                      </option>
+                    )
                   }
-                </select>
-              </div>
-              <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.week_day}</span>
-            </div>
-            <div class="col-span-1 lg:col-start-2">
-              <label for="size" class="block text-sm/6 font-medium text-gray-900"
-                >Tamaño de la clase</label
-              >
-              <div class="mt-2">
-                <select
-                  id="size"
-                  name="size"
-                  autocomplete="Tamaño de la clase"
-                  form="slot_form"
-                  class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
-                >
-                  {
-                    Object.keys(size_names).map((key) => {
-                      if (parseInt(key) != slot_data.info.size) {
-                        return <option value={key}>{size_names[key]}</option>
-                      } else {
-                        return (
-                          <option value={key} selected>
-                            {size_names[key]}
-                          </option>
-                        )
-                      }
-                    })
-                  }
-                </select>
-              </div>
-              <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.size}</span>
-            </div>
-            <div class="col-span-1 lg:col-start-2">
-              <label for="start_hour" class="block text-sm/6 font-medium text-gray-900"
-                >Hora de comienzo</label
-              >
-              <div class="mt-2">
-                <select
-                  id="start_hour"
-                  name="start_hour"
-                  autocomplete="Hora de comienzo"
-                  form="slot_form"
-                  class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
-                >
-                  {
-                    Object.keys(hours).map((key) => {
-                      if (parseInt(key) != slot_data.info.start_hour) {
-                        return <option value={key}>{hours[key]}</option>
-                      } else {
-                        return (
-                          <option value={key} selected>
-                            {hours[key]}
-                          </option>
-                        )
-                      }
-                    })
-                  }
-                </select>
-              </div>
-              <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.start_hour}</span
-              >
-            </div>
+                })
+              }
+            </select>
           </div>
+          <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.week_day}</span>
+        </div>
+        <div class="col-span-1 lg:col-start-2">
+          <label for="size" class="block text-sm/6 font-medium text-gray-900"
+            >Tamaño de la clase</label
+          >
+          <div class="mt-2">
+            <select
+              id="size"
+              name="size"
+              autocomplete="Tamaño de la clase"
+              form="slot_form"
+              class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+            >
+              {
+                Object.keys(size_names).map((key) => {
+                  if (parseInt(key) != slot_data.info.size) {
+                    return <option value={key}>{size_names[key]}</option>
+                  } else {
+                    return (
+                      <option value={key} selected>
+                        {size_names[key]}
+                      </option>
+                    )
+                  }
+                })
+              }
+            </select>
+          </div>
+          <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.size}</span>
+        </div>
+        <div class="col-span-1 lg:col-start-2">
+          <label for="start_hour" class="block text-sm/6 font-medium text-gray-900"
+            >Hora de comienzo</label
+          >
+          <div class="mt-2">
+            <select
+              id="start_hour"
+              name="start_hour"
+              autocomplete="Hora de comienzo"
+              form="slot_form"
+              class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+            >
+              {
+                Object.keys(hours).map((key) => {
+                  if (parseInt(key) != slot_data.info.start_hour) {
+                    return <option value={key}>{hours[key]}</option>
+                  } else {
+                    return (
+                      <option value={key} selected>
+                        {hours[key]}
+                      </option>
+                    )
+                  }
+                })
+              }
+            </select>
+          </div>
+          <span class="text-red-500 text-sm/6 font-semibold">{slot_data.errors.start_hour}</span>
         </div>
       </div>
-      <div class="mx-4 my-5 flex items-center">
+      <div class="mx-4 mt-7 pt-5 flex items-center border-t border-black">
         <div class="w-full flex justify-end gap-x-6">
           <a
             href={'/slots/configurator?week_day=' + slot_data.info.week_day}

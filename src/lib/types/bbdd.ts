@@ -30,6 +30,6 @@ export interface Usuario {
   google_id: string | null
   email: string
   name: string
-  password: string | null
   is_admin: boolean
+  is_active: boolean
 }

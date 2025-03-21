@@ -34,7 +34,7 @@ export default function SwapSlotDatePicker({ slot1, date1 }) {
 
   return (
     <nav aria-label="Directory">
-      <div className="flex z-10 border-y border-b-gray-200 border-t-gray-100 bg-gray-50 px-3 py-1.5 text-sm/6 font-semibold text-gray-900">
+      <div className="flex z-10 border border-black sm:rounded-b-lg bg-gray-50 px-3 py-1.5 text-sm/6 font-semibold text-gray-900">
         <Datepicker
           id="date-selector"
           weekStart={1}
@@ -48,12 +48,12 @@ export default function SwapSlotDatePicker({ slot1, date1 }) {
           }}
         ></Datepicker>
       </div>
-      <ul role="list" className="mx-5 divide-y divide-gray-100">
+      <ul role="list" className="mx-5 py-2 grid grid-cols-1 gap-y-2">
         {slots &&
           Object.keys(slots).length > 0 &&
           Object.keys(slots).map((date) =>
             slots[date].map((clase) => (
-              <li key={clase.id} className="flex justify-between gap-x-6 py-5">
+              <li key={clase.id} className="p-2 border border-black rounded-lg shadow">
                 <a
                   href={
                     '/slots/swap?slot1=' +
@@ -65,25 +65,28 @@ export default function SwapSlotDatePicker({ slot1, date1 }) {
                     '&date2=' +
                     clase.date
                   }
-                  className="flex justify-between w-full"
                 >
-                  <div className="flex min-w-0 gap-x-4">
-                    <div className="min-w-0 flex-auto">
-                      <p className="uppercase text-sm/8 font-semibold">
-                        {clase.start_hour_text + ' - ' + clase.end_hour_text}{' '}
-                      </p>
-                      <p className="mt-1 truncate text-xs/5 text-gray-500">{clase.date_text}</p>
-                    </div>
-                  </div>
-                  <div className="shrink-0 flex flex-col items-end">
-                    <p className="text-sm/6">{clase.User_Slots?.length + '/' + clase.size}</p>
-                  </div>
+                  <span className="flex gap-x-2 mb-2">
+                    <p
+                      className={
+                        'px-2 font-semibold text-sm rounded border border-' + clase.color + '-500'
+                      }
+                    >
+                      {clase.User_Slots?.length + '/' + clase.size}
+                    </p>
+                    <p className="text-sm font-semibold">
+                      {clase.start_hour_text + ' - ' + clase.end_hour_text}
+                    </p>
+                  </span>
+                  <span className="flex">
+                    <p className="uppercase truncate text-sm text-gray-500">{clase.date_text}</p>
+                  </span>
                 </a>
               </li>
             ))
           )}
         {(!slots || Object.keys(slots).length === 0) && (
-          <li className="flex justify-between gap-x-6 py-5">
+          <li className="flex justify-between gap-x-6 py-2">
             <div className="flex min-w-0 gap-x-4">
               <div className="min-w-0 flex-auto">
                 <p className="uppercase text-sm/6 font-semibold">No hay clases disponibles</p>

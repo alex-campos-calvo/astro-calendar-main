@@ -21,43 +21,36 @@ export const POST: APIRoute = async ({ request, locals }) => {
       body.to_slot === '' ||
       body.to_date === '' ||
       body.user_slot === '' ||
-      !moment(body.to_date, 'YYYY-MM-DD', true).isValid()
+      !moment(body.to_date, 'YYYY-MM-DD', true).isValid() ||
+      !locals?.session?.userId
     ) {
       return new Response('Invalid parameters', { status: 400 })
     }
 
-    const slot = await db.select().from(Slot).where(eq(Slot.id, body.to_slot)).all()
-    const user_slot = await db
-      .select()
-      .from(User_Slot)
-      .where(eq(User_Slot.id, body.user_slot))
-      .all()
+    try {
+      const slot = await db.select().from(Slot).where(eq(Slot.id, body.to_slot)).all()
+      const user_slot = await db
+        .select()
+        .from(User_Slot)
+        .where(eq(User_Slot.id, body.user_slot))
+        .all()
 
-    if (
-      slot &&
-      slot.length > 0 &&
-      slot[0] &&
-      user_slot &&
-      user_slot.length > 0 &&
-      user_slot[0] &&
-      locals?.session?.userId
-    ) {
-      await db
-        .insert(Swap_History)
-        .values({
-          id: generateId(15),
-          type: 'SWAP',
-          date_to: body.to_date,
-          date_from: user_slot[0].date,
-          slot_to: slot[0].id,
-          slot_from: user_slot[0].slot_id,
-          user_slot: body.user_slot,
-          member_id: user_slot[0].user_id,
-          teacher_id: locals.session.userId
-        })
-        .run()
+      if (slot && slot.length > 0 && slot[0] && user_slot && user_slot.length > 0 && user_slot[0]) {
+        await db
+          .insert(Swap_History)
+          .values({
+            id: generateId(15),
+            date: new Date(),
+            date_to: body.to_date,
+            date_from: user_slot[0].date,
+            slot_to: slot[0].id,
+            slot_from: user_slot[0].slot_id,
+            user_slot: body.user_slot,
+            member_id: user_slot[0].user_id,
+            teacher_id: locals.session.userId
+          })
+          .run()
 
-      try {
         await db
           .update(User_Slot)
           .set({
@@ -67,10 +60,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
           .where(eq(User_Slot.id, body.user_slot))
           .run()
         return new Response(null, { status: 200 })
-      } catch (e) {
-        console.error(e)
-        return new Response(e?.message, { status: 500 })
       }
+    } catch (e) {
+      console.error(e)
+      return new Response(e?.message, { status: 500 })
     }
   }
   return new Response('Invalid content type', { status: 400 })

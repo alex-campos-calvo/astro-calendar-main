@@ -14,7 +14,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
           </time>
         </h1>
         <SearchBar />
-        <div className="flex items-center justify-center gap-x-3">
+        <div className="flex items-center justify-center gap-x-1">
           <input
             id="date-selector"
             type="date"
@@ -23,7 +23,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             onChange={(e) => setDate(e.target.value)}
           ></input>
           <button
-            className="mr-3"
+            className="mr-6 px-2 border border-black rounded-lg shadow hover:border-fuchsia-500 hover:text-fuchsia-500"
             onClick={() => {
               if (date) {
                 window.location.href = '?date=' + date
@@ -36,7 +36,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             <a
               href={'?date=' + today.previus_day_date}
               type="button"
-              className="flex w-12 h-8 items-center justify-center rounded-l-md border-y border-l border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pr-0"
+              className="flex w-12 h-8 items-center justify-center rounded-l-md border-y border-l border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative md:w-9 md:pr-0"
             >
               <span className="sr-only">Dia anterior</span>
               <ChevronDoubleLeftIcon className="size-5" aria-hidden="true" />
@@ -44,14 +44,14 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
             <a
               href={'?date=' + today.today_date}
               type="button"
-              className="flex items-center h-8 text-sm font-semibold px-3.5 border-y border-x border-black text-black hover:bg-gray-100 focus:relative"
+              className="flex items-center h-8 text-sm font-semibold px-3.5 border-y border-x border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative"
             >
               Hoy
             </a>
             <a
               href={'?date=' + today.next_day_date}
               type="button"
-              className="flex w-12 h-8 items-center justify-center rounded-r-md border-y border-r border-black text-black hover:bg-gray-100 focus:relative md:w-9 md:pl-0"
+              className="flex w-12 h-8 items-center justify-center rounded-r-md border-y border-r border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative md:w-9 md:pl-0"
             >
               <span className="sr-only">Dia siguiente</span>
               <ChevronDoubleRightIcon className="size-5" aria-hidden="true" />

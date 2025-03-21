@@ -1,9 +1,9 @@
 ---
 import { generateId } from 'lucia'
-import { db, eq, or, and, User, User_Slot, Session } from 'astro:db'
+import { db, eq, User } from 'astro:db'
 import Layout from '@/layouts/Layout.astro'
+import TitleHeader from '@/components/astro/TitleHeader.astro'
 import { validateName, validateEmail } from '@/lib/validations/type-validations'
-import { Swap_History } from 'astro:db'
 
 const member_id: string | null = Astro.url.searchParams.get('id')
 const role: string | null = Astro.url.searchParams.get('role')
@@ -71,133 +71,107 @@ if (Astro.request.method === 'POST') {
     }
   }
 } else if (member_id) {
-  const member = await db.select().from(User).where(eq(User.id, member_id)).all()
+  const members = await db.select().from(User).where(eq(User.id, member_id)).all()
 
-  if (member && member.length > 0 && member[0]) {
-    member_data.info.id = member[0].id
-    member_data.info.name = member[0].name
-    member_data.info.email = member[0].email
-    member_data.info.is_admin = member[0].is_admin
-    member_data.info.is_active = member[0].is_active
-  }
-
-  if (role === 'delete') {
-    try {
-      await db
-        .delete(Swap_History)
-        .where(or(eq(Swap_History.member_id, member_id), eq(Swap_History.teacher_id, member_id)))
-      await db.delete(User_Slot).where(and(eq(User_Slot.user_id, member_id)))
-      await db.delete(Session).where(eq(Session.userId, member_id))
-      await db.delete(User).where(eq(User.id, member_id))
-      return Astro.redirect('/members/users')
-    } catch (error) {
-      console.error(error)
-      member_data.errors.name = 'No se ha podido eliminar el usuario, aún aparece en alguna clase.'
-    }
+  if (members && members.length > 0 && members[0]) {
+    member_data.info.id = members[0].id
+    member_data.info.name = members[0].name
+    member_data.info.email = members[0].email
+    member_data.info.is_admin = members[0].is_admin
+    member_data.info.is_active = members[0].is_active
   }
 }
 ---
 
-<Layout title="Listado de miembros">
-  <div class="overflow-hidden bg-white border border-black shadow sm:rounded-lg">
-    <form class="p-4" method="POST">
-      <div class="space-y-12">
-        <div class="border-b border-black pb-12">
-          <h2
-            class="text-base/7 font-semibold text-gray-900 uppercase text-center pb-4 border-b border-black"
+<Layout title="Detalle del usuario">
+  <div class="overflow-hidden bg-white">
+    <TitleHeader title="Detalle del usuario" />
+    <form method="POST">
+      <div class="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3">
+        <div class="col-span-1 lg:col-start-2">
+          <label for="name" class="block text-sm/6 font-medium text-gray-900">Nombre completo</label
           >
-            Detalle del usuario
-          </h2>
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3">
-            <div class="col-span-1 lg:col-start-2">
-              <label for="name" class="block text-sm/6 font-medium text-gray-900"
-                >Nombre completo</label
-              >
-              <div class="mt-2">
+          <div class="mt-2">
+            <input
+              type="text"
+              name="name"
+              id="name"
+              autocomplete="name"
+              required
+              value={member_data.info.name}
+              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
+            />
+          </div>
+          <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.name}</span>
+        </div>
+
+        <div class="col-span-1 lg:col-start-2">
+          <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
+          <div class="mt-2">
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              value={member_data.info.email}
+              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
+            />
+          </div>
+          <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.email}</span>
+        </div>
+
+        <div class="col-span-1 lg:col-start-2">
+          <div class="flex gap-3">
+            <div class="flex h-6 shrink-0 items-center">
+              <div class="group grid size-4 grid-cols-1">
                 <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  autocomplete="name"
-                  required
-                  value={member_data.info.name}
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
+                  id="is_admin"
+                  aria-describedby="is_admin-description"
+                  name="is_admin"
+                  type="checkbox"
+                  checked={member_data.info.is_admin}
+                  class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                 />
               </div>
-              <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.name}</span>
             </div>
-
-            <div class="col-span-1 lg:col-start-2">
-              <label for="email" class="block text-sm/6 font-medium text-gray-900"
-                >Email address</label
+            <div class="text-sm/6">
+              <label for="is_admin" class="font-medium text-gray-900"
+                >¿Convertir en administrador?</label
               >
-              <div class="mt-2">
+              <p id="is_admin-description" class="text-gray-500">
+                Si se selecciona, el usuario tendrá acceso a todas las funciones de administración
+                de calendario, usuarios y clases.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-1 lg:col-start-2">
+          <div class="flex gap-3">
+            <div class="flex h-6 shrink-0 items-center">
+              <div class="group grid size-4 grid-cols-1">
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autocomplete="email"
-                  value={member_data.info.email}
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
+                  id="is_active"
+                  aria-describedby="is_active-description"
+                  name="is_active"
+                  type="checkbox"
+                  checked={member_data.info.is_active}
+                  class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                 />
               </div>
-              <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.email}</span>
             </div>
-
-            <div class="col-span-1 lg:col-start-2">
-              <div class="flex gap-3">
-                <div class="flex h-6 shrink-0 items-center">
-                  <div class="group grid size-4 grid-cols-1">
-                    <input
-                      id="is_admin"
-                      aria-describedby="is_admin-description"
-                      name="is_admin"
-                      type="checkbox"
-                      checked={member_data.info.is_admin}
-                      class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                    />
-                  </div>
-                </div>
-                <div class="text-sm/6">
-                  <label for="is_admin" class="font-medium text-gray-900"
-                    >¿Convertir en administrador?</label
-                  >
-                  <p id="is_admin-description" class="text-gray-500">
-                    Si se selecciona, el usuario tendrá acceso a todas las funciones de
-                    administración de calendario, usuarios y clases.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-span-1 lg:col-start-2">
-              <div class="flex gap-3">
-                <div class="flex h-6 shrink-0 items-center">
-                  <div class="group grid size-4 grid-cols-1">
-                    <input
-                      id="is_active"
-                      aria-describedby="is_active-description"
-                      name="is_active"
-                      type="checkbox"
-                      checked={member_data.info.is_active}
-                      class="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                    />
-                  </div>
-                </div>
-                <div class="text-sm/6">
-                  <label for="is_active" class="font-medium text-gray-900">¿Activar usuario?</label>
-                  <p id="is_active-description" class="text-gray-500">
-                    Si se selecciona, el usuario se tendrá en cuenta en la asignación de clases y
-                    podrá entrar en el sistema para ver sus clases.
-                  </p>
-                </div>
-              </div>
+            <div class="text-sm/6">
+              <label for="is_active" class="font-medium text-gray-900">¿Activar usuario?</label>
+              <p id="is_active-description" class="text-gray-500">
+                Si se selecciona, el usuario se tendrá en cuenta en la asignación de clases y podrá
+                entrar en el sistema para ver sus clases.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="mt-6 flex items-center">
+      <div class="mx-4 mt-7 pt-5 flex items-center border-t border-black">
         {
           member_data.info.id && (
             <button
@@ -228,7 +202,17 @@ if (Astro.request.method === 'POST') {
 
 <script type="module" data-astro-rerun>
   const delete_button = document.getElementById('delete')
-  delete_button?.addEventListener('click', () => {
-    window.location.href = '/members/member?id=' + delete_button.dataset.id + '&role=delete'
+  delete_button.addEventListener('click', () => {
+    fetch('/members/api/delete-user', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: delete_button.dataset.id
+      })
+    }).then(() => {
+      window.location.href = '/members/users'
+    })
   })
 </script>

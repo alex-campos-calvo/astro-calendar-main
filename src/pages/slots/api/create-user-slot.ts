@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { db, User_Slot } from 'astro:db'
+import { db, Upsert_History, User_Slot } from 'astro:db'
 import { generateId } from 'lucia'
 import moment from 'moment'
 import 'moment/locale/es'
@@ -10,7 +10,7 @@ interface Body {
   user_id: string
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   if (request.headers.get('Content-Type') === 'application/json') {
     const body: Body = await request.json()
 
@@ -20,12 +20,25 @@ export const POST: APIRoute = async ({ request }) => {
       body.to_slot === '' ||
       body.to_date === '' ||
       body.user_id === '' ||
-      (body.to_date && !moment(body.to_date, 'YYYY-MM-DD', true).isValid())
+      (body.to_date && !moment(body.to_date, 'YYYY-MM-DD', true).isValid()) ||
+      !locals?.session?.userId
     ) {
       return new Response('Invalid parameters', { status: 400 })
     }
 
     try {
+      await db
+        .insert(Upsert_History)
+        .values({
+          id: generateId(15),
+          date: new Date(),
+          slot_id: body.to_slot,
+          slot_date: body.to_date,
+          member_id: body.user_id,
+          teacher_id: locals.session.userId
+        })
+        .run()
+
       await db
         .insert(User_Slot)
         .values({

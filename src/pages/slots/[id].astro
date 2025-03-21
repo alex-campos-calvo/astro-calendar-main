@@ -8,6 +8,7 @@ import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 import 'moment/locale/es'
 import SwapHistoryList from '@/components/astro/SwapHistoryList.astro'
+import UpsertHistoryList from '@/components/astro/UpsertHistoryList.astro'
 
 const id: string | undefined = Astro.params.id
 const date: string | null = Astro.url.searchParams.get('date')
@@ -65,7 +66,7 @@ slots?.forEach((item) => {
       size: item.Slot.size,
       start: Number(item.Slot.start_hour) - 7,
       end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
-      color: item.Slot.size > 1 ? 'green' : 'red',
+      color: 'green',
       today: moment().isSame(slot_date, 'day'),
       date: slot_date.format('YYYY-MM-DD'),
       User_Slots: []
@@ -77,6 +78,7 @@ slots?.forEach((item) => {
 
     if (item.User_Slot) {
       data.User_Slots.push(item.User_Slot as Participante)
+      data.color = item.Slot.size > data.User_Slots.length ? 'green' : 'red'
       user_ids.push(item.User_Slot.user_id)
     }
   } else if (item.User_Slot) {
@@ -158,8 +160,11 @@ if (user_ids && user_ids.length > 0) {
         </div>
       </dd>
     </div>
-    <div class="flex-1 px-4 py-6 sm:px-6">
-      <SwapHistoryList limit={5} />
+    <div class="flex-1 px-4 sm:py-6 sm:px-6">
+      <div class="grid grid-cols-1 gap-y-4">
+        <SwapHistoryList limit={5} />
+        <UpsertHistoryList limit={5} />
+      </div>
     </div>
   </dl>
 </Layout>

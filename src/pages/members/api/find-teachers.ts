@@ -15,31 +15,44 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response('Invalid parameters', { status: 400 })
     }
 
-    const name: string = '%' + body.name + '%'
-    const users = await db
-      .select()
-      .from(User)
-      .where(and(like(User.name, name), eq(User.is_active, true), eq(User.is_admin, true)))
-      .orderBy(User.name)
-      .all()
+    try {
+      const name: string = '%' + body.name + '%'
+      const users = await db
+        .select()
+        .from(User)
+        .where(and(like(User.name, name), eq(User.is_active, true), eq(User.is_admin, true)))
+        .orderBy(User.name)
+        .all()
 
-    if (users && users.length === 0) {
-      return new Response(JSON.stringify(result), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 206
-      })
-    }
+      if (users && users.length === 0) {
+        return new Response(JSON.stringify(result), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 206
+        })
+      }
 
-    if (users && users.length > 0) {
-      users.forEach((user) => {
-        const fullname = user.name.split(' ')
-        if (fullname && fullname[0] && fullname[0][0]) {
-          user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-        }
-        result.push(user)
-      })
+      if (users && users.length > 0) {
+        users.forEach((user) => {
+          const u: Usuario = {
+            id: user.id,
+            google_id: null,
+            name: user.name,
+            email: user.email,
+            is_active: false,
+            is_admin: false
+          }
+          const fullname = user.name.split(' ')
+          if (fullname && fullname[0] && fullname[0][0]) {
+            u['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
+          }
+          result.push(u)
+        })
+      }
+      return new Response(JSON.stringify(result), { status: 200 })
+    } catch (e) {
+      console.error(e)
+      return new Response(e?.message, { status: 500 })
     }
-    return new Response(JSON.stringify(result), { status: 200 })
   }
   return new Response('Invalid content type', { status: 400 })
 }

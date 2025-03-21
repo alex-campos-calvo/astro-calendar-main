@@ -85,7 +85,7 @@ if (slot1) {
           size: item.Slot.size,
           start: Number(item.Slot.start_hour) - 7,
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
-          color: item.Slot.size > 1 ? 'green' : 'red',
+          color: 'green',
           today: moment().isSame(slot_date1, 'day'),
           date: slot_date1.format('YYYY-MM-DD'),
           User_Slots: []
@@ -97,6 +97,7 @@ if (slot1) {
 
         if (item.User_Slot) {
           data1.User_Slots.push(item.User_Slot as Participante)
+          data1.color = item.Slot.size > data1.User_Slots.length ? 'green' : 'red'
           user_ids.push(item.User_Slot.user_id)
         }
         current = data1
@@ -154,7 +155,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
           size: item.Slot.size,
           start: Number(item.Slot.start_hour) - 7,
           end: Number(item.Slot.end_hour) - Number(item.Slot.start_hour),
-          color: item.Slot.size > 1 ? 'green' : 'red',
+          color: 'green',
           today: moment().isSame(slot_date2, 'day'),
           date: slot_date2.format('YYYY-MM-DD'),
           User_Slots: []
@@ -166,6 +167,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
         if (item.User_Slot) {
           data2.User_Slots.push(item.User_Slot as Participante)
+          data2.color = item.Slot.size > data2.User_Slots.length ? 'green' : 'red'
           user_ids.push(item.User_Slot.user_id)
         }
         current = data2
@@ -197,12 +199,12 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     <div class="h-fit overflow-hidden bg-white border border-black shadow sm:rounded-lg">
       <div class="flex justify-between px-4 py-6 sm:px-6">
-        <div class="gap-4">
+        <a href={'/slots/' + slot1 + '?date=' + date1} class="gap-4">
           <h3 class="text-base/7 font-semibold text-gray-900">
             <span class="uppercase">{slot_date1.format('dddd[,] DD [de] MMMM [de] YYYY')}</span>
           </h3>
           <span class="text-gray-400">{data1['start_hour_text']} - {data1['end_hour_text']}</span>
-        </div>
+        </a>
       </div>
       <dl class="border-t border-black">
         <div class="px-4 py-6 grid sm:col-span-3 sm:px-6 gap-y-3">
@@ -230,8 +232,8 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     </div>
     {
       (!slot2 || !date2) && (
-        <div class="h-fit bg-white border border-black shadow sm:rounded-lg">
-          <div class="flex justify-between px-4 py-6 sm:px-6">
+        <div class="h-fit bg-white border-t border-black sm:rounded-lg">
+          <div class="flex justify-between px-4 py-6 sm:px-6 border-x border-black">
             <div class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
                 <span class="uppercase">Listado de clases</span>
@@ -241,7 +243,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
               </span>
             </div>
           </div>
-          <dl class="border-t border-black">
+          <dl>
             <SwapSlotDatePicker slot1={slot1} date1={date1} client:only="react" />
           </dl>
         </div>
@@ -251,14 +253,14 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
       slot2 && date2 && (
         <div class="h-fit overflow-hidden bg-white border border-black shadow sm:rounded-lg">
           <div class="flex justify-between px-4 py-6 sm:px-6">
-            <div class="gap-4">
+            <a href={'/slots/' + slot2 + '?date=' + date2} class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
                 <span class="uppercase">{slot_date2.format('dddd[,] DD [de] MMMM [de] YYYY')}</span>
               </h3>
               <span class="text-gray-400">
                 {data2['start_hour_text']} - {data2['end_hour_text']}
               </span>
-            </div>
+            </a>
           </div>
           <dl class="border-t border-black">
             <div class="px-4 py-6 grid sm:col-span-3 sm:px-6 gap-y-3">

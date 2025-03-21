@@ -5,7 +5,7 @@ import { db, eq, and, inArray, User, or, Slot, desc } from 'astro:db'
 import type { Clase, Usuario } from '@/lib/types/bbdd'
 import { Swap_History } from 'astro:db'
 import { User_Slot } from 'astro:db'
-import { BackwardIcon, ForwardIcon } from '@heroicons/react/24/solid'
+import { ArrowUturnLeftIcon, ArrowUturnRightIcon } from '@heroicons/react/24/solid'
 
 const id: string | undefined = Astro.params.id
 const date: string | null = Astro.url.searchParams.get('date')
@@ -20,11 +20,8 @@ const swaps = await db
   .from(Swap_History)
   .where(
     and(
-      eq(Swap_History.type, 'SWAP'),
-      and(
-        or(eq(Swap_History.slot_to, id), eq(Swap_History.slot_from, id)),
-        or(eq(Swap_History.date_to, date), eq(Swap_History.date_from, date))
-      )
+      or(eq(Swap_History.slot_to, id), eq(Swap_History.slot_from, id)),
+      or(eq(Swap_History.date_to, date), eq(Swap_History.date_from, date))
     )
   )
   .limit(limit ? limit : 10)
@@ -35,30 +32,15 @@ const user_ids: string[] = []
 const slot_ids: string[] = []
 const user_slot_ids: string[] = []
 for (const swap of swaps) {
-  if (swap.member_id) {
-    user_ids.push(swap.member_id)
-  }
-
-  if (swap.teacher_id) {
-    user_ids.push(swap.teacher_id)
-  }
-
-  if (swap.slot_to) {
-    slot_ids.push(swap.slot_to)
-  }
-
-  if (swap.slot_from) {
-    slot_ids.push(swap.slot_from)
-  }
-
-  if (swap.user_slot) {
-    user_slot_ids.push(swap.user_slot)
-  }
+  if (swap.member_id) user_ids.push(swap.member_id)
+  if (swap.teacher_id) user_ids.push(swap.teacher_id)
+  if (swap.slot_to) slot_ids.push(swap.slot_to)
+  if (swap.slot_from) slot_ids.push(swap.slot_from)
+  if (swap.user_slot) user_slot_ids.push(swap.user_slot)
 
   if (swap.date_to) {
     swap['day_text_to'] = moment(swap.date_to).format('dddd[,] DD [de] MMMM')
   }
-
   if (swap.date_from) {
     swap['day_text_from'] = moment(swap.date_from).format('dddd[,] DD [de] MMMM')
   }
@@ -113,7 +95,9 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
 ---
 
 <div>
-  <label for="name" class="block text-sm/6 font-medium text-gray-900">Listado de movimientos</label>
+  <label for="name" class="block text-sm/6 font-medium text-gray-900"
+    >Historial de intercambios</label
+  >
   <ul
     role="list"
     class="overflow-hidden bg-white ring-1 shadow-xs ring-black sm:rounded-lg shadow mt-2 pt-2"
@@ -131,13 +115,13 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
               <div class="relative flex items-start space-x-3">
                 <div>
                   <div class="relative p-1">
-                    {(swap.slot_to && swap.slot_from === id && (
+                    {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
                       <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-red-400">
-                        <ForwardIcon className="size-4" />
+                        <ArrowUturnRightIcon className="size-4" />
                       </div>
                     )) || (
                       <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-green-400">
-                        <BackwardIcon className="size-4" />
+                        <ArrowUturnLeftIcon className="size-4" />
                       </div>
                     )}
                   </div>
@@ -153,7 +137,7 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
                     </a>
                     <p>{moment(swap.date).format('DD-MM-YYYY HH:mm')}</p>
                     <div class="mt-2 text-sm text-gray-700">
-                      {(swap.slot_to && swap.slot_from === id && (
+                      {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
                         <p>
                           <span>A la clase del</span>
                           <a href={'/slots/' + swap.slot_to + '?date=' + swap.date_to}>

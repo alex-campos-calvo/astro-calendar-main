@@ -1,5 +1,4 @@
 ---
-import '@/styles/global.css'
 import Header from '@/components/react/Header'
 import { ClientRouter } from 'astro:transitions'
 import SpeedInsights from '@vercel/speed-insights/astro'
@@ -16,6 +15,7 @@ const is_admin = Astro.locals?.user?.is_admin ? true : false
     <meta name="generator" content={Astro.generator} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles/global.css" />
 
     <title>{title}</title>
     <meta name="title" content="MOTION-LEON" />

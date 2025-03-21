@@ -12,18 +12,18 @@ export async function GET(context: APIContext): Promise<Response> {
   const storedState = context.cookies.get('google_oauth_state')
   const storedCodeVerifier = context.cookies.get('google_oauth_verifier')
 
-  try {
-    if (
-      code == null ||
-      storedState == null ||
-      storedCodeVerifier == null ||
-      state !== storedState?.value
-    ) {
-      return new Response('Please restart the process.', {
-        status: 400
-      })
-    }
+  if (
+    code == null ||
+    storedState == null ||
+    storedCodeVerifier == null ||
+    state !== storedState?.value
+  ) {
+    return new Response('Please restart the process.', {
+      status: 400
+    })
+  }
 
+  try {
     const tokens = await google.validateAuthorizationCode(code, storedCodeVerifier?.value)
     const response = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
       headers: {
@@ -82,12 +82,8 @@ export async function GET(context: APIContext): Promise<Response> {
   } catch (e) {
     console.error(e)
     if (e instanceof OAuth2RequestError) {
-      return new Response(null, {
-        status: 400
-      })
+      return new Response(e?.message, { status: 400 })
     }
-    return new Response(null, {
-      status: 500
-    })
+    return new Response(e?.message, { status: 500 })
   }
 }
