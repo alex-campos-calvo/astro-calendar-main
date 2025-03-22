@@ -2,6 +2,7 @@ export function getSizeNames(): object {
   return {
     1: 'P',
     4: 'G4',
+    5: 'G5',
     8: 'G8'
   }
 }
@@ -44,4 +45,9 @@ export function getHours(): object {
     21: '21:00 - 22:00',
     22: '22:00 - 23:00'
   }
+}
+
+export function getFullName(name: string): string {
+  const fullname = name?.split(' ')
+  return fullname && fullname[0] && fullname[0][0] ? fullname[0][0] : ''
 }

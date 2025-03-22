@@ -5,6 +5,7 @@ import Layout from '@/layouts/Layout.astro'
 import SwapSlotDatePicker from '@/components/react/SwapSlotDatePicker'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
+import { getFullName } from '@/lib/types/utils'
 import Member from '@/components/astro/Member.astro'
 
 const slot1: string | null = Astro.url.searchParams.get('slot1')
@@ -114,10 +115,7 @@ if (slot1) {
 
     if (users && users.length > 0) {
       users.forEach((user) => {
-        const fullname = user.name.split(' ')
-        if (fullname && fullname[0] && fullname[0][0]) {
-          user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-        }
+        user['short_name'] = getFullName(user.name)
         user_map.set(user.id, user)
       })
     }
@@ -184,10 +182,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
     if (users && users.length > 0) {
       users.forEach((user) => {
-        const fullname = user.name.split(' ')
-        if (fullname && fullname[0] && fullname[0][0]) {
-          user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-        }
+        user['short_name'] = getFullName(user.name)
         user_map.set(user.id, user)
       })
     }

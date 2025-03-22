@@ -16,9 +16,12 @@ const { user, user_slot } = Astro.props
     </span>
   </div>
   <div class="min-w-0 flex-1">
-    <a href={'/members/' + user.id} class="focus:outline-none">
+    <a href={'/members/' + user.id} class="focus:outline-none" title={user.description}>
       <span aria-hidden="true" class="absolute inset-0"></span>
       <p class="text-sm font-medium text-gray-900 capitalize">{user.name}</p>
+      <p class="text-sm font-medium text-gray-500 truncate">
+        {user.description}
+      </p>
     </a>
   </div>
   {

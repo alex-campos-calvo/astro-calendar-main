@@ -7,6 +7,7 @@ import { and, db, Slot, User, User_Slot, eq, inArray } from 'astro:db'
 import type { Clase, Usuario, Participante } from '@/lib/types/bbdd.ts'
 import 'moment/locale/es'
 import TitleHeader from '@/components/astro/TitleHeader.astro'
+import { getFullName } from '@/lib/types/utils'
 
 const week_day_text: string | null = Astro.url.searchParams.get('week_day')
 if (!week_day_text || parseInt(week_day_text) < 1 || parseInt(week_day_text) > 7) {
@@ -71,11 +72,7 @@ if (user_ids && user_ids.length > 0) {
 
   if (users && users.length > 0) {
     users.forEach((user) => {
-      const fullname = user.name.split(' ')
-      if (fullname && fullname[0] && fullname[0][0]) {
-        user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-      }
-
+      user['short_name'] = getFullName(user.name)
       user_map.set(user.id, user)
     })
   }

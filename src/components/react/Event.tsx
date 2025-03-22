@@ -32,6 +32,10 @@ export default function Event({ item, user }) {
           'group absolute inset-1 flex flex-col overflow-hidden rounded-lg p-4 justify-between ' +
           color
         }
+        onClick={(e) => {
+          e.preventDefault()
+          window.location.href = link
+        }}
       >
         <div className="flex justify-between">
           <div className="flex flex-col justify-between">

@@ -13,6 +13,7 @@ const member_data = {
     id: '',
     name: '',
     email: '',
+    description: '',
     is_admin: role === 'admin' ? true : false,
     is_active: true
   },
@@ -27,6 +28,7 @@ if (Astro.request.method === 'POST') {
   const id = (data.get('id') as string)?.trim()
   const name = (data.get('name') as string)?.trim()
   const email = (data.get('email') as string)?.trim()
+  const description = (data.get('description') as string)?.trim()
   const admin = (data.get('is_admin') as string)?.trim()
   const active = (data.get('is_active') as string)?.trim()
 
@@ -46,7 +48,14 @@ if (Astro.request.method === 'POST') {
     if (id) {
       await db
         .update(User)
-        .set({ id: id, name: name, email: email, is_active: is_active, is_admin: is_admin })
+        .set({
+          id: id,
+          name: name,
+          email: email,
+          description: description,
+          is_active: is_active,
+          is_admin: is_admin
+        })
         .where(eq(User.id, id))
       return Astro.redirect('/members/users')
     } else {
@@ -61,6 +70,7 @@ if (Astro.request.method === 'POST') {
           id: userId,
           name: name,
           email: email.toLowerCase(),
+          description: description,
           is_admin: is_admin,
           is_active: is_active
         })
@@ -77,6 +87,7 @@ if (Astro.request.method === 'POST') {
     member_data.info.id = members[0].id
     member_data.info.name = members[0].name
     member_data.info.email = members[0].email
+    member_data.info.description = members[0].description ? members[0].description : ''
     member_data.info.is_admin = members[0].is_admin
     member_data.info.is_active = members[0].is_active
   }
@@ -86,7 +97,7 @@ if (Astro.request.method === 'POST') {
 <Layout title="Detalle del usuario">
   <div class="overflow-hidden bg-white">
     <TitleHeader title="Detalle del usuario" />
-    <form method="POST">
+    <form id="create-user" method="POST">
       <div class="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3">
         <div class="col-span-1 lg:col-start-2">
           <label for="name" class="block text-sm/6 font-medium text-gray-900">Nombre completo</label
@@ -106,7 +117,9 @@ if (Astro.request.method === 'POST') {
         </div>
 
         <div class="col-span-1 lg:col-start-2">
-          <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
+          <label for="email" class="block text-sm/6 font-medium text-gray-900"
+            >Dirección de email</label
+          >
           <div class="mt-2">
             <input
               id="email"
@@ -118,6 +131,23 @@ if (Astro.request.method === 'POST') {
             />
           </div>
           <span class="text-red-500 text-sm/6 font-semibold">{member_data.errors.email}</span>
+        </div>
+
+        <div class="col-span-1 lg:col-start-2">
+          <label for="description" class="block text-sm/6 font-medium text-gray-900"
+            >Descripción</label
+          >
+          <div class="mt-2">
+            <textarea
+              id="description"
+              name="description"
+              form="create-user"
+              rows="4"
+              autocomplete="email"
+              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-black placeholder:text-gray-400 sm:text-sm/6"
+              >{member_data.info.description}</textarea
+            >
+          </div>
         </div>
 
         <div class="col-span-1 lg:col-start-2">
@@ -202,7 +232,7 @@ if (Astro.request.method === 'POST') {
 
 <script type="module" data-astro-rerun>
   const delete_button = document.getElementById('delete')
-  delete_button.addEventListener('click', () => {
+  delete_button?.addEventListener('click', () => {
     fetch('/members/api/delete-user', {
       method: 'DELETE',
       headers: {

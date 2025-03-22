@@ -10,6 +10,7 @@ import TitleHeader from '@/components/astro/TitleHeader.astro'
 import ConfiguratorHeader from '@/components/astro/ConfiguratorHeader.astro'
 import MemberPickerFilter from '@/components/react/MemberPickerFilter'
 import TeacherPickerFilter from '@/components/react/TeacherPickerFilter'
+import { getFullName } from '@/lib/types/utils'
 
 const slot_id: string | undefined = Astro.params.id
 
@@ -147,23 +148,15 @@ if (user_ids && user_ids.length > 0) {
 
   const user = users.filter((user) => user.id === slot_data.info.user_id)
   if (users && user[0]) {
-    const fullname = user[0]?.name?.split(' ')
-
     slot_data.info.user.id = user[0].id
     slot_data.info.user.name = user[0].name
     slot_data.info.user.email = user[0].email
     slot_data.info.user.is_admin = user[0].is_admin
     slot_data.info.user.is_active = user[0].is_active
-
-    if (fullname && fullname[0] && fullname[0][0]) {
-      slot_data.info.user.short_name = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-    }
+    slot_data.info.user.short_name = getFullName(user[0].name)
 
     users.forEach((user) => {
-      const fullname = user.name.split(' ')
-      if (fullname && fullname[0] && fullname[0][0]) {
-        user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-      }
+      user['short_name'] = getFullName(user.name)
       user_map.set(user.id, user)
     })
   }

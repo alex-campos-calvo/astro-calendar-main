@@ -28,6 +28,7 @@ export interface Participante {
 export interface Usuario {
   id: string
   google_id: string | null
+  description: string | null
   email: string
   name: string
   is_admin: boolean

@@ -53,16 +53,15 @@ export default function WeeklyCalendarSearchBar() {
         />
 
         {users && users.length > 0 && (
-          <ComboboxOptions className="absolute uppercase font-semibold z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden sm:text-sm">
+          <ComboboxOptions className="absolute font-semibold z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden sm:text-sm">
             {users.map((user) => (
               <ComboboxOption
                 key={user.id}
                 value={user.id}
                 className="group relative cursor-default py-2 pr-9 pl-3 text-gray-900 select-none data-focus:bg-indigo-600 data-focus:text-white data-focus:outline-hidden"
               >
-                <span className="block truncate group-data-selected:font-semibold">
-                  {user.name}
-                </span>
+                <p className="truncate uppercase">{user.name}</p>
+                <p className="truncate text-sm text-gray-500">{user.description}</p>
 
                 <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-focus:text-white group-data-selected:flex">
                   <CheckIcon className="size-5" aria-hidden="true" />

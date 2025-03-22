@@ -16,7 +16,7 @@ export function validateWeekday(day: number): boolean {
 }
 
 export function validateSize(size: number): boolean {
-  return !(size != 1 && size != 4 && size != 8)
+  return !(size != 1 && size != 4 && size != 5 && size != 8)
 }
 
 export function validateHour(hour: number): boolean {

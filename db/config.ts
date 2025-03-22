@@ -5,6 +5,7 @@ const User = defineTable({
     id: column.text({ primaryKey: true, optional: false, unique: true }),
     google_id: column.text({ optional: true }),
     email: column.text({ unique: true, optional: false }),
+    description: column.text({ optional: true, default: '' }),
     name: column.text({ optional: false }),
     password: column.text({ optional: true }),
     is_admin: column.boolean({ optional: false }),
@@ -50,9 +51,14 @@ const Swap_History = defineTable({
   }
 })
 
-const Delete_History = defineTable({
+const Upsert_History = defineTable({
   columns: {
     id: column.text({ primaryKey: true, optional: false, unique: true }),
+    type: column.text({
+      optional: false,
+      default: 'INSERT',
+      values: ['INSERT', 'DELETE']
+    }),
     date: column.date({ optional: false, default: new Date() }),
     slot_id: column.text({ references: () => Slot.columns.id, optional: false }),
     slot_date: column.text({ optional: false }),
@@ -80,5 +86,5 @@ const Session = defineTable({
 
 // https://astro.build/db/config
 export default defineDb({
-  tables: { User, User_Slot, Slot, Swap_History, Slot_Setting, Session }
+  tables: { User, User_Slot, Slot, Swap_History, Upsert_History, Slot_Setting, Session }
 })

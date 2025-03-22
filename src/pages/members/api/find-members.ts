@@ -1,4 +1,5 @@
 import type { Usuario } from '@/lib/types/bbdd'
+import { getFullName } from '@/lib/types/utils'
 import type { APIRoute } from 'astro'
 import { db, User, and, eq, like } from 'astro:db'
 
@@ -37,14 +38,12 @@ export const POST: APIRoute = async ({ request }) => {
             id: user.id,
             google_id: null,
             name: user.name,
+            description: user.description,
             email: user.email,
             is_active: user.is_active,
             is_admin: user.is_admin
           }
-          const fullname = user.name.split(' ')
-          if (fullname && fullname[0] && fullname[0][0]) {
-            u['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-          }
+          u['short_name'] = getFullName(user.name)
           result.push(u)
         })
       }

@@ -9,6 +9,7 @@ import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 import 'moment/locale/es'
 import SwapHistoryList from '@/components/astro/SwapHistoryList.astro'
 import UpsertHistoryList from '@/components/astro/UpsertHistoryList.astro'
+import { getFullName } from '@/lib/types/utils'
 
 const id: string | undefined = Astro.params.id
 const date: string | null = Astro.url.searchParams.get('date')
@@ -93,10 +94,7 @@ if (user_ids && user_ids.length > 0) {
 
   if (users && users.length > 0) {
     users.forEach((user) => {
-      const fullname = user.name.split(' ')
-      if (fullname && fullname[0] && fullname[0][0]) {
-        user['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-      }
+      user['short_name'] = getFullName(user.name)
       user_map.set(user.id, user)
     })
   }
@@ -125,9 +123,9 @@ if (user_ids && user_ids.length > 0) {
         <dt class="text-sm font-medium text-gray-900 uppercase">Tamaño del grupo:</dt>
         <dd class="text-sm text-gray-400 ml-2 font-semibold">{data['tipo_text']}</dd>
       </div>
-      <dt class="text-sm font-medium text-gray-900 uppercase border-b border-gray-300">
+      <dt class="text-sm font-medium text-gray-900 border-b border-gray-300">
         <div class="items-center lg:flex lg:justify-between">
-          <span class="mr-2">Profesor</span>
+          <span class="mr-2 uppercase">Profesor</span>
           <div class="mt-2 lg:mt-0">
             <TeacherPickerFilter slot_id={id} client:only="react" />
           </div>
@@ -138,9 +136,9 @@ if (user_ids && user_ids.length > 0) {
           <Member user={user_map.get(data.user_id)} />
         </div>
       </dd>
-      <dt class="text-sm font-medium text-gray-900 uppercase border-b border-gray-300">
+      <dt class="text-sm font-medium text-gray-900 border-b border-gray-300">
         <div class="items-center lg:flex lg:justify-between">
-          <span class="mr-2">
+          <span class="uppercase mr-2">
             Participantes ({data.User_Slots.length}/{data.size})
           </span>
           <div class="mt-2 lg:mt-0">

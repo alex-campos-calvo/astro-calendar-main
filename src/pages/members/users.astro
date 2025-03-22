@@ -2,6 +2,7 @@
 import { asc, db, User } from 'astro:db'
 import Layout from '@/layouts/Layout.astro'
 import type { Usuario } from '@/lib/types/bbdd.ts'
+import { getFullName } from '@/lib/types/utils'
 
 const people = await db.select().from(User).orderBy(asc(User.name)).all()
 
@@ -11,10 +12,7 @@ const members = {
 }
 if (people) {
   people.forEach((person) => {
-    const fullname = person.name.split(' ')
-    if (fullname && fullname[0] && fullname[0][0]) {
-      person['short_name'] = fullname[0][0] + (fullname[1] ? fullname[1][0] : '')
-    }
+    person['short_name'] = getFullName(person.name)
 
     if (person.is_admin) {
       members.admin.push(person)
@@ -53,6 +51,7 @@ if (people) {
                   (user.is_active ? 'green' : 'red') +
                   '-500'
                 }
+                title={user.description}
               >
                 <div class="shrink-0">
                   <span
@@ -110,6 +109,7 @@ if (people) {
                   (user.is_active ? 'green' : 'red') +
                   '-500'
                 }
+                title={user.description}
               >
                 <div class="shrink-0">
                   <span
