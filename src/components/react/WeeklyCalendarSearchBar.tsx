@@ -37,7 +37,9 @@ export default function WeeklyCalendarSearchBar() {
     <Combobox
       as="div"
       onChange={(e) => {
-        window.location.href = '/members/' + e
+        if (e) {
+          window.location.href = '/members/' + e
+        }
       }}
     >
       <div className="relative mb-2 mx-2 sm:mb-0">
@@ -47,7 +49,7 @@ export default function WeeklyCalendarSearchBar() {
             setName(event.target.value)
           }}
           displayValue={(user: Usuario) => {
-            return user.name
+            return user?.name
           }}
           placeholder="Buscar miembro..."
         />

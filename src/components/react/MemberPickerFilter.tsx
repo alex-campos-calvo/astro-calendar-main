@@ -75,7 +75,7 @@ export default function MemberPickerFilter({ slot, date }) {
               setName(event.target.value)
             }}
             displayValue={(user: Usuario) => {
-              return user.name
+              return user?.name
             }}
             placeholder="Buscar miembro..."
           />

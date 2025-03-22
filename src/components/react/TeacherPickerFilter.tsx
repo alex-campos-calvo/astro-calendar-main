@@ -74,7 +74,7 @@ export default function TeacherPickerFilter({ slot_id }: { slot_id: string }) {
               setName(event.target.value)
             }}
             displayValue={(user: Usuario) => {
-              return user.name
+              return user?.name
             }}
             placeholder="Buscar profesor..."
           />
