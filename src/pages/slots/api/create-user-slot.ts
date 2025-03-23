@@ -27,17 +27,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     try {
-      await db
-        .insert(Upsert_History)
-        .values({
-          id: generateId(15),
-          date: new Date(),
-          slot_id: body.to_slot,
-          slot_date: body.to_date,
-          member_id: body.user_id,
-          teacher_id: locals.session.userId
-        })
-        .run()
+      if (body.to_date && body.user_id && body.to_slot) {
+        await db
+          .insert(Upsert_History)
+          .values({
+            id: generateId(15),
+            date: new Date(),
+            slot_id: body.to_slot,
+            slot_date: body.to_date,
+            member_id: body.user_id,
+            teacher_id: locals.session.userId
+          })
+          .run()
+      }
 
       await db
         .insert(User_Slot)
