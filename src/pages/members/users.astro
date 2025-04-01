@@ -91,7 +91,7 @@ if (member_ids && member_ids.length > 0) {
                 <div class="shrink-0">
                   <span
                     class={
-                      'inline-flex size-10 items-center justify-center rounded-full ' +
+                      'inline-flex size-12 items-center justify-center rounded-full ' +
                       (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                     }
                   >
@@ -158,7 +158,7 @@ if (member_ids && member_ids.length > 0) {
                 <div class="shrink-0">
                   <span
                     class={
-                      'inline-flex size-14 items-center justify-center rounded-full ' +
+                      'inline-flex size-12 items-center justify-center rounded-full ' +
                       (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                     }
                   >
@@ -188,38 +188,38 @@ if (member_ids && member_ids.length > 0) {
       </div>
     </div>
   </div>
-
-  <script type="module" data-astro-rerun>
-    document.querySelector('#search_member').addEventListener('change', (e) => {
-      if (e.target.value) {
-        document.querySelectorAll('.member').forEach((member) => {
-          if (member.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
-            member.classList.remove('hidden')
-          } else {
-            member.classList.add('hidden')
-          }
-        })
-      } else {
-        document.querySelectorAll('.member').forEach((member) => {
-          member.classList.remove('hidden')
-        })
-      }
-    })
-
-    document.querySelector('#search_teacher').addEventListener('change', (e) => {
-      if (e.target.value) {
-        document.querySelectorAll('.teacher').forEach((teacher) => {
-          if (teacher.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
-            teacher.classList.remove('hidden')
-          } else {
-            teacher.classList.add('hidden')
-          }
-        })
-      } else {
-        document.querySelectorAll('.teacher').forEach((teacher) => {
-          teacher.classList.remove('hidden')
-        })
-      }
-    })
-  </script>
 </Layout>
+
+<script type="module" data-astro-rerun>
+  document.querySelector('#search_member').addEventListener('change', (e) => {
+    if (e.target.value) {
+      document.querySelectorAll('.member').forEach((member) => {
+        if (member.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
+          member.classList.remove('hidden')
+        } else {
+          member.classList.add('hidden')
+        }
+      })
+    } else {
+      document.querySelectorAll('.member').forEach((member) => {
+        member.classList.remove('hidden')
+      })
+    }
+  })
+
+  document.querySelector('#search_teacher').addEventListener('change', (e) => {
+    if (e.target.value) {
+      document.querySelectorAll('.teacher').forEach((teacher) => {
+        if (teacher.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
+          teacher.classList.remove('hidden')
+        } else {
+          teacher.classList.add('hidden')
+        }
+      })
+    } else {
+      document.querySelectorAll('.teacher').forEach((teacher) => {
+        teacher.classList.remove('hidden')
+      })
+    }
+  })
+</script>
