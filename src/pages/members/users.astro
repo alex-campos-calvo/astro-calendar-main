@@ -1,18 +1,44 @@
 ---
-import { asc, db, User } from 'astro:db'
+import { asc, db, and, eq, inArray, User, User_Slot } from 'astro:db'
+import { getWeekDayNames } from '@/lib/types/utils'
 import Layout from '@/layouts/Layout.astro'
 import type { Usuario } from '@/lib/types/bbdd.ts'
 import { getFullName } from '@/lib/types/utils'
+import { Slot } from 'astro:db'
 
-const people = await db.select().from(User).orderBy(asc(User.name)).all()
+const people: Usuario[] = await db.select().from(User).orderBy(asc(User.name)).all()
 
 const members = {
   admin: [] as Usuario[],
   member: [] as Usuario[]
 }
-if (people) {
+
+const member_ids = people.map((person) => person.id)
+if (member_ids && member_ids.length > 0) {
+  const week_days_map = getWeekDayNames()
+  const members_data = await db
+    .select()
+    .from(Slot)
+    .innerJoin(
+      User_Slot,
+      and(
+        eq(User_Slot.slot_id, Slot.id),
+        eq(User_Slot.default, true),
+        inArray(User_Slot.user_id, member_ids)
+      )
+    )
+    .all()
+
   people.forEach((person) => {
     person['short_name'] = getFullName(person.name)
+
+    const default_slots = members_data.filter((member) => {
+      return member.User_Slot.user_id === person.id
+    })
+
+    person['default_days'] = default_slots.map((member) => {
+      return member.Slot?.week_day ? week_days_map[member.Slot.week_day] : null
+    })
 
     if (person.is_admin) {
       members.admin.push(person)
@@ -38,6 +64,14 @@ if (people) {
           </div>
         </div>
       </div>
+      <div class="sm:flex sm:justify-end">
+        <input
+          class="w-full sm:w-auto rounded mb-4"
+          type="search"
+          id="search_teacher"
+          placeholder="Filtrar profesores"
+        />
+      </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 px-4">
         {
           (members &&
@@ -45,9 +79,10 @@ if (people) {
             members.admin.length > 0 &&
             members.admin.map((user) => (
               <a
+                data-name={user.name}
                 href={'/members/member?id=' + user.id}
                 class={
-                  'relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
+                  'teacher relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
                   (user.is_active ? 'green' : 'red') +
                   '-500'
                 }
@@ -96,6 +131,14 @@ if (people) {
           </div>
         </div>
       </div>
+      <div class="sm:flex sm:justify-end">
+        <input
+          class="w-full sm:w-auto rounded mb-4"
+          type="search"
+          id="search_member"
+          placeholder="Filtrar miembros"
+        />
+      </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 px-4">
         {
           (members &&
@@ -103,9 +146,10 @@ if (people) {
             members.member.length > 0 &&
             members.member.map((user) => (
               <a
+                data-name={user.name}
                 href={'/members/member?id=' + user.id}
                 class={
-                  'relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
+                  'member relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
                   (user.is_active ? 'green' : 'red') +
                   '-500'
                 }
@@ -114,7 +158,7 @@ if (people) {
                 <div class="shrink-0">
                   <span
                     class={
-                      'inline-flex size-10 items-center justify-center rounded-full ' +
+                      'inline-flex size-14 items-center justify-center rounded-full ' +
                       (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                     }
                   >
@@ -125,12 +169,13 @@ if (people) {
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="flex-1 truncate">
-                    <div class="flex items-center space-x-3">
-                      <h3 class="truncate text-sm font-medium text-gray-900 capitalize">
+                    <div class="flex items-center">
+                      <h3 class="truncate text-sm font-bold text-gray-900 capitalize">
                         {user.name}
                       </h3>
                     </div>
-                    <p class="mt-1 truncate text-sm text-gray-500">{user.description}</p>
+                    <p class="truncate text-sm text-gray-500">{user.description}</p>
+                    <p class="text-sm/6">{user['default_days'].join(' - ')}</p>
                   </div>
                 </div>
               </a>
@@ -143,4 +188,38 @@ if (people) {
       </div>
     </div>
   </div>
+
+  <script type="module" data-astro-rerun>
+    document.querySelector('#search_member').addEventListener('change', (e) => {
+      if (e.target.value) {
+        document.querySelectorAll('.member').forEach((member) => {
+          if (member.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
+            member.classList.remove('hidden')
+          } else {
+            member.classList.add('hidden')
+          }
+        })
+      } else {
+        document.querySelectorAll('.member').forEach((member) => {
+          member.classList.remove('hidden')
+        })
+      }
+    })
+
+    document.querySelector('#search_teacher').addEventListener('change', (e) => {
+      if (e.target.value) {
+        document.querySelectorAll('.teacher').forEach((teacher) => {
+          if (teacher.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
+            teacher.classList.remove('hidden')
+          } else {
+            teacher.classList.add('hidden')
+          }
+        })
+      } else {
+        document.querySelectorAll('.teacher').forEach((teacher) => {
+          teacher.classList.remove('hidden')
+        })
+      }
+    })
+  </script>
 </Layout>
