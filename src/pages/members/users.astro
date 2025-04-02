@@ -131,9 +131,23 @@ if (member_ids && member_ids.length > 0) {
           </div>
         </div>
       </div>
-      <div class="sm:flex sm:justify-end">
+      <div class="mb-4 sm:flex sm:justify-end sm:mx-4 sm:gap-x-4">
+        <div class="flex gap-3">
+          <div class="flex h-6 shrink-0 items-center">
+            <div class="group grid size-4 grid-cols-1">
+              <input
+                id="search_assigments"
+                type="checkbox"
+                class="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white focus:ring-0"
+              />
+            </div>
+          </div>
+          <div class="text-sm/6">
+            <label for="comments" class="font-medium text-gray-500">Sin clases asignadas</label>
+          </div>
+        </div>
         <input
-          class="w-full sm:w-auto rounded mb-4"
+          class="w-full sm:w-auto rounded"
           type="search"
           id="search_member"
           placeholder="Filtrar miembros"
@@ -147,6 +161,9 @@ if (member_ids && member_ids.length > 0) {
             members.member.map((user) => (
               <a
                 data-name={user.name}
+                data-assignments={
+                  user['default_days'] && user['default_days'].length > 0 ? true : false
+                }
                 href={'/members/member?id=' + user.id}
                 class={
                   'member relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
@@ -174,8 +191,14 @@ if (member_ids && member_ids.length > 0) {
                         {user.name}
                       </h3>
                     </div>
-                    <p class="truncate text-sm text-gray-500">{user.description}</p>
-                    <p class="text-sm/6">{user['default_days'].join(' - ')}</p>
+                    <p class="truncate text-sm text-gray-500">
+                      {user.description ? user.description : '-'}
+                    </p>
+                    <p class="text-sm/6">
+                      {user['default_days'] && user['default_days'].length > 0
+                        ? user['default_days'].join(' - ')
+                        : '-'}
+                    </p>
                   </div>
                 </div>
               </a>
@@ -191,7 +214,24 @@ if (member_ids && member_ids.length > 0) {
 </Layout>
 
 <script type="module" data-astro-rerun>
+  document.querySelector('#search_teacher').addEventListener('change', (e) => {
+    if (e.target.value) {
+      document.querySelectorAll('.teacher').forEach((teacher) => {
+        if (teacher.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
+          teacher.classList.remove('hidden')
+        } else {
+          teacher.classList.add('hidden')
+        }
+      })
+    } else {
+      document.querySelectorAll('.teacher').forEach((teacher) => {
+        teacher.classList.remove('hidden')
+      })
+    }
+  })
+
   document.querySelector('#search_member').addEventListener('change', (e) => {
+    document.querySelector('#search_assigments').checked = false
     if (e.target.value) {
       document.querySelectorAll('.member').forEach((member) => {
         if (member.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
@@ -207,18 +247,18 @@ if (member_ids && member_ids.length > 0) {
     }
   })
 
-  document.querySelector('#search_teacher').addEventListener('change', (e) => {
-    if (e.target.value) {
-      document.querySelectorAll('.teacher').forEach((teacher) => {
-        if (teacher.dataset.name.toLowerCase().includes(e.target.value.toLowerCase())) {
-          teacher.classList.remove('hidden')
+  document.querySelector('#search_assigments').addEventListener('change', (e) => {
+    if (e.target.checked) {
+      document.querySelectorAll('.member').forEach((member) => {
+        if (member.dataset.assignments === 'false') {
+          member.classList.remove('hidden')
         } else {
-          teacher.classList.add('hidden')
+          member.classList.add('hidden')
         }
       })
     } else {
-      document.querySelectorAll('.teacher').forEach((teacher) => {
-        teacher.classList.remove('hidden')
+      document.querySelectorAll('.member').forEach((member) => {
+        member.classList.remove('hidden')
       })
     }
   })
