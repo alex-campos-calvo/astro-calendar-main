@@ -19,7 +19,12 @@ const User_Slot = defineTable({
     user_id: column.text({ references: () => User.columns.id, optional: false }),
     slot_id: column.text({ references: () => Slot.columns.id, optional: false }),
     default: column.boolean({ optional: false, default: false }),
-    date: column.text({ optional: true })
+    date: column.text({ optional: true }),
+    original_date: column.text({ optional: true }),
+    original_slot: column.text({
+      references: () => Slot.columns.id,
+      optional: true
+    })
   }
 })
 

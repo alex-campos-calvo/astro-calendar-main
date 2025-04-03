@@ -47,7 +47,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
             user_id: body.user_id,
             slot_id: body.to_slot,
             default: false,
-            date: body.to_date
+            date: body.to_date,
+            original_date: body.to_date,
+            original_slot: body.to_slot
           })
           .run()
         return new Response(null, { status: 200 })
@@ -83,35 +85,44 @@ export const POST: APIRoute = async ({ request, locals }) => {
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: true,
-              date: null
+              date: null,
+              original_date: null
             },
             {
               id: generateId(15),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
-              date: this_week
+              date: this_week,
+              original_date: this_week,
+              original_slot: body.to_slot
             },
             {
               id: generateId(15),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
-              date: first_week
+              date: first_week,
+              original_date: first_week,
+              original_slot: body.to_slot
             },
             {
               id: generateId(15),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
-              date: second_week
+              date: second_week,
+              original_date: second_week,
+              original_slot: body.to_slot
             },
             {
               id: generateId(15),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
-              date: third_week
+              date: third_week,
+              original_date: third_week,
+              original_slot: body.to_slot
             }
           ])
           .run()

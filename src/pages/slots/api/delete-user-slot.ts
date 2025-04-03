@@ -71,9 +71,15 @@ export const DELETE: APIRoute = async ({ request, locals }) => {
           .where(
             and(
               eq(User_Slot.user_id, user_slot[0].user_id),
-              eq(User_Slot.slot_id, user_slot[0].slot_id),
+              eq(User_Slot.original_slot, user_slot[0].slot_id),
               eq(User_Slot.default, false),
-              inArray(User_Slot.date, [this_week, first_week, second_week, third_week, fourth_week])
+              inArray(User_Slot.original_date, [
+                this_week,
+                first_week,
+                second_week,
+                third_week,
+                fourth_week
+              ])
             )
           )
           .all()

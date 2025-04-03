@@ -100,7 +100,9 @@ export async function GET({ request }) {
                   slot_id: slot.User_Slot.slot_id,
                   user_id: slot.User_Slot.user_id,
                   default: false,
-                  date: this_date
+                  date: this_date,
+                  original_date: this_date,
+                  original_slot: slot.User_Slot.slot_id
                 }
                 values.push(obj)
               })
