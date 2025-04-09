@@ -44,7 +44,7 @@ export default function WeeklyCalendarSearchBar() {
     >
       <div className="relative mb-2 mx-2 sm:mb-0">
         <ComboboxInput
-          className="block w-full rounded-md bg-white py-1.5 text-sm border border-black placeholder:text-gray-400"
+          className="block w-full rounded-md shadow-md bg-white py-1.5 text-sm border-2 border-black placeholder:text-gray-400 font-semibold"
           onChange={(event) => {
             setName(event.target.value)
           }}
@@ -55,7 +55,7 @@ export default function WeeklyCalendarSearchBar() {
         />
 
         {users && users.length > 0 && (
-          <ComboboxOptions className="absolute font-semibold z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden sm:text-sm">
+          <ComboboxOptions className="absolute font-semibold z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden">
             {users.map((user) => (
               <ComboboxOption
                 key={user.id}

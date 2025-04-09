@@ -1,0 +1,25 @@
+---
+import { CheckCircleIcon } from '@heroicons/react/24/outline'
+
+const { identifier, title, message, is_error } = Astro.props
+---
+
+<div
+  id={identifier}
+  class="hidden my-4 pointer-events-auto w-full overflow-hidden rounded-md bg-white ring-1 shadow-md ring-black/5"
+>
+  <div class="p-4">
+    <div class="flex items-start">
+      <div class="shrink-0">
+        <CheckCircleIcon
+          className={'size-6 ' + (is_error === 'true' ? 'text-red-400' : 'text-green-400')}
+          aria-hidden="true"
+        />
+      </div>
+      <div class="ml-3 w-0 flex-1 pt-0.5">
+        {title && <p class="text-sm font-medium text-gray-900">{title}</p>}
+        {message && <p class="mt-1 text-sm text-gray-500">{message}</p>}
+      </div>
+    </div>
+  </div>
+</div>

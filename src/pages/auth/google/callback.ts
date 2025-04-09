@@ -1,9 +1,9 @@
+import type { APIContext } from 'astro'
 import { google, lucia } from '@/lib/auth'
 import { OAuth2RequestError } from 'arctic'
 import { generateId } from 'lucia'
-
-import type { APIContext } from 'astro'
 import { db, or, eq, User } from 'astro:db'
+import { getSizeId } from '@/lib/types/utils'
 
 export async function GET(context: APIContext): Promise<Response> {
   const code = context.url.searchParams.get('code')
@@ -65,7 +65,7 @@ export async function GET(context: APIContext): Promise<Response> {
       return context.redirect('/')
     }
 
-    const userId = generateId(15)
+    const userId = generateId(getSizeId())
     await db.insert(User).values({
       id: userId,
       name: googleUser.name,

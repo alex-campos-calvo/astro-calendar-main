@@ -3,7 +3,7 @@ import { asc, db, and, eq, inArray, User, User_Slot } from 'astro:db'
 import { getWeekDayNames } from '@/lib/types/utils'
 import Layout from '@/layouts/Layout.astro'
 import type { Usuario } from '@/lib/types/bbdd.ts'
-import { getFullName } from '@/lib/types/utils'
+import { getShortName } from '@/lib/types/utils'
 import { Slot } from 'astro:db'
 
 const people: Usuario[] = await db.select().from(User).orderBy(asc(User.name)).all()
@@ -30,7 +30,7 @@ if (member_ids && member_ids.length > 0) {
     .all()
 
   people.forEach((person) => {
-    person['short_name'] = getFullName(person.name)
+    person['short_name'] = getShortName(person.name)
 
     const default_slots = members_data.filter((member) => {
       return member.User_Slot.user_id === person.id
@@ -52,16 +52,10 @@ if (member_ids && member_ids.length > 0) {
 <Layout title="Listado de usuarios">
   <div class="flex flex-col space-y-8">
     <div class="overflow-hidden bg-white">
-      <div class="border border-black bg-white px-4 py-5 sm:px-6 mb-4 shadow sm:rounded-lg">
+      <div class="border border-black bg-white px-6 py-5 mb-4 shadow-md rounded-md">
         <div class="flex flex-wrap items-center justify-between sm:flex-nowrap">
           <h3 class="text-base uppercase font-semibold text-gray-900">Profesores</h3>
-          <div class="ml-4 shrink-0">
-            <a
-              href="/members/member?role=admin"
-              class="content-center text-center bg-transparent font-semibold px-4 py-2 border border-black hover:border-fuchsia-500 rounded shadow"
-              >Nuevo</a
-            >
-          </div>
+          <div class="ml-4 shrink-0"></div>
         </div>
       </div>
       <div class="sm:flex sm:justify-end">
@@ -72,7 +66,9 @@ if (member_ids && member_ids.length > 0) {
           placeholder="Filtrar profesores"
         />
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 px-4">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 p-4 border bg-gray-100 rounded-md shadow"
+      >
         {
           (members &&
             members.admin &&
@@ -80,9 +76,9 @@ if (member_ids && member_ids.length > 0) {
             members.admin.map((user) => (
               <a
                 data-name={user.name}
-                href={'/members/member?id=' + user.id}
+                href={'/members/' + user.id + '?edit=true'}
                 class={
-                  'teacher relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
+                  'teacher relative flex items-center space-x-3 rounded-md shadow-md px-6 py-5 hover:border-fuchsia-500 bg-white border-2 border-' +
                   (user.is_active ? 'green' : 'red') +
                   '-500'
                 }
@@ -91,7 +87,7 @@ if (member_ids && member_ids.length > 0) {
                 <div class="shrink-0">
                   <span
                     class={
-                      'inline-flex size-12 items-center justify-center rounded-full ' +
+                      'inline-flex size-12 items-center justify-center rounded-md ' +
                       (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                     }
                   >
@@ -119,19 +115,19 @@ if (member_ids && member_ids.length > 0) {
     </div>
 
     <div class="overflow-hidden bg-white">
-      <div class="border border-black bg-white px-4 py-5 sm:px-6 mb-4 shadow sm:rounded-lg">
+      <div class="border border-black bg-white px-4 py-5 rounded-md shadow">
         <div class="flex flex-wrap items-center justify-between sm:flex-nowrap">
           <h3 class="text-base uppercase font-semibold text-gray-900">Miembros</h3>
           <div class="ml-4 shrink-0">
             <a
-              href="/members/member?role=member"
+              href="/members/new?edit=true"
               class="content-center text-center bg-transparent font-semibold px-4 py-2 border border-black hover:border-fuchsia-500 rounded shadow"
               >Nuevo</a
             >
           </div>
         </div>
       </div>
-      <div class="mb-4 sm:flex sm:justify-end sm:mx-4 sm:gap-x-4">
+      <div class="my-4 sm:flex sm:justify-end sm:mx-4 sm:gap-x-4">
         <div class="flex gap-3">
           <div class="flex h-6 shrink-0 items-center">
             <div class="group grid size-4 grid-cols-1">
@@ -153,7 +149,9 @@ if (member_ids && member_ids.length > 0) {
           placeholder="Filtrar miembros"
         />
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 px-4">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 p-4 border bg-gray-100 rounded-md shadow"
+      >
         {
           (members &&
             members.member &&
@@ -164,9 +162,9 @@ if (member_ids && member_ids.length > 0) {
                 data-assignments={
                   user['default_days'] && user['default_days'].length > 0 ? true : false
                 }
-                href={'/members/member?id=' + user.id}
+                href={'/members/' + user.id + '?edit=true'}
                 class={
-                  'member relative flex items-center space-x-3 rounded-lg shadow px-6 py-5 hover:border-fuchsia-500 border-2 border-' +
+                  'member relative flex items-center space-x-3 rounded-md shadow-md px-6 py-5 hover:border-fuchsia-500 bg-white border-2 border-' +
                   (user.is_active ? 'green' : 'red') +
                   '-500'
                 }
@@ -175,7 +173,7 @@ if (member_ids && member_ids.length > 0) {
                 <div class="shrink-0">
                   <span
                     class={
-                      'inline-flex size-12 items-center justify-center rounded-full ' +
+                      'inline-flex size-12 items-center justify-center rounded-md ' +
                       (user.is_admin ? 'bg-red-300' : 'bg-gray-500')
                     }
                   >

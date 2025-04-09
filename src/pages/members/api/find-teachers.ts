@@ -1,5 +1,5 @@
 import type { Usuario } from '@/lib/types/bbdd'
-import { getFullName } from '@/lib/types/utils'
+import { getShortName } from '@/lib/types/utils'
 import type { APIRoute } from 'astro'
 import { db, User, and, eq, like } from 'astro:db'
 
@@ -43,7 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
             is_active: false,
             is_admin: false
           }
-          u['short_name'] = getFullName(user.name)
+          u['short_name'] = getShortName(user.name)
           result.push(u)
         })
       }

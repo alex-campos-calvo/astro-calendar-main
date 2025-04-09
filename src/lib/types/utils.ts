@@ -1,3 +1,10 @@
+import moment from 'moment'
+import 'moment/locale/es'
+
+export function getSizeId(): number {
+  return 15
+}
+
 export function getSizeNames(): object {
   return {
     1: 'P',
@@ -47,7 +54,14 @@ export function getHours(): object {
   }
 }
 
-export function getFullName(name: string): string {
+export function getShortName(name: string): string {
   const fullname = name?.split(' ')
   return fullname && fullname[0] && fullname[0][0] ? fullname[0][0] : ''
+}
+
+export function getHourText(hour: number): string {
+  return moment({
+    hour: Math.floor(hour),
+    minute: Math.floor((hour % 1) * 60)
+  }).format('HH:mm')
 }

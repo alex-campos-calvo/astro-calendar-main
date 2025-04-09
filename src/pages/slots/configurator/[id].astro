@@ -1,5 +1,4 @@
 ---
-import moment from 'moment'
 import Layout from '@/layouts/Layout.astro'
 import Member from '@/components/astro/Member.astro'
 import type { Usuario, Participante } from '@/lib/types/bbdd'
@@ -10,7 +9,7 @@ import TitleHeader from '@/components/astro/TitleHeader.astro'
 import ConfiguratorHeader from '@/components/astro/ConfiguratorHeader.astro'
 import MemberPickerFilter from '@/components/react/MemberPickerFilter'
 import TeacherPickerFilter from '@/components/react/TeacherPickerFilter'
-import { getFullName } from '@/lib/types/utils'
+import { getShortName, getHourText } from '@/lib/types/utils'
 
 const slot_id: string | undefined = Astro.params.id
 
@@ -118,8 +117,8 @@ slot_data.info.week_day = slot[0].Slot.week_day
 slot_data.info.start_hour = slot[0].Slot.start_hour
 slot_data.info.end_hour = slot[0].Slot.end_hour
 slot_data.info.size = slot[0].Slot.size
-slot_data.info.start_hour_text = moment(slot[0].Slot.start_hour, 'HH:mm').format('HH:mm')
-slot_data.info.end_hour_text = moment(slot[0].Slot.end_hour, 'HH:mm').format('HH:mm')
+slot_data.info.start_hour_text = getHourText(slot[0].Slot.start_hour)
+slot_data.info.end_hour_text = getHourText(slot[0].Slot.end_hour)
 slot_data.info.tipo_text = slot[0].Slot.size <= 1 ? 'P' : 'G' + slot[0].Slot.size
 user_ids.push(slot[0].Slot.user_id)
 
@@ -153,10 +152,10 @@ if (user_ids && user_ids.length > 0) {
     slot_data.info.user.email = user[0].email
     slot_data.info.user.is_admin = user[0].is_admin
     slot_data.info.user.is_active = user[0].is_active
-    slot_data.info.user.short_name = getFullName(user[0].name)
+    slot_data.info.user.short_name = getShortName(user[0].name)
 
     users.forEach((user) => {
-      user['short_name'] = getFullName(user.name)
+      user['short_name'] = getShortName(user.name)
       user_map.set(user.id, user)
     })
   }
@@ -180,7 +179,7 @@ if (user_ids && user_ids.length > 0) {
                 name="week_day"
                 autocomplete="Dia de la semana"
                 form="slot_form"
-                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black"
               >
                 {
                   Object.keys(week_day_names).map((key) => {
@@ -209,7 +208,7 @@ if (user_ids && user_ids.length > 0) {
                 name="size"
                 autocomplete="Tamaño de la clase"
                 form="slot_form"
-                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black"
               >
                 {
                   Object.keys(size_names).map((key) => {
@@ -238,7 +237,7 @@ if (user_ids && user_ids.length > 0) {
                 name="start_hour"
                 autocomplete="Hora de comienzo"
                 form="slot_form"
-                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black sm:text-sm/6"
+                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-black"
               >
                 {
                   Object.keys(hours).map((key) => {

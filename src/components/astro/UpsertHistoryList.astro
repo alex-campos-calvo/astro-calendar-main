@@ -1,9 +1,8 @@
 ---
 import moment from 'moment'
 import 'moment/locale/es'
-import { db, eq, and, inArray, User, Slot, desc, Upsert_History } from 'astro:db'
-import type { Clase, Usuario } from '@/lib/types/bbdd'
-import { User_Slot } from 'astro:db'
+import { db, eq, and, inArray, User, desc, Upsert_History } from 'astro:db'
+import type { Usuario } from '@/lib/types/bbdd'
 import { UserPlusIcon, UserMinusIcon } from '@heroicons/react/24/solid'
 
 const id: string | undefined = Astro.params.id
@@ -23,15 +22,11 @@ const upserts = await db
   .all()
 
 const user_ids: string[] = []
-const slot_ids: string[] = []
-const user_slot_ids: string[] = []
 for (const upsert of upserts) {
-  if (upsert.slot_id) slot_ids.push(upsert.slot_id)
   if (upsert.member_id) user_ids.push(upsert.member_id)
   if (upsert.teacher_id) user_ids.push(upsert.teacher_id)
 }
 
-const slot_map: Map<string, Clase> = new Map<string, Clase>()
 const user_map: Map<string, Usuario> = new Map<string, Usuario>()
 if (user_ids && user_ids.length > 0) {
   const users = await db.select().from(User).where(inArray(User.id, user_ids)).all()
@@ -42,51 +37,13 @@ if (user_ids && user_ids.length > 0) {
     })
   }
 }
-
-if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0) {
-  const slots = await db
-    .select()
-    .from(Slot)
-    .where(inArray(Slot.id, slot_ids))
-    .leftJoin(User_Slot, and(inArray(User_Slot.id, user_slot_ids), eq(User_Slot.default, false)))
-    .all()
-
-  slots?.forEach((item) => {
-    let current_slot = slot_map.has(item.Slot.id) ? slot_map.get(item.Slot.id) : null
-    if (!current_slot) {
-      const s: Clase = {
-        id: item.Slot.id,
-        user_id: item.Slot.user_id,
-        week_day: item.Slot ? item.Slot.week_day : 0,
-        start_hour: item.Slot ? item.Slot.start_hour : 0,
-        end_hour: item.Slot ? item.Slot.end_hour : 0,
-        size: item.Slot ? item.Slot.size : 0,
-        start: 0,
-        end: 0,
-        color: '',
-        today: false,
-        date: '',
-        User_Slots: []
-      }
-      s['start_hour_text'] = moment({
-        hour: Math.floor(s.start_hour),
-        minute: Math.floor((s.start_hour % 1) * 60)
-      }).format('HH:mm')
-
-      slot_map.set(s.id, s)
-    }
-  })
-}
 ---
 
-<div>
+<div class="p-2 border border-fuchsia-500 bg-fuchsia-50 rounded-md">
   <label for="name" class="block text-sm/6 font-medium text-gray-900"
     >Historial de añadidos y borrados</label
   >
-  <ul
-    role="list"
-    class="overflow-hidden bg-white ring-1 shadow-xs ring-black sm:rounded-lg shadow mt-2 pt-2"
-  >
+  <ul role="list" class="overflow-hidden bg-white ring-1 ring-black rounded-md shadow-md mt-2 pt-2">
     {
       (upserts &&
         upserts.length > 0 &&
@@ -101,11 +58,11 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
                 <div>
                   <div class="relative p-1">
                     {(upsert.type && upsert.type === 'INSERT' && (
-                      <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-green-400">
+                      <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-green-400">
                         <UserPlusIcon className="size-4" />
                       </div>
                     )) || (
-                      <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-red-400">
+                      <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-red-400">
                         <UserMinusIcon className="size-4" />
                       </div>
                     )}

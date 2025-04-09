@@ -35,7 +35,8 @@ const Slot = defineTable({
     week_day: column.number({ optional: false }),
     start_hour: column.number({ optional: false }),
     end_hour: column.number({ optional: false }),
-    size: column.number({ optional: false })
+    size: column.number({ optional: false }),
+    schedule: column.number({ optional: false, default: 1 })
   }
 })
 

@@ -28,7 +28,7 @@ const slots = await db
       inArray(User_Slot.date, dates)
     )
   )
-  .limit(6)
+  .limit(15)
   .all()
 
 const user_ids: string[] = []
@@ -50,54 +50,36 @@ if (user_ids && user_ids.length > 0) {
 }
 ---
 
-<div>
-  <label for="name" class="block text-sm/6 font-medium text-gray-900">Listado de clases</label>
+<div class="p-2 border border-fuchsia-500 bg-fuchsia-50 rounded-md">
+  <label for="name" class="block text-sm/6 font-medium text-gray-900">Proximas de clases</label>
   <ul
     role="list"
-    class="divide-y divide-black overflow-hidden bg-white ring-1 shadow-xs ring-black lg:rounded-xl mt-2"
+    class="overflow-hidden divide-y bg-white ring-1 ring-black rounded-md shadow-md mt-2 py-2 px-4"
   >
     {
       (slots &&
         slots.length > 0 &&
         slots.map((slot) => (
-          <li class="relative flex justify-between gap-x-6 px-4 py-4 hover:bg-gray-50 sm:px-6">
+          <li class="relative p-2 hover:bg-gray-50">
             <div class="flex min-w-0 gap-x-4">
               <div class="min-w-0 flex-auto">
-                <p class="text-sm/6 font-semibold text-gray-900">
+                <div class="text-sm/6 font-semibold text-gray-900">
                   <a href={'/slots/' + slot.Slot.id + '?date=' + slot.User_Slot.date}>
-                    <span class="absolute inset-x-0 -top-px bottom-0" />
-                    <span class="uppercase">
-                      {moment(slot?.User_Slot?.date).format('dddd, DD [de] MMMM [de] YYYY')}
+                    <span class="uppercase inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-black">
+                      {moment(slot?.User_Slot?.date).format('dddd, DD [de] MMMM [de] YYYY') +
+                        ', ' +
+                        moment({
+                          hour: Math.floor(slot.Slot.start_hour),
+                          minute: Math.floor((slot.Slot.start_hour % 1) * 60)
+                        }).format('HH:mm')}
                     </span>
+                    <span class="uppercase inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-xs font-medium text-black">
+                      {user_map.get(slot.Slot.user_id)?.name}
+                    </span>
+                    <span />
                   </a>
-                </p>
-                <div class="mt-1 flex text-md/5 text-gray-700">
-                  <div class="grid grid-cols-2 gap-x-8">
-                    <span>
-                      {moment({
-                        hour: Math.floor(slot.Slot.start_hour),
-                        minute: Math.floor((slot.Slot.start_hour % 1) * 60)
-                      }).format('HH:mm')}
-                    </span>
-                    <span>{user_map.get(slot.Slot.user_id)?.name}</span>
-                  </div>
                 </div>
               </div>
-            </div>
-            <div class="flex shrink-0 items-center gap-x-4">
-              <svg
-                class="size-5 flex-none text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                data-slot="icon"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
             </div>
           </li>
         ))) || (

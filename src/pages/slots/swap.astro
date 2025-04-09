@@ -5,7 +5,7 @@ import Layout from '@/layouts/Layout.astro'
 import SwapSlotDatePicker from '@/components/react/SwapSlotDatePicker'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
-import { getFullName } from '@/lib/types/utils'
+import { getShortName, getHourText } from '@/lib/types/utils'
 import Member from '@/components/astro/Member.astro'
 
 const slot1: string | null = Astro.url.searchParams.get('slot1')
@@ -91,8 +91,8 @@ if (slot1) {
           date: slot_date1.format('YYYY-MM-DD'),
           User_Slots: []
         }
-        data1['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
-        data1['end_hour_text'] = moment(item.Slot.end_hour, 'HH:mm').format('HH:mm')
+        data1['start_hour_text'] = getHourText(item.Slot.start_hour)
+        data1['end_hour_text'] = getHourText(item.Slot.end_hour)
         data1['tipo_text'] = item.Slot.size <= 1 ? 'P' : 'G' + item.Slot.size
         user_ids.push(item.Slot.user_id)
 
@@ -115,7 +115,7 @@ if (slot1) {
 
     if (users && users.length > 0) {
       users.forEach((user) => {
-        user['short_name'] = getFullName(user.name)
+        user['short_name'] = getShortName(user.name)
         user_map.set(user.id, user)
       })
     }
@@ -182,7 +182,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
     if (users && users.length > 0) {
       users.forEach((user) => {
-        user['short_name'] = getFullName(user.name)
+        user['short_name'] = getShortName(user.name)
         user_map.set(user.id, user)
       })
     }
@@ -192,7 +192,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
 
 <Layout title="Intercambio de miembros">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <div class="h-fit overflow-hidden bg-white border border-black shadow sm:rounded-lg">
+    <div class="h-fit overflow-hidden bg-white border border-black shadow-md rounded-md">
       <div class="flex justify-between px-4 py-6 sm:px-6">
         <a href={'/slots/' + slot1 + '?date=' + date1} class="gap-4">
           <h3 class="text-base/7 font-semibold text-gray-900">
@@ -211,7 +211,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
               id="draggable1"
               data-id={data1.id}
               data-date={slot_date1.format('YYYY-MM-DD')}
-              class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20 bg-gray-100 rounded-lg"
+              class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20 bg-gray-100 rounded-md"
             >
               {
                 data1.User_Slots.map((user_slot1) => (
@@ -227,8 +227,8 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     </div>
     {
       (!slot2 || !date2) && (
-        <div class="h-fit bg-white border-t border-black sm:rounded-lg">
-          <div class="flex justify-between px-4 py-6 sm:px-6 border-x border-black">
+        <div class="h-fit bg-white">
+          <div class="flex justify-between px-4 py-6 sm:px-6 border-x border-t border-black rounded-md">
             <div class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
                 <span class="uppercase">Listado de clases</span>
@@ -246,7 +246,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
     }
     {
       slot2 && date2 && (
-        <div class="h-fit overflow-hidden bg-white border border-black shadow sm:rounded-lg">
+        <div class="h-fit overflow-hidden bg-white border border-black shadow-md rounded-md">
           <div class="flex justify-between px-4 py-6 sm:px-6">
             <a href={'/slots/' + slot2 + '?date=' + date2} class="gap-4">
               <h3 class="text-base/7 font-semibold text-gray-900">
@@ -267,7 +267,7 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
                   id="draggable2"
                   data-id={data2.id}
                   data-date={slot_date2.format('YYYY-MM-DD')}
-                  class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20 bg-gray-100 rounded-lg"
+                  class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-20 bg-gray-100 rounded-md"
                 >
                   {data2.User_Slots.map((user_slot2) => (
                     <div data-id={user_slot2.id}>

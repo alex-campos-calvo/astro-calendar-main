@@ -6,6 +6,7 @@ import type { Clase, Usuario } from '@/lib/types/bbdd'
 import { Swap_History } from 'astro:db'
 import { User_Slot } from 'astro:db'
 import { ArrowUturnLeftIcon, ArrowUturnRightIcon } from '@heroicons/react/24/solid'
+import { getHourText } from '@/lib/types/utils'
 
 const id: string | undefined = Astro.params.id
 const date: string | null = Astro.url.searchParams.get('date')
@@ -83,10 +84,7 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
         date: '',
         User_Slots: []
       }
-      s['start_hour_text'] = moment({
-        hour: Math.floor(s.start_hour),
-        minute: Math.floor((s.start_hour % 1) * 60)
-      }).format('HH:mm')
+      s['start_hour_text'] = getHourText(s.start_hour)
 
       slot_map.set(s.id, s)
     }
@@ -94,13 +92,13 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
 }
 ---
 
-<div>
+<div class="p-2 border border-fuchsia-500 bg-fuchsia-50 rounded-md">
   <label for="name" class="block text-sm/6 font-medium text-gray-900"
     >Historial de intercambios</label
   >
   <ul
     role="list"
-    class="overflow-hidden bg-white ring-1 shadow-xs ring-black sm:rounded-lg shadow mt-2 pt-2"
+    class="overflow-hidden bg-white ring-1 shadow-xs ring-black rounded-md shadow-md mt-2 pt-2"
   >
     {
       (swaps &&
@@ -116,11 +114,11 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
                 <div>
                   <div class="relative p-1">
                     {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
-                      <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-red-400">
+                      <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-red-400">
                         <ArrowUturnRightIcon className="size-4" />
                       </div>
                     )) || (
-                      <div class="flex size-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-green-400">
+                      <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-green-400">
                         <ArrowUturnLeftIcon className="size-4" />
                       </div>
                     )}

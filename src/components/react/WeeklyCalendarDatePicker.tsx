@@ -11,7 +11,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
     root: {
       base: 'absolute top-10 z-50 block pt-2',
       inline: 'relative top-0 z-auto',
-      inner: 'inline-block border border-black rounded-lg bg-white p-4 shadow-lg'
+      inner: 'inline-block border border-black rounded-md bg-white p-4 shadow-lg'
     },
     header: {
       base: '',
@@ -19,7 +19,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
       selectors: {
         base: 'mb-2 flex justify-between',
         button: {
-          base: 'rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200',
+          base: 'rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200',
           prev: '',
           next: '',
           view: ''
@@ -32,7 +32,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
     footer: {
       base: 'mt-2 flex space-x-2',
       button: {
-        base: 'w-full rounded-lg px-5 py-2 text-center text-sm font-medium focus:ring-4 focus:ring-cyan-300',
+        base: 'w-full rounded-md px-5 py-2 text-center text-sm font-medium focus:ring-4 focus:ring-cyan-300',
         today: 'bg-cyan-700 text-white hover:bg-cyan-800',
         clear: 'border border-gray-300 bg-white text-gray-900 hover:bg-gray-100'
       }
@@ -47,7 +47,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
       items: {
         base: 'grid w-64 grid-cols-7',
         item: {
-          base: 'block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
+          base: 'block flex-1 cursor-pointer rounded-md border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
           selected: 'bg-cyan-700 text-white hover:bg-cyan-600',
           disabled: 'text-gray-500'
         }
@@ -57,7 +57,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
       items: {
         base: 'grid w-64 grid-cols-4',
         item: {
-          base: 'block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
+          base: 'block flex-1 cursor-pointer rounded-md border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
           selected: 'bg-cyan-700 text-white hover:bg-cyan-600',
           disabled: 'text-gray-500'
         }
@@ -67,7 +67,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
       items: {
         base: 'grid w-64 grid-cols-4',
         item: {
-          base: 'block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
+          base: 'block flex-1 cursor-pointer rounded-md border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
           selected: 'bg-cyan-700 text-white hover:bg-cyan-600',
           disabled: 'text-gray-500'
         }
@@ -77,7 +77,7 @@ const datePickerTheme: CustomFlowbiteTheme['datepicker'] = {
       items: {
         base: 'grid w-64 grid-cols-4',
         item: {
-          base: 'block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
+          base: 'block flex-1 cursor-pointer rounded-md border-0 text-center text-sm font-semibold leading-9 text-gray-900 hover:bg-gray-100',
           selected: 'bg-cyan-700 text-white hover:bg-cyan-600',
           disabled: 'text-gray-500'
         }

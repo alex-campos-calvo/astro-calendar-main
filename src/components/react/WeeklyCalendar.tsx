@@ -3,14 +3,18 @@ import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/
 import SearchBar from './WeeklyCalendarSearchBar'
 import { useState } from 'react'
 
-export default function WeeklyCalendar({ today, week_days, week_slots, user_map }) {
+export default function WeeklyCalendar({ parameters }) {
   const [date, setDate] = useState('')
   return (
     <div className="flex flex-col h-full">
       <div className="grid grid-cols-1 gap-y-2 lg:grid-cols-3 border-b border-black py-4">
         <h1 className="text-center font-semibold text-black">
-          <time className="uppercase" dateTime={today.date_name}>
-            {today.day_name + ' ' + today.month_name + ' ' + today.year_name}
+          <time className="uppercase" dateTime={parameters.today.date_name}>
+            {parameters.today.day_name +
+              ' ' +
+              parameters.today.month_name +
+              ' ' +
+              parameters.today.year_name}
           </time>
         </h1>
         <SearchBar />
@@ -18,15 +22,21 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
           <input
             id="date-selector"
             type="date"
-            className="rounded-md h-8 border-b border-black"
-            defaultValue={today.current_date}
+            className="rounded-md shadow-md h-8 border-b border-black"
+            defaultValue={parameters.today.current_date}
             onChange={(e) => setDate(e.target.value)}
           ></input>
           <button
-            className="mr-6 px-2 border border-black rounded-lg shadow hover:border-fuchsia-500 hover:text-fuchsia-500"
+            className="mr-6 px-2 border border-black rounded-md shadow-md hover:border-fuchsia-500 hover:text-fuchsia-500"
             onClick={() => {
               if (date) {
-                window.location.href = '?date=' + date
+                window.location.href =
+                  '?tab=' +
+                  parameters.state.tab +
+                  '&date=' +
+                  date +
+                  '&teacher=' +
+                  parameters.state.teacher
               }
             }}
           >
@@ -34,24 +44,45 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
           </button>
           <div className="relative flex items-center">
             <a
-              href={'?date=' + today.previus_day_date}
+              href={
+                '?tab=' +
+                parameters.state.tab +
+                '&date=' +
+                parameters.today.previus_day_date +
+                '&teacher=' +
+                parameters.state.teacher
+              }
               type="button"
-              className="flex w-12 h-8 items-center justify-center rounded-l-md border-y border-l border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative md:w-9 md:pr-0"
+              className="flex w-12 h-8 items-center justify-center rounded-l-md shadow-md border-y border-l border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative md:w-9 md:pr-0"
             >
               <span className="sr-only">Dia anterior</span>
               <ChevronDoubleLeftIcon className="size-5" aria-hidden="true" />
             </a>
             <a
-              href={'?date=' + today.today_date}
+              href={
+                '?tab=' +
+                parameters.state.tab +
+                '&date=' +
+                parameters.today.today_date +
+                '&teacher=' +
+                parameters.state.teacher
+              }
               type="button"
-              className="flex items-center h-8 text-sm font-semibold px-3.5 border-y border-x border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative"
+              className="flex items-center h-8 text-sm font-semibold px-3.5 shadow-md border-y border-x border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative"
             >
               Hoy
             </a>
             <a
-              href={'?date=' + today.next_day_date}
+              href={
+                '?tab=' +
+                parameters.state.tab +
+                '&date=' +
+                parameters.today.next_day_date +
+                '&teacher=' +
+                parameters.state.teacher
+              }
               type="button"
-              className="flex w-12 h-8 items-center justify-center rounded-r-md border-y border-r border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative md:w-9 md:pl-0"
+              className="flex w-12 h-8 items-center justify-center rounded-r-md shadow-md border-y border-r border-black text-black hover:border-fuchsia-500 hover:text-fuchsia-500 focus:relative md:w-9 md:pl-0"
             >
               <span className="sr-only">Dia siguiente</span>
               <ChevronDoubleRightIcon className="size-5" aria-hidden="true" />
@@ -64,9 +95,9 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
           style={{ width: '165%' }}
           className="flex max-w-full flex-none flex-col sm:max-w-none md:max-w-full"
         >
-          <div className="sticky top-0 z-30 flex-none bg-white shadow ring-1 ring-black sm:pr-8">
+          <div className="sticky top-0 z-30 flex-none bg-white ring-1 ring-black sm:pr-8">
             <div className="grid grid-cols-5 text-sm/6 text-black sm:hidden">
-              {week_days.map((day) => (
+              {parameters.week_days.map((day) => (
                 <span key={day.name} className="flex flex-col items-center pb-3 pt-2 capitalize">
                   {day.name + ' '}
                   <span
@@ -83,7 +114,7 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
 
             <div className="-mr-px hidden grid-cols-5 divide-x divide-black border-r border-black text-sm/6 text-black sm:grid">
               <div className="col-end-1 w-8" />
-              {week_days.map((day) => (
+              {parameters.week_days.map((day) => (
                 <div key={day.name} className="flex items-center justify-center py-3 capitalize">
                   <span className={day.today ? 'flex items-baseline' : ''}>
                     {day.name + ' '}
@@ -216,8 +247,12 @@ export default function WeeklyCalendar({ today, week_days, week_slots, user_map 
                 className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-5 sm:pr-8"
                 style={{ gridTemplateRows: '1.75rem repeat(28, minmax(0, 1fr)) auto' }}
               >
-                {week_slots.map((event) => (
-                  <Event key={event.id} item={event} user={user_map.get(event.user_id)} />
+                {parameters.week_slots.map((event) => (
+                  <Event
+                    key={event.id}
+                    item={event}
+                    user={parameters.user_map.get(event.user_id)}
+                  />
                 ))}
               </ol>
             </div>
