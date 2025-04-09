@@ -7,6 +7,7 @@ import { Swap_History } from 'astro:db'
 import { User_Slot } from 'astro:db'
 import { ArrowUturnLeftIcon, ArrowUturnRightIcon } from '@heroicons/react/24/solid'
 import { getHourText } from '@/lib/types/utils'
+import List from './List.astro'
 
 const id: string | undefined = Astro.params.id
 const date: string | null = Astro.url.searchParams.get('date')
@@ -92,83 +93,75 @@ if (slot_ids && slot_ids.length > 0 && user_slot_ids && user_slot_ids.length > 0
 }
 ---
 
-<div class="p-2 border border-fuchsia-500 bg-fuchsia-50 rounded-md">
-  <label for="name" class="block text-sm/6 font-medium text-gray-900"
-    >Historial de intercambios</label
-  >
-  <ul
-    role="list"
-    class="overflow-hidden bg-white ring-1 shadow-xs ring-black rounded-md shadow-md mt-2 pt-2"
-  >
-    {
-      (swaps &&
-        swaps.length > 0 &&
-        swaps.map((swap) => (
-          <li class="px-4 py-2">
-            <div class="relative">
-              <span
-                class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
-                aria-hidden="true"
-              />
-              <div class="relative flex items-start space-x-3">
-                <div>
-                  <div class="relative p-1">
-                    {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
-                      <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-red-400">
-                        <ArrowUturnRightIcon className="size-4" />
-                      </div>
-                    )) || (
-                      <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-green-400">
-                        <ArrowUturnLeftIcon className="size-4" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div class="min-w-0 flex-1 py-1.5">
-                  <div class="text-sm text-gray-500">
-                    <a href={'/members/' + swap.teacher_id} class="font-medium text-fuchsia-500">
-                      <span class="font-semibold">{user_map.get(swap.teacher_id)?.name}</span>
-                    </a>
-                    movío a
-                    <a href={'/members/' + swap.member_id} class="font-semibold text-black">
-                      {user_map.get(swap.member_id)?.name}
-                    </a>
-                    <p>{moment(swap.date).format('DD-MM-YYYY HH:mm')}</p>
-                    <div class="mt-2 text-sm text-gray-700">
-                      {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
-                        <p>
-                          <span>A la clase del</span>
-                          <a href={'/slots/' + swap.slot_to + '?date=' + swap.date_to}>
-                            <span class="uppercase">{swap['day_text_to']}</span>
-                            <span>a las</span>
-                            <span class="font-semibold">
-                              {slot_map.get(swap.slot_to)?.['start_hour_text']}
-                            </span>
-                          </a>
-                        </p>
-                      )) || (
-                        <p>
-                          <span>Desde la clase del</span>
-                          <a href={'/slots/' + swap.slot_from + '?date=' + swap.date_from}>
-                            <span class="uppercase">{swap['day_text_from']}</span>
-                            <span>a las</span>
-                            <span class="font-semibold">
-                              {slot_map.get(swap.slot_from)?.['start_hour_text']}
-                            </span>
-                          </a>
-                        </p>
-                      )}
+<List title="Historial de intercambios">
+  {
+    (swaps &&
+      swaps.length > 0 &&
+      swaps.map((swap) => (
+        <li class="px-4 py-2">
+          <div class="relative">
+            <span
+              class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
+              aria-hidden="true"
+            />
+            <div class="relative flex items-start space-x-3">
+              <div>
+                <div class="relative p-1">
+                  {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
+                    <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-red-400">
+                      <ArrowUturnRightIcon className="size-4" />
                     </div>
+                  )) || (
+                    <div class="flex size-8 items-center justify-center rounded-md bg-gray-100 ring-8 ring-green-400">
+                      <ArrowUturnLeftIcon className="size-4" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div class="min-w-0 flex-1 py-1.5">
+                <div class="text-sm text-gray-500">
+                  <a href={'/members/' + swap.teacher_id} class="font-medium text-fuchsia-500">
+                    <span class="font-semibold">{user_map.get(swap.teacher_id)?.name}</span>
+                  </a>
+                  movío a
+                  <a href={'/members/' + swap.member_id} class="font-semibold text-black">
+                    {user_map.get(swap.member_id)?.name}
+                  </a>
+                  <p>{moment(swap.date).format('DD-MM-YYYY HH:mm')}</p>
+                  <div class="mt-2 text-sm text-gray-700">
+                    {(swap.slot_from && swap.slot_from === id && swap.date_from === date && (
+                      <p>
+                        <span>A la clase del</span>
+                        <a href={'/slots/' + swap.slot_to + '?date=' + swap.date_to}>
+                          <span class="uppercase">{swap['day_text_to']}</span>
+                          <span>a las</span>
+                          <span class="font-semibold">
+                            {slot_map.get(swap.slot_to)?.['start_hour_text']}
+                          </span>
+                        </a>
+                      </p>
+                    )) || (
+                      <p>
+                        <span>Desde la clase del</span>
+                        <a href={'/slots/' + swap.slot_from + '?date=' + swap.date_from}>
+                          <span class="uppercase">{swap['day_text_from']}</span>
+                          <span>a las</span>
+                          <span class="font-semibold">
+                            {slot_map.get(swap.slot_from)?.['start_hour_text']}
+                          </span>
+                        </a>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </li>
-        ))) || (
-        <li class="px-4 pb-2 sm:px-6">
-          <div class="text-center text-gray-500">Aún no hay cambios sobre esta clase.</div>
+          </div>
         </li>
-      )
-    }
-  </ul>
-</div>
+      ))) || (
+      <li class="px-4 pb-2 sm:px-6">
+        <div class="text-center text-gray-500">Aún no hay cambios sobre esta clase.</div>
+      </li>
+    )
+  }
+</List>

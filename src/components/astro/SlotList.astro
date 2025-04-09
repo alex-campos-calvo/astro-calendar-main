@@ -4,6 +4,7 @@ import 'moment/locale/es'
 import { db, eq, and, User_Slot, inArray, Slot, User } from 'astro:db'
 import { getWeekDayNames } from '@/lib/types/utils'
 import type { Usuario } from '@/lib/types/bbdd'
+import List from './List.astro'
 
 const { member } = Astro.props
 
@@ -50,43 +51,32 @@ if (user_ids && user_ids.length > 0) {
 }
 ---
 
-<div class="p-2 border border-fuchsia-500 bg-fuchsia-50 rounded-md">
-  <label for="name" class="block text-sm/6 font-medium text-gray-900">Proximas de clases</label>
-  <ul
-    role="list"
-    class="overflow-hidden divide-y bg-white ring-1 ring-black rounded-md shadow-md mt-2 py-2 px-4"
-  >
-    {
-      (slots &&
-        slots.length > 0 &&
-        slots.map((slot) => (
-          <li class="relative p-2 hover:bg-gray-50">
-            <div class="flex min-w-0 gap-x-4">
-              <div class="min-w-0 flex-auto">
-                <div class="text-sm/6 font-semibold text-gray-900">
-                  <a href={'/slots/' + slot.Slot.id + '?date=' + slot.User_Slot.date}>
-                    <span class="uppercase inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-black">
-                      {moment(slot?.User_Slot?.date).format('dddd, DD [de] MMMM [de] YYYY') +
-                        ', ' +
-                        moment({
-                          hour: Math.floor(slot.Slot.start_hour),
-                          minute: Math.floor((slot.Slot.start_hour % 1) * 60)
-                        }).format('HH:mm')}
-                    </span>
-                    <span class="uppercase inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-xs font-medium text-black">
-                      {user_map.get(slot.Slot.user_id)?.name}
-                    </span>
-                    <span />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </li>
-        ))) || (
-        <li class="px-4 py-4 sm:px-6">
-          <div class="text-center text-gray-500">No hay clases programadas.</div>
+<List title="Proximas de clases programadas">
+  {
+    (slots &&
+      slots.length > 0 &&
+      slots.map((slot) => (
+        <li class="py-2 hover:bg-gray-50">
+          <a href={'/slots/' + slot.Slot.id + '?date=' + slot.User_Slot.date}>
+            <span class="grid grid-cols-4 gap-x-2">
+              <span class="col-span-3 uppercase inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-black">
+                {moment(slot?.User_Slot?.date).format('dddd, DD [de] MMMM [de] YYYY') +
+                  ', ' +
+                  moment({
+                    hour: Math.floor(slot.Slot.start_hour),
+                    minute: Math.floor((slot.Slot.start_hour % 1) * 60)
+                  }).format('HH:mm')}
+              </span>
+              <span class="uppercase inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-xs font-medium text-black">
+                {user_map.get(slot.Slot.user_id)?.name}
+              </span>
+            </span>
+          </a>
         </li>
-      )
-    }
-  </ul>
-</div>
+      ))) || (
+      <li class="px-4 py-4 sm:px-6">
+        <div class="text-center text-gray-500">No hay clases programadas.</div>
+      </li>
+    )
+  }
+</List>

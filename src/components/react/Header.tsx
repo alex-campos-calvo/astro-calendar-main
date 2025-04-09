@@ -88,22 +88,23 @@ function LogoutButton(props) {
 
   if (props.item.form) {
     return (
-      <div>
-        <form action={props.item.href} method="POST">
+      <form action={props.item.href} method="POST">
+        <div className="grid grid-cols-2">
+          <span>{props.email}</span>
           <button className="font-semibold text-gray-900">
             <div className="inline-flex items-center gap-x-1">
               <props.item.icon aria-hidden="true" className="size-6 text-gray-600" />
               <span>{props.item.name}</span>
             </div>
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     )
   }
   return null
 }
 
-export default function Header({ is_admin }) {
+export default function Header({ email, is_admin }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -156,7 +157,7 @@ export default function Header({ is_admin }) {
           </Popover>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <LogoutButton item={items.buttons.logout} />
+          <LogoutButton email={email} item={items.buttons.logout} />
         </div>
       </nav>
       <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
@@ -208,7 +209,7 @@ export default function Header({ is_admin }) {
                 </Disclosure>
               </div>
               <div className="py-6">
-                <LogoutButton item={items.buttons.logout} />
+                <LogoutButton email={email} item={items.buttons.logout} />
               </div>
             </div>
           </div>
