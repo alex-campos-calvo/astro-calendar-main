@@ -69,7 +69,7 @@ export default function MemberPickerFilter({ slot, date }) {
       >
         <div className="relative mb-2">
           <ComboboxInput
-            className="block w-full rounded-md bg-white py-1.5 text-base outline-gray-300 placeholder:text-gray-400 sm:text-sm"
+            className="block w-full rounded-md bg-white py-1.5 text-base outline-gray-300 placeholder:text-gray-400"
             onChange={(event) => {
               setUserId('')
               setName(event.target.value)
@@ -81,7 +81,7 @@ export default function MemberPickerFilter({ slot, date }) {
           />
 
           {users && users.length > 0 && (
-            <ComboboxOptions className="absolute font-semibold z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden sm:text-sm">
+            <ComboboxOptions className="absolute font-semibold z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden">
               {users.map((user) => (
                 <ComboboxOption
                   key={user.id}

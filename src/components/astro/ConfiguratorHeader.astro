@@ -1,22 +1,39 @@
 ---
 import { getWeekDayMobileNames, getWeekDayNames } from '@/lib/types/utils'
 
-const { day_number } = Astro.props
+const { day_number, current_tab } = Astro.props
 
 const week_days_map = getWeekDayNames()
 const week_days_mobile_map = getWeekDayMobileNames()
 ---
 
-<div class="text-center uppercase font-semibold p-4">
-  <div class="flex justify-center">
-    <div class="grid grid-cols-5">
+<di class="text-center uppercase font-semibold p-4">
+  <div class="sm:flex justify-between items-center">
+    <nav class="-mb-px flex space-x-8 justify-center">
+      <a
+        href={'/slots/configurator?tab=1&week_day=' + day_number}
+        class={'border-b-2 px-1 pb-4 text-sm font-medium whitespace-nowrap' +
+          (current_tab === 1
+            ? ' text-fuchsia-500 border-fuchsia-500'
+            : ' text-black hover:border-black hover:text-black')}
+        aria-current="page">Horario 1</a
+      >
+      <a
+        href={'/slots/configurator?tab=2&week_day=' + day_number}
+        class={'border-b-2 px-1 pb-4 text-sm font-medium whitespace-nowrap' +
+          (current_tab === 2
+            ? ' text-fuchsia-500 border-fuchsia-500'
+            : ' text-black hover:border-black hover:text-black')}>Horario 2</a
+      >
+    </nav>
+    <div class="mt-4 sm:mt-0 grid grid-cols-5">
       {
         Object.keys(week_days_map).map((key) => (
           <a
-            href={'/slots/configurator?week_day=' + key}
+            href={'/slots/configurator?tab=' + current_tab + '&week_day=' + key}
             type="button"
             class={
-              'flex items-center h-9 px-3.5 mx-2 justify-center rounded-md border border-black text-black hover:bg-gray-100 focus:relative ' +
+              'flex items-center h-9 px-3.5 mx-2 justify-center rounded-md shadow-md border border-black text-black hover:bg-gray-100 focus:relative ' +
               (day_number === parseInt(key) ? 'border-fuchsia-500 text-fuchsia-500' : '')
             }
           >
@@ -27,4 +44,4 @@ const week_days_mobile_map = getWeekDayMobileNames()
       }
     </div>
   </div>
-</div>
+</di>

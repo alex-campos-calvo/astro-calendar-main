@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { generateId } from 'lucia'
 import { and, asc, db, eq, inArray, Slot, Slot_Setting, User_Slot } from 'astro:db'
+import { getSizeId } from '@/lib/types/utils'
 
 export async function GET({ request }) {
   try {
@@ -25,7 +26,7 @@ export async function GET({ request }) {
       for (let week = 1; week <= 52; week++) {
         toInsert.push(
           db.insert(Slot_Setting).values({
-            id: generateId(15),
+            id: generateId(getSizeId()),
             start_date: moment().week(week).startOf('week').format('YYYY-MM-DD'),
             end_date: moment().week(week).endOf('week').format('YYYY-MM-DD'),
             is_active: true
@@ -96,7 +97,7 @@ export async function GET({ request }) {
             if (slot.Slot.week_day === Number(key)) {
               dates[key].forEach((this_date) => {
                 const obj = {
-                  id: generateId(15),
+                  id: generateId(getSizeId()),
                   slot_id: slot.User_Slot.slot_id,
                   user_id: slot.User_Slot.user_id,
                   default: false,

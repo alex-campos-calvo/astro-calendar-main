@@ -48,12 +48,15 @@ export default function SwapSlotDatePicker({ slot1, date1 }) {
           }}
         ></Datepicker>
       </div>
-      <ul role="list" className="mx-5 py-2 grid grid-cols-1 gap-y-2">
+      <ul
+        role="list"
+        className="mx-5 mt-2 p-2 grid grid-cols-1 gap-y-2 border border-black bg-gray-50 rounded-md shadow"
+      >
         {slots &&
           Object.keys(slots).length > 0 &&
           Object.keys(slots).map((date) =>
             slots[date].map((clase) => (
-              <li key={clase.id} className="p-2 border border-black rounded-lg shadow">
+              <li key={clase.id} className="p-2 bg-white border border-black rounded-md">
                 <a
                   href={
                     '/slots/swap?slot1=' +
@@ -86,7 +89,7 @@ export default function SwapSlotDatePicker({ slot1, date1 }) {
             ))
           )}
         {(!slots || Object.keys(slots).length === 0) && (
-          <li className="flex justify-between gap-x-6 py-2">
+          <li className="flex justify-between gap-x-6 p-2">
             <div className="flex min-w-0 gap-x-4">
               <div className="min-w-0 flex-auto">
                 <p className="uppercase text-sm/6 font-semibold">No hay clases disponibles</p>

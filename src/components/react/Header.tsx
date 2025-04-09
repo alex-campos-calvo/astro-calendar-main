@@ -67,10 +67,10 @@ function Link(props) {
     return (
       <a
         href={props.item.href}
-        className="group relative rounded-lg p-6 text-sm/6 hover:bg-gray-50"
+        className="group relative rounded-md p-6 text-sm/6 hover:bg-gray-50"
       >
         <div className="inline-flex items-center gap-x-2">
-          <div className="flex size-11 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+          <div className="flex size-11 items-center justify-center rounded-md bg-gray-50 group-hover:bg-white">
             <props.item.icon aria-hidden="true" className="size-6 text-gray-60" />
           </div>
           <span className="font-semibold text-gray-900">{props.item.name}</span>
@@ -88,22 +88,23 @@ function LogoutButton(props) {
 
   if (props.item.form) {
     return (
-      <div>
-        <form action={props.item.href} method="POST">
+      <form action={props.item.href} method="POST">
+        <div className="grid grid-cols-2">
+          <span>{props.email}</span>
           <button className="font-semibold text-gray-900">
             <div className="inline-flex items-center gap-x-1">
               <props.item.icon aria-hidden="true" className="size-6 text-gray-600" />
               <span>{props.item.name}</span>
             </div>
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     )
   }
   return null
 }
 
-export default function Header({ is_admin }) {
+export default function Header({ email, is_admin }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -156,7 +157,7 @@ export default function Header({ is_admin }) {
           </Popover>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <LogoutButton item={items.buttons.logout} />
+          <LogoutButton email={email} item={items.buttons.logout} />
         </div>
       </nav>
       <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
@@ -180,7 +181,7 @@ export default function Header({ is_admin }) {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-md py-2 pl-3 pr-3.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
                     <div className="inline-flex items-center gap-x-1">
                       <AdjustmentsHorizontalIcon
                         aria-hidden="true"
@@ -199,7 +200,7 @@ export default function Header({ is_admin }) {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
+                        className="block rounded-md py-2 pl-6 pr-3 text-sm/7 font-semibold text-gray-900 hover:bg-gray-50"
                       >
                         {item.name}
                       </DisclosureButton>
@@ -208,7 +209,7 @@ export default function Header({ is_admin }) {
                 </Disclosure>
               </div>
               <div className="py-6">
-                <LogoutButton item={items.buttons.logout} />
+                <LogoutButton email={email} item={items.buttons.logout} />
               </div>
             </div>
           </div>

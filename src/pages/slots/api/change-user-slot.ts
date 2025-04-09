@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { db, eq, Slot, Swap_History, User_Slot } from 'astro:db'
 import { generateId } from 'lucia'
+import { getSizeId } from '@/lib/types/utils'
 import moment from 'moment'
 import 'moment/locale/es'
 
@@ -39,7 +40,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         await db
           .insert(Swap_History)
           .values({
-            id: generateId(15),
+            id: generateId(getSizeId()),
             date: new Date(),
             date_to: body.to_date,
             date_from: user_slot[0].date,

@@ -5,6 +5,7 @@ import SpeedInsights from '@vercel/speed-insights/astro'
 
 const title = Astro.props.title || 'Motion Leon'
 
+const email = Astro.locals?.user?.email ? Astro.locals?.user?.email : ''
 const is_admin = Astro.locals?.user?.is_admin ? true : false
 ---
 
@@ -24,7 +25,7 @@ const is_admin = Astro.locals?.user?.is_admin ? true : false
   </head>
   <body>
     <article>
-      <Header is_admin={is_admin} client:load />
+      <Header email={email} is_admin={is_admin} client:load />
       <div class="flex flex-col items-center justify-center my-5">
         <div class="w-11/12">
           <slot />

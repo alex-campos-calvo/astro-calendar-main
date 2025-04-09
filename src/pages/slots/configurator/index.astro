@@ -1,5 +1,4 @@
 ---
-import moment from 'moment'
 import Layout from '@/layouts/Layout.astro'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import ConfiguratorHeader from '@/components/astro/ConfiguratorHeader.astro'
@@ -7,20 +6,22 @@ import { and, db, Slot, User, User_Slot, eq, inArray } from 'astro:db'
 import type { Clase, Usuario, Participante } from '@/lib/types/bbdd.ts'
 import 'moment/locale/es'
 import TitleHeader from '@/components/astro/TitleHeader.astro'
-import { getFullName } from '@/lib/types/utils'
+import { getShortName, getHourText } from '@/lib/types/utils'
 
 const week_day_text: string | null = Astro.url.searchParams.get('week_day')
 if (!week_day_text || parseInt(week_day_text) < 1 || parseInt(week_day_text) > 7) {
   return Astro.redirect('/slots/configurator?week_day=1')
 }
-
 const day_number: number = parseInt(week_day_text)
+
+const tab: string | null = Astro.url.searchParams.get('tab')
+const current_tab = tab && [1, 2].includes(parseInt(tab)) ? parseInt(tab) : 1
 
 const slots = await db
   .select()
   .from(Slot)
+  .where(and(eq(Slot.schedule, current_tab), eq(Slot.week_day, day_number)))
   .leftJoin(User_Slot, and(eq(User_Slot.slot_id, Slot.id), eq(User_Slot.default, true)))
-  .where(eq(Slot.week_day, day_number))
   .orderBy(Slot.start_hour)
   .all()
 
@@ -48,8 +49,8 @@ if (slots) {
         date: '',
         User_Slots: []
       }
-      s['start_hour_text'] = moment(slot.Slot.start_hour, 'HH:mm').format('HH:mm')
-      s['end_hour_text'] = moment(slot.Slot.end_hour, 'HH:mm').format('HH:mm')
+      s['start_hour_text'] = getHourText(slot.Slot.start_hour)
+      s['end_hour_text'] = getHourText(slot.Slot.end_hour)
       s['tipo_text'] = slot.Slot.size <= 1 ? 'P' : 'G' + slot.Slot.size
       user_ids.push(slot.Slot.user_id)
 
@@ -72,7 +73,7 @@ if (user_ids && user_ids.length > 0) {
 
   if (users && users.length > 0) {
     users.forEach((user) => {
-      user['short_name'] = getFullName(user.name)
+      user['short_name'] = getShortName(user.name)
       user_map.set(user.id, user)
     })
   }
@@ -80,19 +81,19 @@ if (user_ids && user_ids.length > 0) {
 ---
 
 <Layout title="Configurador de clases">
-  <ConfiguratorHeader day_number={day_number} />
+  <ConfiguratorHeader day_number={day_number} current_tab={current_tab} />
   <TitleHeader title="Listado de clases" />
-  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:rounded-lg">
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 rounded-md">
     {
       default_slots && default_slots.length > 0 ? (
         default_slots.map((slot) => (
           <div
-            class={'bg-white px-4 py-5 sm:px-6 rounded-lg border-2 border-' + slot.color + '-500'}
+            class={'bg-white px-4 py-5 sm:px-6 rounded-md border-2 border-' + slot.color + '-500'}
           >
             <div class="flex space-x-3 border-b border-gray-300 pb-3">
               <div class="shrink-0">
                 <span
-                  class={'inline-flex size-10 items-center justify-center rounded-full bg-gray-500'}
+                  class={'inline-flex size-10 items-center justify-center rounded-md bg-gray-500'}
                 >
                   <span class="text-lg font-medium text-white uppercase">{slot['tipo_text']}</span>
                 </span>

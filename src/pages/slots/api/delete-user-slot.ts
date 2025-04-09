@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { and, db, eq, inArray, Slot, Swap_History, Upsert_History, User_Slot } from 'astro:db'
+import { getSizeId } from '@/lib/types/utils'
 import { generateId } from 'lucia'
 import moment from 'moment'
 import 'moment/locale/es'
@@ -27,7 +28,7 @@ export const DELETE: APIRoute = async ({ request, locals }) => {
         await db
           .insert(Upsert_History)
           .values({
-            id: generateId(15),
+            id: generateId(getSizeId()),
             type: 'DELETE',
             date: new Date(),
             slot_id: user_slot[0].slot_id,

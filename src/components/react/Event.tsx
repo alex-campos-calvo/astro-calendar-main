@@ -29,7 +29,7 @@ export default function Event({ item, user }) {
         href={link}
         /*style={!isFuture ? { pointerEvents: 'none' } : {}}*/
         className={
-          'group absolute inset-1 flex flex-col overflow-hidden rounded-lg p-4 justify-between ' +
+          'group absolute inset-1 flex flex-col overflow-hidden rounded-md shadow-md p-4 justify-between ' +
           color
         }
         onClick={(e) => {

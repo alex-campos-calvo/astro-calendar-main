@@ -11,6 +11,10 @@ export function validateEmail(email: string): boolean {
   )
 }
 
+export function validatePassword(password: string): boolean {
+  return !(typeof password !== 'string' || password.length < 8 || password.length > 64)
+}
+
 export function validateWeekday(day: number): boolean {
   return !(day < 1 || day > 7)
 }

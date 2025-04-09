@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { db, eq, Slot, Upsert_History, User_Slot } from 'astro:db'
+import { getSizeId } from '@/lib/types/utils'
 import { generateId } from 'lucia'
 import moment from 'moment'
 import 'moment/locale/es'
@@ -31,7 +32,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         await db
           .insert(Upsert_History)
           .values({
-            id: generateId(15),
+            id: generateId(getSizeId()),
             date: new Date(),
             slot_id: body.to_slot,
             slot_date: body.to_date,
@@ -43,7 +44,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         await db
           .insert(User_Slot)
           .values({
-            id: generateId(15),
+            id: generateId(getSizeId()),
             user_id: body.user_id,
             slot_id: body.to_slot,
             default: false,
@@ -81,7 +82,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           .insert(User_Slot)
           .values([
             {
-              id: generateId(15),
+              id: generateId(getSizeId()),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: true,
@@ -89,7 +90,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
               original_date: null
             },
             {
-              id: generateId(15),
+              id: generateId(getSizeId()),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
@@ -98,7 +99,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
               original_slot: body.to_slot
             },
             {
-              id: generateId(15),
+              id: generateId(getSizeId()),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
@@ -107,7 +108,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
               original_slot: body.to_slot
             },
             {
-              id: generateId(15),
+              id: generateId(getSizeId()),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,
@@ -116,7 +117,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
               original_slot: body.to_slot
             },
             {
-              id: generateId(15),
+              id: generateId(getSizeId()),
               user_id: body.user_id,
               slot_id: body.to_slot,
               default: false,

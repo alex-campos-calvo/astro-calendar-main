@@ -6,9 +6,36 @@ import WeeklyCalendar from '@/components/react/WeeklyCalendar'
 import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
 import { and, db, eq, Slot, User_Slot, inArray, User } from 'astro:db'
 import { getWeekDayNames } from '@/lib/types/utils'
+import WeeklyCalendarScheduleHeader from '@/components/astro/WeeklyCalendarScheduleHeader.astro'
 
 const date: string | null = Astro.url.searchParams.get('date')
 const current = date && moment(date, 'YYYY-MM-DD', true).isValid() ? moment(date) : moment()
+
+const tab: string | null = Astro.url.searchParams.get('tab')
+const current_tab = tab && [1, 2].includes(parseInt(tab)) ? parseInt(tab) : 1
+
+let teacher: string | null = Astro.url.searchParams.get('teacher')
+const teachers = await db.select().from(User).where(eq(User.is_admin, true)).all()
+
+let current_teacher: string[] = []
+if (teachers && teachers.length > 0) {
+  const teachers = await db
+    .select()
+    .from(User)
+    .where(and(eq(User.is_active, true), eq(User.is_admin, true)))
+    .all()
+
+  if (!teacher || (teacher && teacher === 'all')) {
+    teacher = 'all'
+    current_teacher = teachers.map((teacher) => teacher.id)
+  } else {
+    current_teacher = teachers.filter((user) => user.id === teacher).map((user) => user.id)
+    if (!current_teacher || current_teacher.length === 0) {
+      teacher = 'all'
+      current_teacher = teachers.map((teacher) => teacher.id)
+    }
+  }
+}
 
 const now = moment()
 const today = {
@@ -87,7 +114,13 @@ const dates: string[] = [
 const slots = await db
   .select()
   .from(Slot)
-  .where(inArray(Slot.week_day, week_days_map))
+  .where(
+    and(
+      eq(Slot.schedule, current_tab),
+      inArray(Slot.user_id, current_teacher),
+      inArray(Slot.week_day, week_days_map)
+    )
+  )
   .leftJoin(
     User_Slot,
     and(
@@ -145,11 +178,25 @@ if (user_ids && user_ids.length > 0) {
 ---
 
 <Layout title="Panel semanal">
+  <WeeklyCalendarScheduleHeader
+    state={{
+      current_date: current.format('YYYY-MM-DD'),
+      current_tab: current_tab,
+      current_teacher: teacher
+    }}
+  />
   <WeeklyCalendar
-    today={today}
-    week_days={week_days}
-    week_slots={week_slots}
-    user_map={user_map}
+    parameters={{
+      today: today,
+      week_days: week_days,
+      week_slots: week_slots,
+      user_map: user_map,
+      state: {
+        tab: current_tab,
+        date: current.format('YYYY-MM-DD'),
+        teacher: teacher
+      }
+    }}
     client:idle
   />
 </Layout>

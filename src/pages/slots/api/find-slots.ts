@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import type { Clase, ClaseByDate, Participante } from '@/lib/types/bbdd'
 import { db, Slot, User_Slot, eq, and } from 'astro:db'
 import moment from 'moment'
+import { getHourText } from '@/lib/types/utils'
 
 interface Body {
   date: string
@@ -84,8 +85,8 @@ export const POST: APIRoute = async ({ request }) => {
             date: date,
             User_Slots: []
           }
-          data['start_hour_text'] = moment(item.Slot.start_hour, 'HH:mm').format('HH:mm')
-          data['end_hour_text'] = moment(item.Slot.end_hour, 'HH:mm').format('HH:mm')
+          data['start_hour_text'] = getHourText(item.Slot.start_hour)
+          data['end_hour_text'] = getHourText(item.Slot.end_hour)
           data['date_text'] = moment_date.format('dddd DD [de] MMMM [de] yyyy')
           data['tipo_text'] = item.Slot.size <= 1 ? 'P' : 'G' + item.Slot.size
           user_ids.push(item.Slot.user_id)

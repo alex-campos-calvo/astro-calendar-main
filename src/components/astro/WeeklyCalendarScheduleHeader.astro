@@ -1,0 +1,85 @@
+---
+import { db, User, eq, and } from 'astro:db'
+import type { Usuario } from '@/lib/types/bbdd'
+
+const { state } = Astro.props
+
+const users = await db
+  .select()
+  .from(User)
+  .where(and(eq(User.is_admin, true), eq(User.is_active, true)))
+  .all()
+
+const teachers: Usuario[] = users.map((user) => {
+  return {
+    id: user.id,
+    google_id: user.google_id,
+    description: user.description,
+    name: user.name,
+    email: user.email,
+    is_admin: user.is_admin,
+    is_active: user.is_active
+  }
+})
+---
+
+<div class="grid grid-cols-1 gap-y-4 lg:flex lg:items-center lg:justify-between">
+  <nav class="-mb-px flex space-x-8 justify-center">
+    <a
+      href={'/?tab=1&date=' + state.current_date + '&teacher=' + state.current_teacher}
+      class={'border-b-2 px-1 pb-4 text-sm font-medium whitespace-nowrap' +
+        (state.current_tab === 1
+          ? ' text-fuchsia-500 border-fuchsia-500'
+          : ' text-black hover:border-black hover:text-black')}
+      aria-current="page">Horario 1</a
+    >
+    <a
+      href={'/?tab=2&date=' + state.current_date + '&teacher=' + state.current_teacher}
+      class={'border-b-2 px-1 pb-4 text-sm font-medium whitespace-nowrap' +
+        (state.current_tab === 2
+          ? ' text-fuchsia-500 border-fuchsia-500'
+          : ' text-black hover:border-black hover:text-black')}>Horario 2</a
+    >
+  </nav>
+  <div class="flex items-center justify-center">
+    <select
+      id="teachers_select"
+      class="border-2 border-black rounded-md shadow-md font-semibold text-black uppercase"
+      data-date={state.current_date}
+      data-tab={state.current_tab}
+    >
+      {
+        (state.current_teacher === 'all' && (
+          <option value={'all'} selected>
+            {'Todos'}
+          </option>
+        )) || <option value={'all'}>{'Todos'}</option>
+      }
+      {
+        teachers.map((teacher) => {
+          if (teacher.id !== state.current_teacher) {
+            return <option value={teacher.id}>{teacher.name}</option>
+          } else
+            return (
+              <option value={teacher.id} selected>
+                {teacher.name}
+              </option>
+            )
+        })
+      }
+    </select>
+  </div>
+</div>
+
+<script type="module" data-astro-rerun>
+  const selector = document.querySelector('#teachers_select')
+  selector?.addEventListener('change', (e) => {
+    window.location.href =
+      '?tab=' +
+      selector.dataset.tab +
+      '&date=' +
+      selector.dataset.date +
+      '&teacher=' +
+      e.target.value
+  })
+</script>
