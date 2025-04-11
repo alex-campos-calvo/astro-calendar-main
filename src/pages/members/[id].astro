@@ -4,8 +4,9 @@ import Layout from '@/layouts/Layout.astro'
 import SlotList from '@/components/astro/SlotList.astro'
 import TitleHeader from '@/components/astro/TitleHeader.astro'
 import { getShortName } from '@/lib/types/utils'
-import Notification from '@/components/astro/Notification.astro'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
+import Save from '@/components/react/member/Save'
+import Delete from '@/components/react/member/Delete'
 
 const member_id: string | undefined = Astro.params.id
 const edit_mode = Astro.url.searchParams.get('edit') === 'true'
@@ -43,13 +44,7 @@ if ((!member || !member[0]) && member_id !== 'new') {
 <Layout title="Detalle del usuario">
   <TitleHeader title="Detalle del usuario">
     {edit_mode && member_id !== 'new' && (
-      <button
-        id="delete_button"
-        type="button"
-        class="place-self-start rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-      >
-        Eliminar
-      </button>
+      <Delete client:load/>
     )}
   </TitleHeader>
   <dl class="lg:flex">
@@ -156,17 +151,8 @@ if ((!member || !member[0]) && member_id !== 'new') {
       }
       {
         edit_mode && (
-          <Notification identifier="notify_success_save" title="Guardado correctamente!" />
-          <Notification identifier="notify_error" title="Se ha producido un error!" is_error="true" />
-          <div class="flex justify-end">
-            <input type="hidden" id="id" name="id" value={member_id} />
-            <button
-              id="save_button"
-              class="place-self-end rounded-md bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
-            >
-              Guardar
-            </button>
-          </div>
+          <input type="hidden" id="id" name="id" value={member_id} />
+          <Save client:load/>
         )
       }
     </div>
@@ -177,51 +163,3 @@ if ((!member || !member[0]) && member_id !== 'new') {
     </div>
   </dl>
 </Layout>
-
-<script type="module" data-astro-rerun>
-  import Notification from '/js/utils/Notification.js'
-  document.getElementById('save_button')?.addEventListener('click', () => {
-    const obj = {
-      id: document.getElementById('id').value,
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      description: document.getElementById('description').value,
-      is_admin: document.getElementById('is_admin').checked,
-      is_active: document.getElementById('is_active').checked
-    }
-
-    fetch('/members/api/upsert-user', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(obj)
-    })
-      .then((result) => {
-        if(result.ok) {
-          Notification.showNotification('notify_success_save')
-        } else {
-          Notification.showNotification('notify_error')
-        }
-    })
-  })
-
-  document.getElementById('delete_button')?.addEventListener('click', () => {
-    fetch('/members/api/delete-user', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        id: document.getElementById('id').value
-      })
-    })
-      .then((result) => {
-        if(result.ok) {
-          document.location.href = '/members/users'
-        } else {
-          Notification.showNotification('notify_error')
-        }
-      })
-  })
-</script>

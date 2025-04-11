@@ -27,7 +27,7 @@ export default function WeeklyCalendar({ parameters }) {
             onChange={(e) => setDate(e.target.value)}
           ></input>
           <button
-            className="mr-6 px-2 border border-black rounded-md shadow-md hover:border-fuchsia-500 hover:text-fuchsia-500"
+            className="mr-2 px-2 border border-black rounded-md shadow-md hover:border-fuchsia-500 hover:text-fuchsia-500"
             onClick={() => {
               if (date) {
                 window.location.href =

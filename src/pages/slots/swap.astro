@@ -4,7 +4,7 @@ import 'moment/locale/es'
 import Layout from '@/layouts/Layout.astro'
 import SwapSlotDatePicker from '@/components/react/SwapSlotDatePicker'
 import { and, db, eq, inArray, Slot, User, User_Slot } from 'astro:db'
-import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.ts'
+import type { Clase, Participante, Usuario } from '@/lib/types/bbdd.js'
 import { getShortName, getHourText } from '@/lib/types/utils'
 import Member from '@/components/astro/Member.astro'
 
@@ -284,8 +284,9 @@ if (slot2 && date2 && moment(date2, 'YYYY-MM-DD', true).isValid()) {
   </div>
 </Layout>
 
-<script type="module" src="/js/modules/Sortable.min.js"></script>
 <script type="module" data-astro-rerun>
+  import '/js/modules/Sortable.min.js'
+
   const el1 = document.getElementById('draggable1')
   const el2 = document.getElementById('draggable2')
 

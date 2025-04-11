@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     try {
-      if (body.id) {
+      if (body.id && body.id !== 'new') {
         const user = await db.select().from(User).where(eq(User.id, body.id)).get()
 
         if (!user) {
@@ -48,6 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
           })
           .where(eq(User.id, body.id))
           .run()
+        return new Response(null, { status: 200 })
       } else {
         const existingUser = await db
           .select()
@@ -58,16 +59,17 @@ export const POST: APIRoute = async ({ request }) => {
           return new Response('User already exists', { status: 400 })
         }
 
+        const id = generateId(getSizeId())
         await db.insert(User).values({
-          id: generateId(getSizeId()),
+          id: id,
           name: body.name,
           email: body.email.toLowerCase(),
           description: body.description,
           is_admin: body.is_admin,
           is_active: body.is_active
         })
+        return new Response(id, { status: 202 })
       }
-      return new Response(null, { status: 200 })
     } catch (error) {
       console.error(error)
       return new Response(error?.message, { status: 500 })
